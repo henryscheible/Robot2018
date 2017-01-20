@@ -48,7 +48,7 @@ public class MiniBotDrive extends RobotDrive {
         //straight
         /*
          * This is an artifact from two years ago for smoother control that I don't think works with the new
-         * FRC GenericHID library
+         * 2017 FRC GenericHID library
          */
         /*
         if (rightStick.getTrigger()) {

@@ -12,6 +12,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * directory.
  */
 public class Robot extends IterativeRobot {
+	public static Robot instance;
+    //from http://wpilib.screenstepslive.com/s/4485/m/26401/l/255419-choosing-an-autonomous-program-from-smartdashboard
+
+    public TechnoDrive drive;  // class that handles basic drive operations
+    
 	final String defaultAuto = "Default";
 	final String customAuto = "My Auto";
 	String autoSelected;
@@ -58,7 +63,8 @@ public class Robot extends IterativeRobot {
 			break;
 		case defaultAuto:
 		default:
-			// Put default auto code here
+			drive.drive(1, 0.5);
+			drive.stopMotor();
 			break;
 		}
 	}
@@ -68,6 +74,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
+		
 	}
 
 	/**

@@ -3,6 +3,7 @@ package org.usfirst.frc.team2239.robot;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.Timer;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -16,11 +17,13 @@ public class Robot extends IterativeRobot {
     //from http://wpilib.screenstepslive.com/s/4485/m/26401/l/255419-choosing-an-autonomous-program-from-smartdashboard
 
     public TechnoDrive drive;  // class that handles basic drive operations
+    public Timer timer; // Timer
     
 	final String defaultAuto = "Default";
 	final String customAuto = "My Auto";
 	String autoSelected;
 	SendableChooser<String> chooser = new SendableChooser<>();
+	
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -50,6 +53,7 @@ public class Robot extends IterativeRobot {
 		// autoSelected = SmartDashboard.getString("Auto Selector",
 		// defaultAuto);
 		System.out.println("Auto selected: " + autoSelected);
+		timer.start();
 	}
 
 	/**
@@ -57,15 +61,25 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
+		
+		/*
 		switch (autoSelected) {
 		case customAuto:
 			// Put custom auto code here
 			break;
 		case defaultAuto:
 		default:
-			drive.drive(1, 0.5);
-			drive.stopMotor();
+			// put custom default here
 			break;
+		}
+		*/
+		double dCurrentTime = timer.get();
+		
+		if(dCurrentTime <= 2) {
+			drive.drive(0.5, 0);
+		} else {
+			drive.stopMotor();
+			timer.stop();
 		}
 	}
 

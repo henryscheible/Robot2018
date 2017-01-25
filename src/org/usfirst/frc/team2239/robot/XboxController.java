@@ -1,11 +1,15 @@
 package org.usfirst.frc.team2239.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.DriverStation;
 
 public class XboxController extends GenericHID {
+	private int port;
+    private DriverStation station;
 
 	public XboxController(int port) {
 		super(port);
+		this.station = DriverStation.getInstance();
 	}
 
 	@Override
@@ -16,61 +20,57 @@ public class XboxController extends GenericHID {
 	@Override
 	public double getY(Hand hand) {
 		return hand == Hand.kLeft ? getRawAxis(1) : getRawAxis(5);
-		
 	}
 
 	@Override
 	public double getRawAxis(int which) {
-		// TODO Auto-generated method stub
-		return 0;
+		return station.getStickAxis(port, which);
 	}
 
 	@Override
 	public boolean getRawButton(int button) {
-		// TODO Auto-generated method stub
-		return false;
+		return station.getStickButton(port, (byte) button);
 	}
+	
+	// CUSTOM
+	public boolean getTrigger(Hand hand) {
+        return hand == Hand.kLeft ? getRawAxis(2) > .9 : getRawAxis(3) > .9;
+    }
 
 	@Override
 	public int getPOV(int pov) {
-		// TODO Auto-generated method stub
-		return 0;
+		return station.getStickPOV(port, pov);
 	}
-
+	
 	@Override
 	public int getPOVCount() {
-		// TODO Auto-generated method stub
-		return 0;
+		throw new UnsupportedOperationException("POVCount is not used");
 	}
-
+	
 	@Override
 	public HIDType getType() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("HIDType is not used");
 	}
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("getName is not used");
 	}
 
 	@Override
 	public void setOutput(int outputNumber, boolean value) {
-		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException("setOutput is not used");
 	}
 
 	@Override
 	public void setOutputs(int value) {
-		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("setOutputs is not used");
 		
 	}
 
 	@Override
 	public void setRumble(RumbleType type, double value) {
-		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException("setRumble is not used");
 	}
 
 }

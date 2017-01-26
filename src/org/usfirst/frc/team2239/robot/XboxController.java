@@ -21,7 +21,7 @@ public class XboxController extends GenericHID {
 	public double getY(Hand hand) {
 		return hand == Hand.kLeft ? getRawAxis(1) : getRawAxis(5);
 	}
-
+	
 	@Override
 	public double getRawAxis(int which) {
 		return station.getStickAxis(port, which);

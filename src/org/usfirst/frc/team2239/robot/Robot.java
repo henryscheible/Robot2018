@@ -20,7 +20,7 @@ public class Robot extends IterativeRobot {
 
     public TechnoDrive drive;  // class that handles basic drive operations
     public Timer timer; // Timer
-    public XboxController control; //Control for the robot
+    public XboxController controller; //Control for the robot
     
 	final String defaultAuto = "Default";
 	final String customAuto = "My Auto";
@@ -37,6 +37,13 @@ public class Robot extends IterativeRobot {
 		chooser.addDefault("Default Auto", defaultAuto);
 		chooser.addObject("My Auto", customAuto);
 		SmartDashboard.putData("Auto choices", chooser);
+		//2 = left rear
+		//3 = left front
+		//0 = right rear
+		//1 = right front
+		drive = new TechnoDrive(3, 2, 1, 0);
+		timer = new Timer();
+		controller = new XboxController(0);  
 	}
 
 	/**
@@ -91,7 +98,9 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
-		
+		double leftVal = -controller.getY(XboxController.Hand.kLeft);
+        double rightVal = -controller.getY(XboxController.Hand.kRight);
+        drive.tankDrive(leftVal, rightVal);
 	}
 
 	/**

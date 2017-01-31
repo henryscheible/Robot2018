@@ -45,11 +45,10 @@ public class Robot extends IterativeRobot {
 		//0 = right rear
 		//1 = right front
 		drive = new TechnoDrive(3, 2, 1, 0);
-		navSensor = new AHRS(SPI.Port.kMXP); /* Alternatives: SerialPort.Port.kMXP, I2C.Port.kMXP or SerialPort.Port.kUSB */
 		timer = new Timer();
 		controller = new XboxController(0);  
 		try {
-			navSensor = new AHRS(SPI.Port.kMXP);
+			navSensor = new AHRS(SPI.Port.kMXP); /* Alternatives: SerialPort.Port.kMXP, I2C.Port.kMXP or SerialPort.Port.kUSB */
 		} catch (RuntimeException ex) {
 			DriverStation.reportError("Error instantiating navX-MXP: " + ex.getMessage(), true);
 		}
@@ -87,12 +86,7 @@ public class Robot extends IterativeRobot {
 		System.out.println(dispZ);
 		System.out.println(angle);
 		
-		/*
-		DriverStation.reportWarning(sDispX, false);
-		DriverStation.reportWarning(sDispY, false);
-		DriverStation.reportWarning(sDispZ, false);
-		DriverStation.reportWarning(sAngle, false);
-		*/
+	
 		timer.start();
 
 		while( (dCurrentTime = timer.get()) < .55 ); // wait for 0.55 second before starting autonomousPeriodic
@@ -121,12 +115,12 @@ public class Robot extends IterativeRobot {
 		*/
 		double dCurrentTime = timer.get();
 		SmartDashboard.putBoolean("IMU_Connected", 		navSensor.isConnected());
-		SmartDashboard.putNumber("Displacement_X", 		navSensor.getDisplacementX());
+	    SmartDashboard.putNumber("Displacement_X", 		navSensor.getDisplacementX());
 		SmartDashboard.putNumber("Displacement_Y", 		navSensor.getDisplacementY());
 		SmartDashboard.putNumber("Displacement_Z", 		navSensor.getDisplacementZ());
 		
 		
-		if(dCurrentTime <= 1.5) {
+		if(dCurrentTime <= 1.8) {
 			// drive.accelerateTo(0.25, 0.25);
 			drive.drive(0.25, 0);
 		} else {

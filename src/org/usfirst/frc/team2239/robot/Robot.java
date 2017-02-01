@@ -118,11 +118,12 @@ public class Robot extends IterativeRobot {
 	    SmartDashboard.putNumber("Displacement_X", 		navSensor.getDisplacementX());
 		SmartDashboard.putNumber("Displacement_Y", 		navSensor.getDisplacementY());
 		SmartDashboard.putNumber("Displacement_Z", 		navSensor.getDisplacementZ());
+		SmartDashboard.putNumber("Angle", 		        navSensor.getYaw());
 		
 		
 		if(dCurrentTime <= 1.8) {
 			// drive.accelerateTo(0.25, 0.25);
-			drive.drive(0.25, 0);
+			//drive.drive(0.25, 0);
 		} else {
 			if (!stoppedYet) {
 				while( (dCurrentTime = timer.get()) < 2.05 ); // wait for 0.55 second before starting autonomousPeriodic

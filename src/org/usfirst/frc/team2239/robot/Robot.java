@@ -29,8 +29,6 @@ public class Robot extends IterativeRobot {
 	SendableChooser<String> chooser = new SendableChooser<>();
 	AHRS navSensor; //The navigation sensor object
 	
-	boolean stoppedYet = false; //TODO delete
-
 	/**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
@@ -67,31 +65,11 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-		double dCurrentTime;
 		autoSelected = chooser.getSelected();
 		// autoSelected = SmartDashboard.getString("Auto Selector",
 		// defaultAuto);
 		navSensor.reset();
-		navSensor.resetDisplacement();
-		
 		System.out.println("Auto selected: " + autoSelected);
-		float dispX = navSensor.getDisplacementX();
-		float dispY = navSensor.getDisplacementY();
-		float dispZ = navSensor.getDisplacementZ();
-		float angle = navSensor.getYaw();
-		
-		System.out.println("Printing values");
-		System.out.println(dispX);
-		System.out.println(dispY);
-		System.out.println(dispZ);
-		System.out.println(angle);
-		
-	
-		timer.start();
-
-		while( (dCurrentTime = timer.get()) < .55 ); // wait for 0.55 second before starting autonomousPeriodic
-
-		stoppedYet = false;
 	}
 
 	/**
@@ -99,9 +77,6 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
-		
-		
-		
 		/*
 		switch (autoSelected) {
 		case customAuto:
@@ -113,45 +88,9 @@ public class Robot extends IterativeRobot {
 			break;
 		}
 		*/
-		double dCurrentTime = timer.get();
-		SmartDashboard.putBoolean("IMU_Connected", 		navSensor.isConnected());
-	    SmartDashboard.putNumber("Displacement_X", 		navSensor.getDisplacementX());
-		SmartDashboard.putNumber("Displacement_Y", 		navSensor.getDisplacementY());
-		SmartDashboard.putNumber("Displacement_Z", 		navSensor.getDisplacementZ());
-		SmartDashboard.putNumber("Angle", 		        navSensor.getYaw());
-		
-		
-		if(dCurrentTime <= 1.8) {
-			// drive.accelerateTo(0.25, 0.25);
-			//drive.drive(0.25, 0);
-		} else {
-			if (!stoppedYet) {
-				while( (dCurrentTime = timer.get()) < 2.05 ); // wait for 0.55 second before starting autonomousPeriodic
-				
-				float dispX = navSensor.getDisplacementX();
-				float dispY = navSensor.getDisplacementY();
-				float dispZ = navSensor.getDisplacementZ();
-				float angle = navSensor.getYaw();
-				
-				System.out.println("Printing values");
-				System.out.println(dispX);
-				System.out.println(dispY);
-				System.out.println(dispZ);
-				System.out.println(angle);
-				
-				timer.stop();
-				
-				/*
-				DriverStation.reportWarning(sDispX, false);
-				DriverStation.reportWarning(sDispY, false);
-				DriverStation.reportWarning(sDispZ, false);
-				DriverStation.reportWarning(sAngle, false);
-				*/
-			}
-			stoppedYet = true;
-			drive.stopMotor();
-			timer.stop();
-		}
+
+		SmartDashboard.putNumber("Angle", navSensor.getYaw());
+	
 	}
 
 	/**

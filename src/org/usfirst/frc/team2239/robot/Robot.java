@@ -7,6 +7,9 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.DriverStation;
 import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
+
+
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -16,6 +19,13 @@ import com.kauailabs.navx.frc.AHRS;
  * directory.
  */
 public class Robot extends IterativeRobot {
+	NetworkTable table;
+	
+	public Robot() {
+		table = NetworkTable.getTable("GRIP/myLinesReport");
+	}
+	
+	
 	public static Robot instance;
     //from http://wpilib.screenstepslive.com/s/4485/m/26401/l/255419-choosing-an-autonomous-program-from-smartdashboard
 
@@ -49,6 +59,30 @@ public class Robot extends IterativeRobot {
 			navSensor = new AHRS(SPI.Port.kMXP); /* Alternatives: SerialPort.Port.kMXP, I2C.Port.kMXP or SerialPort.Port.kUSB */
 		} catch (RuntimeException ex) {
 			DriverStation.reportError("Error instantiating navX-MXP: " + ex.getMessage(), true);
+		}
+		
+		//network tables
+		double[] defaultValue = new double[0];
+		while (true) {
+			//double[] areas = table.getNumberArray("area", defaultValue); //code from FRC //TODO delete
+			double[] x1s = table.getNumberArray("x1", defaultValue);
+			double[] x2s = table.getNumberArray("x2", defaultValue);
+			double[] y1s = table.getNumberArray("y1", defaultValue);
+			double[] y2s = table.getNumberArray("y2", defaultValue);
+			double[] lengths = table.getNumberArray("length", defaultValue);
+			double[] angles = table.getNumberArray("angle", defaultValue);
+			
+			double[][] allInfo = {x1s, x2s, y1s, y2s, lengths, angles};
+			System.out.print("Bunch of info from myLinesReport: ");
+			for (double[] values : allInfo) {
+				for (double value : values) {
+					System.out.print(value + " ");
+				}
+
+			}
+			
+			System.out.println();
+			Timer.delay(1);
 		}
 	}
 

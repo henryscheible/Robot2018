@@ -26,6 +26,7 @@ public class TechnoDrive extends RobotDrive {
         return new double[] {super.m_rearLeftMotor.get(), -super.m_rearRightMotor.get()};
     }
 
+    /* Writing our own encoder/tick/wheel-rotation based function //TODO delete
     public void accelerateTo(double left, double right) {
         double[] speed = getMotorValues();
         tankDrive(accelerateHelper(speed[0], left), accelerateHelper(speed[1], right));
@@ -38,7 +39,24 @@ public class TechnoDrive extends RobotDrive {
             return Math.min(to, from + .005);
         }
     }
+    */
 
+    public void autoRamp(double acceleration, double rotationAmt) {
+    	int curEncoderCount = 0; //dummy variable //how many times the wheels have rotated.
+    	//tankDrive(mySpeed, mySpeed);
+    	while (mySpeed < 1)
+    	{
+    		(mySpeed + acceleration);
+    	}
+    	
+    	while (mySpeed <= 1)
+    	{
+    		mySpeed - acceleration;
+    	}
+    	
+    	tankDrive(mySpeed, mySpeed);
+    }
+    
     @Override
     public void tankDrive(GenericHID leftStick, GenericHID rightStick) {
         if (leftStick == null || rightStick == null) {
@@ -54,6 +72,7 @@ public class TechnoDrive extends RobotDrive {
 
         //straight
 
+    
     @Override
     public void tankDrive(double left, double right) {
         tankDrive(left, right, true);

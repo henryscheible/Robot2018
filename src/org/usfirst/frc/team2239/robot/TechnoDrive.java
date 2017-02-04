@@ -41,20 +41,25 @@ public class TechnoDrive extends RobotDrive {
     }
     */
 
-    public void autoRamp(double acceleration, double rotationAmt) {
+    /*
+     * Goal: Write a program to ramp up at acceleration until halfway there, and then ramp down afterwards
+     * 
+     */
+    public double autoRamp(double acceleration, double rotationAmt, double mySpeed) {
     	int curEncoderCount = 0; //dummy variable //how many times the wheels have rotated.
-    	//tankDrive(mySpeed, mySpeed);
-    	while (mySpeed < 1)
+    	//tankDrive(mySpeed, mySpeed); 
+    	if ((mySpeed < 1) && (curEncoderCount < rotationAmt/2))
     	{
-    		(mySpeed + acceleration);
+    		mySpeed += acceleration;
     	}
     	
-    	while (mySpeed <= 1)
+    	if  (curEncoderCount >= rotationAmt/2)
     	{
-    		mySpeed - acceleration;
+    		mySpeed -= acceleration;
     	}
     	
     	tankDrive(mySpeed, mySpeed);
+    	return mySpeed;
     }
     
     @Override

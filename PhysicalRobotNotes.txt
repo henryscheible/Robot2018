@@ -17,3 +17,14 @@ Refresh the page and make sure the PCM shows up this time.
 Now check the Firmware on the PCM (same website, just different component)
 
 Now, install Java on the RoboRIO: C:\Users\hopki\wpilib\tools\java-installer.jar
+
+
+Radio Configuration:
+Need to be plugged into the robot via usb cable
+C:\Program Files (x86)\FRC Radio Configuration Utility\FRC Radio Configuration Utility.exe
+
+Kangaroo:
+Needs to be plugged into the radio port farthest away from the power supply on the radio
+To open GRIP with a project, run the following command:
+/opt/GRIP/GRIP -f filename.grip
+(So far, the above command has been failing. We have submitted a bug report)

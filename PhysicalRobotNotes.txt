@@ -28,3 +28,11 @@ Needs to be plugged into the radio port farthest away from the power supply on t
 To open GRIP with a project, run the following command:
 /opt/GRIP/GRIP -f filename.grip
 (So far, the above command has been failing. We have submitted a bug report)
+
+Checking network table values from Kangaroo on RoboRIO:
+Use C:\Users\hopki\wpilib\tools\OutlineViewer.jar
+Then, enter 10.22.39.2 as the host
+Then click "Start Client"
+The values should pop up. If they don't, make sure you actually have a connection to the robot.
+(For example, check http://roborio-2239-frc.local/#Home on Windows Explorer or check the Driver Station Connection)
+

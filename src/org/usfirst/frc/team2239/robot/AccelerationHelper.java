@@ -20,6 +20,12 @@ public class AccelerationHelper {
 	
 	//make a new function called accelerate which takes
 	//double curTime (the current time gotten from the timer)
+	//
+	//check to see if the time is less than the middle time
+	//if so, increase curVelocity by acceleration
+	//if not, decrease by acceleration
+	//Either way, make sure we don't go below 0 or over maxVelocity
+	//Drive by curVelocity
 	public void accelerate(double curTime)
 	{
 		if (curTime < runTime/2.0)
@@ -34,9 +40,5 @@ public class AccelerationHelper {
 		
 	}
 	//inside the function:
-	//check to see if the time is less than the middle time
-	//if so, increase curVelocity by acceleration
-	//if not, decrease by acceleration
-	//Either way, make sure we don't go below 0 or over maxVelocity
-	//Drive by curVelocity
+	
 }

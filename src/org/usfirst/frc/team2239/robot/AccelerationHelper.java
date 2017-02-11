@@ -10,15 +10,6 @@ public class AccelerationHelper {
 	double curVelocity;
 	boolean forwards;
 	
-<<<<<<< Upstream, based on branch 'master' of https://github.com/Technocrats2239/Robot2017.git
-	public AccelerationHelper (TechnoDrive theRobot, double startTime, double runTime, double maxVelocity) {
-		//TODO calculate acceleration from these values and use it
-		this.startTime = startTime;
-		this.runTime = runTime;
-		this.acceleration = acceleration;
-		this.maxVelocity = maxVelocity;
-		this.curVelocity = 0; //init to  0; we shouldn't be moving when we initiate
-=======
 	
 	/*
 	 * 
@@ -36,7 +27,6 @@ public class AccelerationHelper {
 		if (acceleration == -1) acceleration = .005;
 		if (emergencyAcceleration==-1) emergencyAcceleration = .01;
 		
->>>>>>> c106c96 accelerationHelper made but still needs to deal with accelerating early
 		this.theRobot = theRobot;
 		this.maxVelocity = maxVelocity;
 		this.acceleration = acceleration;

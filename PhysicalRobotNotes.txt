@@ -36,3 +36,6 @@ Then click "Start Client"
 The values should pop up. If they don't, make sure you actually have a connection to the robot.
 (For example, check http://roborio-2239-frc.local/#Home on Windows Explorer or check the Driver Station Connection)
 
+Haven't actually gotten any values from GRIP yet. Those just seem to be values from the RoboRIO in general.
+Changed the Kangaroo settings from roboRIO-2239-FRC.local to 10.22.39.2 to see if that works
+

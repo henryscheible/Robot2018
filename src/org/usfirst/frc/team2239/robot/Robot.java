@@ -52,6 +52,7 @@ public class Robot extends IterativeRobot {
 		//3 = left front
 		//0 = right rear
 		//1 = right front
+		//public TechnoDrive(int frontLeftMotor, int rearLeftMotor, int frontRightMotor, int rearRightMotor)
 		drive = new TechnoDrive(3, 2, 1, 0);
 		timer = new Timer();
 		controller = new XboxController(0);  

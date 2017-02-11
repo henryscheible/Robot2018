@@ -39,3 +39,5 @@ The values should pop up. If they don't, make sure you actually have a connectio
 Haven't actually gotten any values from GRIP yet. Those just seem to be values from the RoboRIO in general.
 Changed the Kangaroo settings from roboRIO-2239-FRC.local to 10.22.39.2 to see if that works
 
+Issue with connecting to the field even though offline connection works so far:
+https://github.com/WPIRoboticsProjects/GRIP/issues/536

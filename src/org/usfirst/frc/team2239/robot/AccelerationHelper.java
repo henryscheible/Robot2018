@@ -14,7 +14,7 @@ public class AccelerationHelper {
 		this.runTime = runTime;
 		this.acceleration = acceleration;
 		this.maxVelocity = maxVelocity;
-		this.curVelocity = 0; //init to 0; we shouldn't be moving when we initiate
+		this.curVelocity = 0; //init to  0; we shouldn't be moving when we initiate
 		this.theRobot = theRobot;
 	}
 	

@@ -41,3 +41,7 @@ Changed the Kangaroo settings from roboRIO-2239-FRC.local to 10.22.39.2 to see i
 
 Issue with connecting to the field even though offline connection works so far:
 https://github.com/WPIRoboticsProjects/GRIP/issues/536
+
+Camera:
+Striped power cord = black = ground
+Plug into the port closest to the kangaroo's power cable in order to get it as Webcam 0.

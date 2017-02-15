@@ -71,12 +71,10 @@ public class Robot extends IterativeRobot {
 				System.out.print(area + " ");
 				}
 			System.out.println();
-			Timer.delay(1); //All of this is from FRC and works with ision. That is all I know.
-			}
-			
-			System.out.println();
-			Timer.delay(1);
+			Timer.delay(1); //All of this is from FRC and works with vision. That is all I know.
 		}
+			
+			
 	}
 
 	/**

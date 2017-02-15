@@ -1,21 +1,13 @@
 RoboRIO imaging:
-
 C:\Program Files (x86)\National Instruments\LabVIEW 2016\project\roboRIO Tool and double click on roboRIO_ImagingTool.exe
 This may fail on the first try.
-
 Then, go to http://roborio-2239-frc.local/ in order to connect to the RoboRio (You must use Internet Explorer, not Microsoft Edge)
-
 Check to make sure the PDP has the correct firmware version matching with the version on
 http://www.ctr-electronics.com/pdp.html#product_tabs_technical_resources
-
 Change the device ID on the PDP to 1. It needs a different device ID than the PCM in order to be able to communicate with the PCM.
-
 Click "save". Make sure the device ID stays at 1.
-
 Refresh the page and make sure the PCM shows up this time.
-
 Now check the Firmware on the PCM (same website, just different component)
-
 Now, install Java on the RoboRIO: C:\Users\hopki\wpilib\tools\java-installer.jar
 
 
@@ -23,10 +15,16 @@ Radio Configuration:
 Need to be plugged into the robot via usb cable
 C:\Program Files (x86)\FRC Radio Configuration Utility\FRC Radio Configuration Utility.exe
 
+
 Kangaroo:
 
 Setup:
-
+Download rufus (non-portable version) onto windows computer (technocrats computer).
+Download Ubuntu Desktop (.iso)
+Plug in wipeable flashdrive (takes up about 1.6 GB)
+Run rufus with settings as shown on their website
+Plug into Kangaroo and install. (There is some special setting you need to change before it installs. Hit F2 or something? Don't remember)
+Setup done.
 
 Needs to be plugged into the radio port farthest away from the power supply on the radio
 To open GRIP with a project, run the following command:
@@ -40,9 +38,6 @@ Then click "Start Client"
 The values should pop up. If they don't, make sure you actually have a connection to the robot.
 (For example, check http://roborio-2239-frc.local/#Home on Windows Explorer or check the Driver Station Connection)
 
-Haven't actually gotten any values from GRIP yet. Those just seem to be values from the RoboRIO in general.
-Changed the Kangaroo settings from roboRIO-2239-FRC.local to 10.22.39.2 to see if that works
-
 Issue with connecting to the field even though offline connection works so far:
 https://github.com/WPIRoboticsProjects/GRIP/issues/536
 
@@ -55,9 +50,4 @@ Done.
 Camera:
 Striped power cord = black = ground
 Plug into the port closest to the kangaroo's power cable in order to get it as Webcam 0.
-
-Lights are 12 volt 500 mA and plugged into the Voltage Regulator Module
-
-
-Ubuntu stuff:
-https://www.linux.com/learn/how-rescue-non-booting-grub-2-linux
+Camera lights are 12 volt 500 mA and plugged into the Voltage Regulator Module

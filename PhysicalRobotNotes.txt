@@ -24,6 +24,10 @@ Need to be plugged into the robot via usb cable
 C:\Program Files (x86)\FRC Radio Configuration Utility\FRC Radio Configuration Utility.exe
 
 Kangaroo:
+
+Setup:
+
+
 Needs to be plugged into the radio port farthest away from the power supply on the radio
 To open GRIP with a project, run the following command:
 /opt/GRIP/GRIP -f filename.grip
@@ -42,9 +46,17 @@ Changed the Kangaroo settings from roboRIO-2239-FRC.local to 10.22.39.2 to see i
 Issue with connecting to the field even though offline connection works so far:
 https://github.com/WPIRoboticsProjects/GRIP/issues/536
 
+How to get the OutlineViewer to work:
+Connect both computers to 2239 internet via wifi.
+ifconfig on kangaroo. Look at inet address. Type that into outline viewer and use host. (it's usually 10.22.39.14)
+ipconfig on windows computer. Look at IPv4 address. Type that into GRIP. (It's usually 10.22.39.82)
+Done.
+
 Camera:
 Striped power cord = black = ground
 Plug into the port closest to the kangaroo's power cable in order to get it as Webcam 0.
+
+Lights are 12 volt 500 mA and plugged into the Voltage Regulator Module
 
 
 Ubuntu stuff:

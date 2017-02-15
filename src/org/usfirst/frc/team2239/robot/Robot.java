@@ -65,21 +65,13 @@ public class Robot extends IterativeRobot {
 		//network tables
 		double[] defaultValue = new double[0];
 		while (true) {
-			//double[] areas = table.getNumberArray("area", defaultValue); //code from FRC //TODO delete
-			double[] x1s = table.getNumberArray("x1", defaultValue);
-			double[] x2s = table.getNumberArray("x2", defaultValue);
-			double[] y1s = table.getNumberArray("y1", defaultValue);
-			double[] y2s = table.getNumberArray("y2", defaultValue);
-			double[] lengths = table.getNumberArray("length", defaultValue);
-			double[] angles = table.getNumberArray("angle", defaultValue);
-			
-			double[][] allInfo = {x1s, x2s, y1s, y2s, lengths, angles};
-			System.out.print("Bunch of info from myLinesReport: ");
-			for (double[] values : allInfo) {
-				for (double value : values) {
-					System.out.print(value + " ");
+			double[] areas = table.getNumberArray("area", defaultValue); //code from FRC //TODO delete
+			System.out.print("areas:  ");
+			for (double area : areas) {
+				System.out.print(area + " ");
 				}
-
+			System.out.println();
+			Timer.delay(1); //All of this is from FRC and works with ision. That is all I know.
 			}
 			
 			System.out.println();

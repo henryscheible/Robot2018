@@ -45,3 +45,7 @@ https://github.com/WPIRoboticsProjects/GRIP/issues/536
 Camera:
 Striped power cord = black = ground
 Plug into the port closest to the kangaroo's power cable in order to get it as Webcam 0.
+
+
+Ubuntu stuff:
+https://www.linux.com/learn/how-rescue-non-booting-grub-2-linux

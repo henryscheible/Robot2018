@@ -1,3 +1,11 @@
+Where things are:
+C:\Users\hopki\wpilib\tools\SmartDashboard.jar
+C:\Users\hopki\wpilib\tools\OutlineViewer.jar
+C:\Program Files (x86)\National Instruments\LabVIEW 2016\project\roboRIO Tool\roboRIO_ImagingTool.exe
+C:\Users\hopki\wpilib\tools\java-installer.jar
+C:\Program Files (x86)\FRC Radio Configuration Utility\FRC Radio Configuration Utility.exe
+
+
 RoboRIO imaging:
 C:\Program Files (x86)\National Instruments\LabVIEW 2016\project\roboRIO Tool and double click on roboRIO_ImagingTool.exe
 This may fail on the first try.

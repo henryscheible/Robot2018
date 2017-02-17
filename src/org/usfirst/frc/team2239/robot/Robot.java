@@ -26,15 +26,16 @@ public class Robot extends IterativeRobot {
 	
 	public void robotInit() {
 		double[] defaultValue = new double[0];
-		//while (true) {
-			double[] areas = table.getNumberArray("area", defaultValue);
-			System.out.print("areas: ");
-			for (double area : areas) {
-				SmartDashboard.putNumber("Area", area);
-			}
-			System.out.println();
-			Timer.delay(1);
-		//}
+		SmartDashboard.putNumber("Hello", 100);
+		/*
+		double[] areas = table.getNumberArray("area", defaultValue);
+		System.out.print("areas: ");
+		for (double area : areas) {
+			SmartDashboard.putNumber("Area", area);
+		}
+		System.out.println();
+		Timer.delay(1);
+		*/
 	}
 	
 	public void autonomousInit() {

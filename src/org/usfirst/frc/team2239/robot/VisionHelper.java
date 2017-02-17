@@ -9,7 +9,9 @@ public class VisionHelper { //create a class to do the math
 		double[] ans = {dx, dy}; //Create an array to send the answers back to the program
 		return ans; //Send answer back to the main program
 	}
+	/*
 	static public double[] getDistanceToGoal(double dx, double dy)	{
 		double l = Math.sqrt(dx*dx + dy*dy); //Calculate the hypotenuse, l, of triangle dx,dy,l
 	}
+	*/
 }

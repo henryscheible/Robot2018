@@ -51,3 +51,38 @@ Camera:
 Striped power cord = black = ground
 Plug into the port closest to the kangaroo's power cable in order to get it as Webcam 0.
 Camera lights are 12 volt 500 mA and plugged into the Voltage Regulator Module
+
+Egit (git for Eclipse):
+How to import new project from git:
+File>>Import>>Git>>Projects from Git (with smart import)
+You must use smart import. Don't know why the other one doesn't work but it just doesn't.
+
+If weird errors occur:
+Copy what files you need. Then try combinations of "pull...", "fetch from upstream", and hard resets.
+Then paste your files back in and commit.
+
+How to upload project:
+Right click Robot2017>>Team>>Commit
+Drag the files from unstaged changes to staged changes
+Type a commit message.
+Commit if you just want to store it on your computer. Commit and push if you want to do both.
+
+How to revert back to old version:
+Right click on project (Robot2017)
+Team>>Show in History
+Find the revision you want. Right-click it and rebase. You will need to redownload the current version.
+There may be a way to look at the code without having to redownload everything.
+You can look at just the revised pages if you open the history file in the commit page and then click on the file.
+But that doesn't open anything that wasn't revised in that particular commit.
+
+How to download the most current version:
+Right click on project
+Team>>Fetch from Upstream
+Team>>Revert>>Hard
+
+
+Other Errors:
+If the driver station is saying there's no robot code, it could be an issue within the code.
+Revert back to a version you know was working and see if that one still works.
+If it does, it's a coding issue. Check for "while (true)" loops.
+If it doesn't, it's not a coding issue.

@@ -55,12 +55,12 @@ public class Robot extends IterativeRobot {
 		}
 		System.out.println();
 		
+		String[] propertiesToGet;
 		
 		//TODO test getting rid of area
-		String[] propertiesToGet = new String[] {"centerX", "centerY", "width", "height", "area"};
-		Contour[] contours;
-		int contourAmount = 0;
-		double[][] allPropertyArrays = new double[propertiesToGet.length][];
+		//get the values we can from contours
+		propertiesToGet = new String[] {"width", "area"};
+		double[][] contourPropertyArrays = new double[propertiesToGet.length][];
 		for (int i=0; i<propertiesToGet.length; i++) {
 			String property = propertiesToGet[i];
 			double[] propertyArray = contoursTable.getNumberArray(property, defaultValue);
@@ -69,15 +69,13 @@ public class Robot extends IterativeRobot {
 				System.out.print(" value: ");
 				System.out.print(value);
 			}
-			allPropertyArrays[i] = propertyArray;
-			if (i==0) { //just got the first array, so we now know how many contours we have
-				contourAmount = propertyArray.length;
-			}
+			contourPropertyArrays[i] = propertyArray;
 			System.out.println();
 		}
 		
+		//get the values we can from blobs
 		propertiesToGet = new String[] {"x", "y"};
-		allPropertyArrays = new double[propertiesToGet.length][];
+		double[][] blobPropertyArrays = new double[propertiesToGet.length][];
 		for (int i=0; i<propertiesToGet.length; i++) {
 			String property = propertiesToGet[i];
 			double[] propertyArray = blobsTable.getNumberArray(property, defaultValue);
@@ -86,10 +84,30 @@ public class Robot extends IterativeRobot {
 				System.out.print(" value: ");
 				System.out.print(value);
 			}
+			blobPropertyArrays[i] = propertyArray;
+			System.out.println();
 		}
 		
+		/*
+		//The class/final result is called "Contours" even though it has some info from blobsTable and some from contoursTable
+		Contour[] contours = new Contour[contourPropertyArrays[0].length];
+		for (int i=0; i<contours.length; i++) { //for each contour
+			Contour contour = new Contour(); //create default Contour with all values at default value
+			contour.w = contourPropertyArrays[0][i];
+			contour.area = contourPropertyArrays[1][i];
+			contour.x = blobPropertyArrays[0][i];
+			contour.y = blobPropertyArrays[1][i];
+			contour.h = contour.area/contour.w;
+			contours[i] = contour; //make the new contour and add it
+		}
+		
+		
 		//set up the contours array
-		System.out.println("contourAmount is: "+contourAmount);
+		System.out.println("contourAmount is: "+contours.length);
+		*/
+		
+		//System.out.println(contours[0]);
+		//System.out.println(contours[1]);
 		/*
 		contours = new Contour[contourAmount];
 		for (int i=0; i<contourAmount; i++) { //for each contour

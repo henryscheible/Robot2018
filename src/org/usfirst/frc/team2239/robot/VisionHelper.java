@@ -3,9 +3,18 @@ package org.usfirst.frc.team2239.robot;
 public class VisionHelper { //create a class to do the math
 
 	/*
+	 * @param halfFov is half the field of view in radians 
+	 * 
+	 */
+	static public double getDistanceToTape(double pixelTapeHeight, double pixelScreenHeight, double realTapeHeight, double halfFov) {
+		double realScreenHeight = (realTapeHeight*pixelScreenHeight)/pixelTapeHeight;
+		return realScreenHeight/(2*Math.tan(halfFov));
+	}
+	
+	/*
 	 * height is probably in inches, which would mean our distance is in inches as well //TODO check what unit height is
-	 * @param left the real height of the left piece of tape
-	 * @param right the real height of the right piece of tape
+	 * @param left robot's distance to the left piece of tape
+	 * @param right robot's distance to the right piece of tape
 	 * @param spread the real distance between the two pieces of tape.
 	 */
 	static public double[] getPositionToGoal(double left, double right, double spread) {

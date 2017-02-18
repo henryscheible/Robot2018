@@ -25,17 +25,7 @@ public class Robot extends IterativeRobot {
 	}
 	
 	public void robotInit() {
-		double[] defaultValue = new double[0];
-		SmartDashboard.putNumber("Hello", 100);
-		/*
-		double[] areas = table.getNumberArray("area", defaultValue);
-		System.out.print("areas: ");
-		for (double area : areas) {
-			SmartDashboard.putNumber("Area", area);
-		}
-		System.out.println();
-		Timer.delay(1);
-		*/
+		
 	}
 	
 	public void autonomousInit() {
@@ -43,7 +33,18 @@ public class Robot extends IterativeRobot {
 	}
 	
 	public void autonomousPeriodic() {
-		
+		double[] defaultValue = new double[0];
+		SmartDashboard.putNumber("Running", (int )(Math.random() * 100 + 1));
+		double[] areas = table.getNumberArray("area", defaultValue);
+		SmartDashboard.putNumber("Areas table length", areas.length);
+		System.out.print("areas:");
+		for (double area : areas) {
+			System.out.print(" area: ");
+			System.out.print(area);
+			SmartDashboard.putNumber("Area", area);
+		}
+		System.out.println();
+		Timer.delay(1);
 	}
 	
 	public void teleopInit() {

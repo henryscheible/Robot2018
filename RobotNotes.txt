@@ -20,8 +20,8 @@ Now, install Java on the RoboRIO: C:\Users\hopki\wpilib\tools\java-installer.jar
 
 
 Radio Configuration:
-Need to be plugged into the robot via usb cable
 C:\Program Files (x86)\FRC Radio Configuration Utility\FRC Radio Configuration Utility.exe
+If connected by Ethernet, choose "Ethernet"
 
 
 Kangaroo:

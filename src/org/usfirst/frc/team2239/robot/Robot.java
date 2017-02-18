@@ -20,13 +20,15 @@ import com.kauailabs.navx.frc.AHRS;
  * directory.
  */
 public class Robot extends IterativeRobot {
-	NetworkTable table;
+	NetworkTable contoursTable;
+	NetworkTable blobsTable; 
 	final double halfFov = Math.toRadians(30); //half the field of vision (radians)
 	final double realTapeHeight = 5; //height of the strip of tape (inches)
 	final double pixelScreenHeight = 360;
 	
 	public Robot() {
-		table = NetworkTable.getTable("GRIP/myContoursReport");
+		contoursTable = NetworkTable.getTable("GRIP/myContoursReport");
+		blobsTable = NetworkTable.getTable("GRIP/myBlobsReport");
 	}
 	
 	public void robotInit() {
@@ -38,10 +40,12 @@ public class Robot extends IterativeRobot {
 	}
 	
 	public void autonomousPeriodic() {
-		/*
+		
 		double[] defaultValue = new double[0];
+		
+		
 		SmartDashboard.putNumber("Running", (int )(Math.random() * 100 + 1));
-		double[] areas = table.getNumberArray("area", defaultValue);
+		double[] areas = contoursTable.getNumberArray("area", defaultValue);
 		SmartDashboard.putNumber("Areas table length", areas.length);
 		System.out.print("areas:");
 		for (double area : areas) {
@@ -50,24 +54,43 @@ public class Robot extends IterativeRobot {
 			SmartDashboard.putNumber("Area", area);
 		}
 		System.out.println();
-		*/
+		
 		
 		//TODO test getting rid of area
-		String[] propertiesToGet = new String[] {"x", "y", "width", "height", "area"};
+		String[] propertiesToGet = new String[] {"centerX", "centerY", "width", "height", "area"};
 		Contour[] contours;
 		int contourAmount = 0;
-		double[] defaultValue = new double[0];
 		double[][] allPropertyArrays = new double[propertiesToGet.length][];
 		for (int i=0; i<propertiesToGet.length; i++) {
 			String property = propertiesToGet[i];
-			double[] propertyArray = table.getNumberArray(property, defaultValue);
+			double[] propertyArray = contoursTable.getNumberArray(property, defaultValue);
+			System.out.print("Got a propertyArray "+property+": ");
+			for (double value : propertyArray) {
+				System.out.print(" value: ");
+				System.out.print(value);
+			}
 			allPropertyArrays[i] = propertyArray;
 			if (i==0) { //just got the first array, so we now know how many contours we have
 				contourAmount = propertyArray.length;
 			}
+			System.out.println();
+		}
+		
+		propertiesToGet = new String[] {"x", "y"};
+		allPropertyArrays = new double[propertiesToGet.length][];
+		for (int i=0; i<propertiesToGet.length; i++) {
+			String property = propertiesToGet[i];
+			double[] propertyArray = blobsTable.getNumberArray(property, defaultValue);
+			System.out.print("Got a propertyArray "+property+": ");
+			for (double value : propertyArray) {
+				System.out.print(" value: ");
+				System.out.print(value);
+			}
 		}
 		
 		//set up the contours array
+		System.out.println("contourAmount is: "+contourAmount);
+		/*
 		contours = new Contour[contourAmount];
 		for (int i=0; i<contourAmount; i++) { //for each contour
 			double[] contourProperties = new double[propertiesToGet.length]; //set up its property array
@@ -98,7 +121,7 @@ public class Robot extends IterativeRobot {
 		} else {
 			System.out.println("Did not find 2 countours. Instead, I found " + contours.length);
 		}
-		
+		*/
 		
 		
 		Timer.delay(1); //TODO delete

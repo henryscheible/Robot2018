@@ -1,5 +1,7 @@
 package org.usfirst.frc.team2239.robot;
 
+import java.util.Comparator;
+import java.util.Arrays;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -19,8 +21,9 @@ import com.kauailabs.navx.frc.AHRS;
  */
 public class Robot extends IterativeRobot {
 	NetworkTable table;
-	final double halfFOV = Math.toRadians(30); //half the field of vision (radians)
+	final double halfFov = Math.toRadians(30); //half the field of vision (radians)
 	final double realTapeHeight = 5; //height of the strip of tape (inches)
+	final double pixelScreenHeight = 360;
 	
 	public Robot() {
 		table = NetworkTable.getTable("GRIP/myContoursReport");
@@ -50,13 +53,13 @@ public class Robot extends IterativeRobot {
 		*/
 		
 		//TODO test getting rid of area
-		String[] valuesToGet = new String[] {"x", "y", "width", "height", "area"};
+		String[] propertiesToGet = new String[] {"x", "y", "width", "height", "area"};
 		Contour[] contours;
 		int contourAmount = 0;
 		double[] defaultValue = new double[0];
-		double[][] allPropertyArrays = new double[valuesToGet.length][];
-		for (int i=0; i<valuesToGet.length; i++) {
-			String property = valuesToGet[i];
+		double[][] allPropertyArrays = new double[propertiesToGet.length][];
+		for (int i=0; i<propertiesToGet.length; i++) {
+			String property = propertiesToGet[i];
 			double[] propertyArray = table.getNumberArray(property, defaultValue);
 			allPropertyArrays[i] = propertyArray;
 			if (i==0) { //just got the first array, so we now know how many contours we have
@@ -67,26 +70,38 @@ public class Robot extends IterativeRobot {
 		//set up the contours array
 		contours = new Contour[contourAmount];
 		for (int i=0; i<contourAmount; i++) { //for each contour
+			double[] contourProperties = new double[propertiesToGet.length]; //set up its property array
 			//grab its properties, create it, and add it to contours
-			
-			
-			contours[i] = new Contour(); //add a blank contour to the contours array
+			for (int j=0; j<contourProperties.length; j++) {
+				contourProperties[j] = allPropertyArrays[i][j]; //get the each property and add it to the array
+			}
+			contours[i] = new Contour(contourProperties); //make the new contour and add it
 		}
 		
-		
-		double[] tapeHeightsDefault = new double[0];
-		double[] tapeHeights = table.getNumberArray("height", tapeHeightsDefault);
-		if (tapeHeights.length==2) {
+		if (contours.length==2) {
 			System.out.println("Found the tape!");
-			//TODO make sure it knows the difference between the right tape and the left tape
-			//double distToRightTape
+			//Sort contours so that the one on the left comes first
+			Arrays.sort(contours, new Comparator<Contour>() {
+			    public int compare(Contour c1, Contour c2) {
+			        return Double.compare(c1.x, c2.x);
+			    }
+			});
+			System.out.println("x value of contour on left: "+contours[0].x);
+			System.out.println("x value of contour on right: "+contours[1].x);
+			
+			for (Contour contour : contours) {
+				//getDistanceToTape(double pixelTapeHeight, double pixelScreenHeight, double realTapeHeight, double halfFov)
+				double distanceToContour = VisionHelper.getDistanceToTape(contour.h, pixelScreenHeight, realTapeHeight, halfFov);
+				System.out.println("Distance to contour "+distanceToContour);
+			}
+
 		} else {
-			System.out.println("Did not find 2 countours. Instead, I found " + tapeHeights.length);
+			System.out.println("Did not find 2 countours. Instead, I found " + contours.length);
 		}
 		
 		
 		
-		//Timer.delay(1); //TODO delete
+		Timer.delay(1); //TODO delete
 	}
 	
 	public void teleopInit() {

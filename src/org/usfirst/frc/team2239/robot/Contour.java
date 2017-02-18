@@ -31,6 +31,8 @@ public class Contour {
 		}
 	}
 	
+	
+	//The following constructors are probably not used
 	public Contour() {
 		this.x = notFoundDefault;
 		this.y = notFoundDefault;

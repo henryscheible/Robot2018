@@ -24,7 +24,10 @@ public class Robot extends IterativeRobot {
 	NetworkTable blobsTable; 
 	final double halfFov = Math.toRadians(20); //half the field of vision (radians)
 	final double realTapeHeight = 5; //height of the strip of tape (inches)
-	final double pixelScreenHeight = 480;
+	final double spread = 8.25; //distance between the centers of the strips of tape (inches)
+	final double pixelScreenHeight = 480; //height of screen (pixels)
+	final double pixelScreenWidth = 640; //width of screen (pixels)
+	final double 
 	
 	public Robot() {
 		contoursTable = NetworkTable.getTable("GRIP/myContoursReport");
@@ -119,11 +122,17 @@ public class Robot extends IterativeRobot {
 			System.out.println("x value of contour on left: "+contours[0].x);
 			System.out.println("x value of contour on right: "+contours[1].x);
 			
-			for (Contour contour : contours) {
+			double[] distanceToContours = new double[2];
+			
+			for (int i=0; i<2; i++) {
+				Contour contour = contours[i];
 				//getDistanceToTape(double pixelTapeHeight, double pixelScreenHeight, double realTapeHeight, double halfFov)
 				double distanceToContour = VisionHelper.getDistanceToTape(contour.h, pixelScreenHeight, realTapeHeight, halfFov);
 				System.out.println("Distance to contour "+distanceToContour);
+				distanceToContours[i] = distanceToContour;
 			}
+			
+			double distanceToGoal = getPositionToGoal()
 
 		} else {
 			System.out.println("Did not find 2 countours. Instead, I found " + contours.length);

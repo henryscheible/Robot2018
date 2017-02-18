@@ -30,4 +30,16 @@ public class VisionHelper { //create a class to do the math
 		return Math.sqrt(dx*dx + dy*dy); //Calculate the hypotenuse, l, of triangle dx,dy,l
 	}
 	
+	//TODO reorder parameters, make sure constants are defined.
+	static public double angleToGoal(double dx, double dy, double l, double away, double pixelScreenWidth, double middleXPixel, double halfFov) {
+		double beta = Math.acos(dx/l);
+		double gamma = Math.atan((dy-away)/dx);
+		double theta = (1-(2*middleXPixel/pixelScreenWidth))*halfFov;
+		//how far we need to turn counterclockwise assuming that out if our calc gives negative dx when we are right of the target
+		double alpha1 = theta+gamma-beta; 
+		double driveDistance = Math.sqrt((Math.pow(dx, 2)+Math.pow(dy-away, 2)));
+		double alpha2 = Math.toRadians(90) - gamma;
+	}
+	
+	
 }

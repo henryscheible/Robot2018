@@ -22,9 +22,9 @@ import com.kauailabs.navx.frc.AHRS;
 public class Robot extends IterativeRobot {
 	NetworkTable contoursTable;
 	NetworkTable blobsTable; 
-	final double halfFov = Math.toRadians(30); //half the field of vision (radians)
+	final double halfFov = Math.toRadians(20); //half the field of vision (radians)
 	final double realTapeHeight = 5; //height of the strip of tape (inches)
-	final double pixelScreenHeight = 360;
+	final double pixelScreenHeight = 480;
 	
 	public Robot() {
 		contoursTable = NetworkTable.getTable("GRIP/myContoursReport");
@@ -88,7 +88,7 @@ public class Robot extends IterativeRobot {
 			System.out.println();
 		}
 		
-		/*
+		
 		//The class/final result is called "Contours" even though it has some info from blobsTable and some from contoursTable
 		Contour[] contours = new Contour[contourPropertyArrays[0].length];
 		for (int i=0; i<contours.length; i++) { //for each contour
@@ -104,23 +104,12 @@ public class Robot extends IterativeRobot {
 		
 		//set up the contours array
 		System.out.println("contourAmount is: "+contours.length);
-		*/
-		
-		//System.out.println(contours[0]);
-		//System.out.println(contours[1]);
-		/*
-		contours = new Contour[contourAmount];
-		for (int i=0; i<contourAmount; i++) { //for each contour
-			double[] contourProperties = new double[propertiesToGet.length]; //set up its property array
-			//grab its properties, create it, and add it to contours
-			for (int j=0; j<contourProperties.length; j++) {
-				contourProperties[j] = allPropertyArrays[i][j]; //get the each property and add it to the array
-			}
-			contours[i] = new Contour(contourProperties); //make the new contour and add it
-		}
 		
 		if (contours.length==2) {
 			System.out.println("Found the tape!");
+			System.out.println(contours[0]);
+			System.out.println(contours[1]);
+			
 			//Sort contours so that the one on the left comes first
 			Arrays.sort(contours, new Comparator<Contour>() {
 			    public int compare(Contour c1, Contour c2) {
@@ -139,7 +128,6 @@ public class Robot extends IterativeRobot {
 		} else {
 			System.out.println("Did not find 2 countours. Instead, I found " + contours.length);
 		}
-		*/
 		
 		
 		Timer.delay(1); //TODO delete

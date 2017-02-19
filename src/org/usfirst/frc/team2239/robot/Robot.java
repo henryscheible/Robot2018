@@ -27,7 +27,6 @@ public class Robot extends IterativeRobot {
 	final double spread = 8.25; //distance between the centers of the strips of tape (inches)
 	final double pixelScreenHeight = 480; //height of screen (pixels)
 	final double pixelScreenWidth = 640; //width of screen (pixels)
-	final double 
 	
 	public Robot() {
 		contoursTable = NetworkTable.getTable("GRIP/myContoursReport");
@@ -94,14 +93,22 @@ public class Robot extends IterativeRobot {
 		
 		//The class/final result is called "Contours" even though it has some info from blobsTable and some from contoursTable
 		Contour[] contours = new Contour[contourPropertyArrays[0].length];
-		for (int i=0; i<contours.length; i++) { //for each contour
-			Contour contour = new Contour(); //create default Contour with all values at default value
-			contour.w = contourPropertyArrays[0][i];
-			contour.area = contourPropertyArrays[1][i];
-			contour.x = blobPropertyArrays[0][i];
-			contour.y = blobPropertyArrays[1][i];
-			contour.h = contour.area/contour.w;
-			contours[i] = contour; //make the new contour and add it
+		try {
+			for (int i=0; i<contours.length; i++) { //for each contour
+				Contour contour = new Contour(); //create default Contour with all values at default value
+				contour.w = contourPropertyArrays[0][i];
+				contour.area = contourPropertyArrays[1][i];
+				contour.x = blobPropertyArrays[0][i];
+				contour.y = blobPropertyArrays[1][i];
+				contour.h = contour.area/contour.w;
+				contours[i] = contour; //make the new contour and add it
+			}
+		}
+			
+			
+		catch (ArrayIndexOutOfBoundsException exc) {
+			System.out.println("Caught the killer error! About to return.");
+			return;
 		}
 		
 		
@@ -132,7 +139,7 @@ public class Robot extends IterativeRobot {
 				distanceToContours[i] = distanceToContour;
 			}
 			
-			double distanceToGoal = getPositionToGoal()
+			//double distanceToGoal = getPositionToGoal()
 
 		} else {
 			System.out.println("Did not find 2 countours. Instead, I found " + contours.length);

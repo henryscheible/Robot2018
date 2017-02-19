@@ -39,7 +39,8 @@ public class VisionHelper { //create a class to do the math
 		double alpha1 = theta+gamma-beta; 
 		double driveDistance = Math.sqrt((Math.pow(dx, 2)+Math.pow(dy-away, 2)));
 		double alpha2 = Math.toRadians(90) - gamma;
-	}
+		return 0.0; //TODO fix
+	} 
 	
 	
 }

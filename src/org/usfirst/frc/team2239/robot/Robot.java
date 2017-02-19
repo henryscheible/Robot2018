@@ -186,18 +186,20 @@ public class Robot extends IterativeRobot {
  	        }
         }
         
-        if (speedToggleReady){
-	        if (speedTriggered) {
+        if (gearToggleReady){
+	        if (gearTriggered) {
+	        	/*
 	        	if (speed==1) {
 	        		speed = .5;
 	        	} else {
 	        		speed = 1;
 	        	}
-	        	speedToggleReady = false;
+	        	*/
+	        	gearToggleReady = false;
 	        }
         } else {
-        	if (!speedTriggered) {
- 	        	speedToggleReady = true;
+        	if (!gearTriggered) {
+ 	        	gearToggleReady = true;
  	        }
         }
         

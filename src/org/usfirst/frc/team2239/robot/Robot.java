@@ -47,7 +47,8 @@ public class Robot extends IterativeRobot {
 	String autoSelected;
 	SendableChooser<String> chooser = new SendableChooser<>();
 	AHRS navSensor; //The navigation sensor object
-	boolean toggleReady = true;
+	boolean speedToggleReady = true;
+	boolean gearToggleReady = true;
 	double speed = 1;
 	AccelerationHelper baseline;
 	
@@ -164,24 +165,25 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		
-		SmartDashboard.putBoolean("Trigger", toggleReady);
+		SmartDashboard.putBoolean("Trigger", speedToggleReady);
 		double leftVal = -controller.getY(XboxController.Hand.kLeft);
         double rightVal = -controller.getY(XboxController.Hand.kRight);
         boolean triggered = controller.getTrigger(XboxController.Hand.kLeft) || controller.getTrigger(XboxController.Hand.kRight);
-        if (toggleReady){
+        if (speedToggleReady){
 	        if (triggered) {
 	        	if (speed==1) {
 	        		speed = .5;
 	        	} else {
 	        		speed = 1;
 	        	}
-	        	toggleReady = false;
+	        	speedToggleReady = false;
 	        }
         } else {
         	if (!triggered) {
- 	        	toggleReady = true;
+ 	        	speedToggleReady = true;
  	        }
         }
+        
         if (controller.getRawButton(2)) {
         	climber.set(1);
         }

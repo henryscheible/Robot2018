@@ -168,9 +168,11 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putBoolean("Trigger", speedToggleReady);
 		double leftVal = -controller.getY(XboxController.Hand.kLeft);
         double rightVal = -controller.getY(XboxController.Hand.kRight);
-        boolean triggered = controller.getTrigger(XboxController.Hand.kLeft) || controller.getTrigger(XboxController.Hand.kRight);
+        boolean speedTriggered = controller.getTrigger(XboxController.Hand.kLeft) || controller.getTrigger(XboxController.Hand.kRight);
+        boolean gearTriggered = controller.getRawButton(5) || controller.getRawButton(6);
+        
         if (speedToggleReady){
-	        if (triggered) {
+	        if (speedTriggered) {
 	        	if (speed==1) {
 	        		speed = .5;
 	        	} else {
@@ -179,7 +181,22 @@ public class Robot extends IterativeRobot {
 	        	speedToggleReady = false;
 	        }
         } else {
-        	if (!triggered) {
+        	if (!speedTriggered) {
+ 	        	speedToggleReady = true;
+ 	        }
+        }
+        
+        if (speedToggleReady){
+	        if (speedTriggered) {
+	        	if (speed==1) {
+	        		speed = .5;
+	        	} else {
+	        		speed = 1;
+	        	}
+	        	speedToggleReady = false;
+	        }
+        } else {
+        	if (!speedTriggered) {
  	        	speedToggleReady = true;
  	        }
         }

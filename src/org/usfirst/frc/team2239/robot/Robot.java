@@ -60,10 +60,10 @@ public class Robot extends IterativeRobot {
 		chooser.addDefault("Default Auto", defaultAuto);
 		chooser.addObject("My Auto", customAuto);
 		SmartDashboard.putData("Auto choices", chooser);
-		myCompressor = new Compressor();
+		myCompressor = new Compressor(6);
 		//myCompressor.setClosedLoopControl(true);
-		gearRelease = new Solenoid(0);
-		gearRelease.set(false);
+		gearRelease = new Solenoid(6, 0);
+		//gearRelease.set(false);
 		
 		/*
 		MOTORS:
@@ -75,7 +75,7 @@ public class Robot extends IterativeRobot {
 			5- Climber
 		*/
 		//public TechnoDrive(int frontLeftMotor, int rearLeftMotor, int frontRightMotor, int rearRightMotor)
-		drive = new TechnoDrive(4, 1, 3, 2);
+		drive = new TechnoDrive(2, 3, 1, 4);
 		timer = new Timer();
 		controller = new XboxController(0);  
 		climber = new CANTalon(5);
@@ -115,15 +115,15 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-		myCompressor.start();
+		//myCompressor.start();
 		//autoSelected = chooser.getSelected();
 		// autoSelected = SmartDashboard.getString("Auto Selector",
 		// defaultAuto);
-		//navSensor.reset();
+		navSensor.reset();
 		//System.out.println("Auto selected: " + autoSelected);
-		//timer.start();
+		timer.start();
 		//TechnoDrive theRobot, double startTime, double distance, double maxVelocity
-		//AccelerationHelper baseline = new AccelerationHelper(drive, timer.get(), 156.0, .7);
+		baseline = new AccelerationHelper(drive, timer.get(), 156.0, .7);
 	}
 	
 
@@ -144,9 +144,9 @@ public class Robot extends IterativeRobot {
 		}
 		*/
 
-		//SmartDashboard.putNumber("Angle", navSensor.getYaw());
+		SmartDashboard.putNumber("Angle", navSensor.getYaw());
 		
-		//baseline.accelerate(timer.get());
+		baseline.accelerate(timer.get());
 	
 	}
 
@@ -155,12 +155,12 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
-		/*
+		
 		SmartDashboard.putBoolean("Trigger", toggleReady);
 		double leftVal = -controller.getY(XboxController.Hand.kLeft);
         double rightVal = -controller.getY(XboxController.Hand.kRight);
         if (toggleReady){
-	        if (controller.getTrigger(XboxController.Hand.kLeft) && controller.getTrigger(XboxController.Hand.kRight)) {
+	        if (controller.getTrigger(XboxController.Hand.kLeft) || controller.getTrigger(XboxController.Hand.kRight)) {
 	        	if (speed==1) {
 	        		speed = .5;
 	        	} else {
@@ -180,20 +180,21 @@ public class Robot extends IterativeRobot {
         	climber.set(0);
         }
         if (controller.getRawButton(1)){
-        	gearRelease.set(true);
-        } else {
         	gearRelease.set(false);
-        }	
+        } else {
+        	gearRelease.set(true);
+        }
         	
-        */
+        
         SmartDashboard.putNumber("speed", speed);
-        //drive.tankDrive(speed * leftVal, speed * rightVal);
-		
-        //if (myCompressor.getPressureSwitchValue()) {
-        	
-        //} else {
-        	//myCompressor.stop();
-        //}
+        drive.tankDrive(speed * leftVal, speed * rightVal);
+		/*
+        if (myCompressor.getPressureSwitchValue()) {
+        	myCompressor.start();
+        } else {
+        	myCompressor.stop();
+        }
+        */
 	}
 	
 	

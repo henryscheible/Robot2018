@@ -86,3 +86,20 @@ If the driver station is saying there's no robot code, it could be an issue with
 Revert back to a version you know was working and see if that one still works.
 If it does, it's a coding issue. Check for "while (true)" loops.
 If it doesn't, it's not a coding issue.
+
+
+
+How to configure network settings on the Robot's wifi network:
+1: Join the Robot's wifi network-when succesful, under the network name will appear 'No internet, open'
+2: Right click the wifi tab
+3: Left click 'open network and sharing center'
+4: Left click change adapter settings
+5: Right click the network you are connected to(Shown by five green bars increasing in size from left to right)
+6: Left Click 'Properties'
+7: Right click 'Internet Protocol Version 4 (TCP/IPv4)'
+8: Left click 'Properties'
+9: Left click 'Use the following IP address'
+10: Left click the 'IP Address:' box and type 10.22.39.{Number of your choice greater than ten}
+11: Left click the 'Subnet Mask:' box
+12: Left click 'OK'
+You have now configured your network settings for the roboRIO network. Have a nice day

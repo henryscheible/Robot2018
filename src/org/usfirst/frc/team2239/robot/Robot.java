@@ -1,13 +1,19 @@
 package org.usfirst.frc.team2239.robot;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
+
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.hal.CompressorJNI;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.DriverStation;
+
+import com.ctre.CANTalon;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.Solenoid;
 
 
 
@@ -32,12 +38,18 @@ public class Robot extends IterativeRobot {
     public TechnoDrive drive;  // class that handles basic drive operations
     public Timer timer; // Timer
     public XboxController controller; //Control for the robot
+    public CANTalon climber;
+    public Solenoid gearRelease;
+    public Compressor myCompressor;
     
 	final String defaultAuto = "Default";
 	final String customAuto = "My Auto";
 	String autoSelected;
 	SendableChooser<String> chooser = new SendableChooser<>();
 	AHRS navSensor; //The navigation sensor object
+	boolean toggleReady = true;
+	double speed = 1;
+	AccelerationHelper baseline;
 	
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -48,20 +60,32 @@ public class Robot extends IterativeRobot {
 		chooser.addDefault("Default Auto", defaultAuto);
 		chooser.addObject("My Auto", customAuto);
 		SmartDashboard.putData("Auto choices", chooser);
-		//2 = left rear
-		//3 = left front
-		//0 = right rear
-		//1 = right front
+		myCompressor = new Compressor();
+		//myCompressor.setClosedLoopControl(true);
+		gearRelease = new Solenoid(0);
+		gearRelease.set(false);
+		
+		/*
+		MOTORS:
+			1- Back Left
+			2- Back Right
+			3- Front Right
+			4- Front Left
+
+			5- Climber
+		*/
 		//public TechnoDrive(int frontLeftMotor, int rearLeftMotor, int frontRightMotor, int rearRightMotor)
-		drive = new TechnoDrive(3, 2, 1, 0);
+		drive = new TechnoDrive(4, 1, 3, 2);
 		timer = new Timer();
 		controller = new XboxController(0);  
+		climber = new CANTalon(5);
 		try {
 			navSensor = new AHRS(SPI.Port.kMXP); /* Alternatives: SerialPort.Port.kMXP, I2C.Port.kMXP or SerialPort.Port.kUSB */
 		} catch (RuntimeException ex) {
 			DriverStation.reportError("Error instantiating navX-MXP: " + ex.getMessage(), true);
 		}
 		
+		/*
 		//network tables
 		double[] defaultValue = new double[0];
 		while (true) {
@@ -73,6 +97,7 @@ public class Robot extends IterativeRobot {
 			System.out.println();
 			Timer.delay(1); //All of this is from FRC and works with vision. That is all I know.
 		}
+		*/
 			
 			
 	}
@@ -90,12 +115,17 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-		autoSelected = chooser.getSelected();
+		myCompressor.start();
+		//autoSelected = chooser.getSelected();
 		// autoSelected = SmartDashboard.getString("Auto Selector",
 		// defaultAuto);
-		navSensor.reset();
-		System.out.println("Auto selected: " + autoSelected);
+		//navSensor.reset();
+		//System.out.println("Auto selected: " + autoSelected);
+		//timer.start();
+		//TechnoDrive theRobot, double startTime, double distance, double maxVelocity
+		//AccelerationHelper baseline = new AccelerationHelper(drive, timer.get(), 156.0, .7);
 	}
+	
 
 	/**
 	 * This function is called periodically during autonomous
@@ -114,7 +144,9 @@ public class Robot extends IterativeRobot {
 		}
 		*/
 
-		SmartDashboard.putNumber("Angle", navSensor.getYaw());
+		//SmartDashboard.putNumber("Angle", navSensor.getYaw());
+		
+		//baseline.accelerate(timer.get());
 	
 	}
 
@@ -123,11 +155,48 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
+		/*
+		SmartDashboard.putBoolean("Trigger", toggleReady);
 		double leftVal = -controller.getY(XboxController.Hand.kLeft);
         double rightVal = -controller.getY(XboxController.Hand.kRight);
-        drive.tankDrive(leftVal, rightVal);
+        if (toggleReady){
+	        if (controller.getTrigger(XboxController.Hand.kLeft) && controller.getTrigger(XboxController.Hand.kRight)) {
+	        	if (speed==1) {
+	        		speed = .5;
+	        	} else {
+	        		speed = 1;
+	        	}
+	        	toggleReady = false;
+	        }
+        } else {
+        	if (!controller.getTrigger(XboxController.Hand.kRight)) {
+ 	        	toggleReady = true;
+ 	        }
+        }
+        if (controller.getRawButton(2)) {
+        	climber.set(1);
+        }
+        else {
+        	climber.set(0);
+        }
+        if (controller.getRawButton(1)){
+        	gearRelease.set(true);
+        } else {
+        	gearRelease.set(false);
+        }	
+        	
+        */
+        SmartDashboard.putNumber("speed", speed);
+        //drive.tankDrive(speed * leftVal, speed * rightVal);
+		
+        //if (myCompressor.getPressureSwitchValue()) {
+        	
+        //} else {
+        	//myCompressor.stop();
+        //}
 	}
-
+	
+	
 	/**
 	 * This function is called periodically during test mode
 	 */

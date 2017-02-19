@@ -115,7 +115,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-		//myCompressor.start();
+		//myCompressor.start(); //TODO test
 		//autoSelected = chooser.getSelected();
 		// autoSelected = SmartDashboard.getString("Auto Selector",
 		// defaultAuto);
@@ -123,7 +123,8 @@ public class Robot extends IterativeRobot {
 		//System.out.println("Auto selected: " + autoSelected);
 		timer.start();
 		//TechnoDrive theRobot, double startTime, double distance, double maxVelocity
-		baseline = new AccelerationHelper(drive, timer.get(), 156.0, .7);
+		baseline = new AccelerationHelper(drive, timer.get(), 167.0, .7);
+		myCompressor.start();
 	}
 	
 
@@ -132,6 +133,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
+		myCompressor.start();
 		/*
 		switch (autoSelected) {
 		case customAuto:
@@ -146,8 +148,14 @@ public class Robot extends IterativeRobot {
 
 		SmartDashboard.putNumber("Angle", navSensor.getYaw());
 		
-		baseline.accelerate(timer.get());
-	
+	baseline.accelerate(timer.get());
+		//TODO test
+		
+		if (timer.get()>9) {
+			gearRelease.set(true);
+		}
+		
+		
 	}
 
 	/**
@@ -159,8 +167,9 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putBoolean("Trigger", toggleReady);
 		double leftVal = -controller.getY(XboxController.Hand.kLeft);
         double rightVal = -controller.getY(XboxController.Hand.kRight);
+        boolean triggered = controller.getTrigger(XboxController.Hand.kLeft) || controller.getTrigger(XboxController.Hand.kRight);
         if (toggleReady){
-	        if (controller.getTrigger(XboxController.Hand.kLeft) || controller.getTrigger(XboxController.Hand.kRight)) {
+	        if (triggered) {
 	        	if (speed==1) {
 	        		speed = .5;
 	        	} else {
@@ -169,7 +178,7 @@ public class Robot extends IterativeRobot {
 	        	toggleReady = false;
 	        }
         } else {
-        	if (!controller.getTrigger(XboxController.Hand.kRight)) {
+        	if (!triggered) {
  	        	toggleReady = true;
  	        }
         }
@@ -179,22 +188,25 @@ public class Robot extends IterativeRobot {
         else {
         	climber.set(0);
         }
+        
+        //TODO test
         if (controller.getRawButton(1)){
-        	gearRelease.set(false);
+        	gearRelease.set(true); //open it
         } else {
-        	gearRelease.set(true);
+        	gearRelease.set(false); //close it
         }
+        
         	
         
         SmartDashboard.putNumber("speed", speed);
         drive.tankDrive(speed * leftVal, speed * rightVal);
-		/*
-        if (myCompressor.getPressureSwitchValue()) {
+        //TODO test
+        //if (myCompressor.getPressureSwitchValue()) {
         	myCompressor.start();
-        } else {
-        	myCompressor.stop();
-        }
-        */
+        //} else {
+        	//myCompressor.stop();
+        //}
+        
 	}
 	
 	

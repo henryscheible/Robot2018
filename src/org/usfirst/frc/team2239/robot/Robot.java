@@ -59,60 +59,11 @@ public class Robot extends IterativeRobot {
 		
 		String[] propertiesToGet;
 		
-		//TODO test getting rid of area
-		//get the values we can from contours
-		propertiesToGet = new String[] {"width", "area"};
-		double[][] contourPropertyArrays = new double[propertiesToGet.length][];
-		for (int i=0; i<propertiesToGet.length; i++) {
-			String property = propertiesToGet[i];
-			double[] propertyArray = contoursTable.getNumberArray(property, defaultValue);
-			System.out.print("Got a propertyArray "+property+": ");
-			for (double value : propertyArray) {
-				System.out.print(" value: ");
-				System.out.print(value);
-			}
-			contourPropertyArrays[i] = propertyArray;
-			System.out.println();
-		}
+		double[][] contourPropertyArrays = getDataFromGRIPContours(new String[] {"width", "area"});
+		double[][] blobPropertyArrays = getDataFromGRIPBlobs(new String[] {"x", "y"});
 		
-		//get the values we can from blobs
-		propertiesToGet = new String[] {"x", "y"};
-		double[][] blobPropertyArrays = new double[propertiesToGet.length][];
-		for (int i=0; i<propertiesToGet.length; i++) {
-			String property = propertiesToGet[i];
-			double[] propertyArray = blobsTable.getNumberArray(property, defaultValue);
-			System.out.print("Got a propertyArray "+property+": ");
-			for (double value : propertyArray) {
-				System.out.print(" value: ");
-				System.out.print(value);
-			}
-			blobPropertyArrays[i] = propertyArray;
-			System.out.println();
-		}
-		
-		
-		//The class/final result is called "Contours" even though it has some info from blobsTable and some from contoursTable
-		Contour[] contours = new Contour[contourPropertyArrays[0].length];
-		try {
-			for (int i=0; i<contours.length; i++) { //for each contour
-				Contour contour = new Contour(); //create default Contour with all values at default value
-				contour.w = contourPropertyArrays[0][i];
-				contour.area = contourPropertyArrays[1][i];
-				contour.x = blobPropertyArrays[0][i];
-				contour.y = blobPropertyArrays[1][i];
-				contour.h = contour.area/contour.w;
-				contours[i] = contour; //make the new contour and add it
-			}
-		}
-			
-			
-		catch (ArrayIndexOutOfBoundsException exc) {
-			System.out.println("Caught the killer error! About to return.");
-			return;
-		}
-		
-		
-		//set up the contours array
+		//Get the contour objects 
+		Contour[] contours = getContours(contourPropertyArrays, blobPropertyArrays);
 		System.out.println("contourAmount is: "+contours.length);
 		
 		if (contours.length==2) {
@@ -156,4 +107,68 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 		
 	}
+	
+	//get the requested values from the contours table posted by GRIP
+	public double[][] getDataFromGRIPContours(String[] propertiesToGet) {
+		double[][] ans = new double[propertiesToGet.length][];
+		for (int i=0; i<propertiesToGet.length; i++) {
+			String property = propertiesToGet[i];
+			double[] propertyArray = contoursTable.getNumberArray(property, new double[0]);
+			System.out.print("Got a propertyArray "+property+": ");
+			for (double value : propertyArray) {
+				System.out.print(" value: ");
+				System.out.print(value);
+			}
+			ans[i] = propertyArray;
+			System.out.println();
+		}
+		return ans;
+	}
+	
+	//get the values we can from blobs
+	//This is a workaround since GRIP wasn't giving us all the values we wanted
+	public double[][] getDataFromGRIPBlobs(String[] propertiesToGet) {
+		double[][] ans = new double[propertiesToGet.length][];
+		for (int i=0; i<propertiesToGet.length; i++) {
+			String property = propertiesToGet[i];
+			double[] propertyArray = blobsTable.getNumberArray(property, new double[0]);
+			System.out.print("Got a propertyArray "+property+": ");
+			for (double value : propertyArray) {
+				System.out.print(" value: ");
+				System.out.print(value);
+			}
+			ans[i] = propertyArray;
+			System.out.println();
+		}
+		return ans;
+	}
+	
+	//Take all the data from GRIP and return the tape contours.
+	//This is where finding the tape (ignoring other things) takes place.
+	public Contour[] getContours(double[][] contourPropertyArrays, double[][] blobPropertyArrays) {
+		//The class/final result is called "Contours" even though it has some info from blobsTable and some from contoursTable
+		Contour[] contours = new Contour[contourPropertyArrays[0].length];
+		try {
+			for (int i=0; i<contours.length; i++) { //for each contour
+				Contour contour = new Contour(); //create default Contour with all values at default value
+				contour.w = contourPropertyArrays[0][i];
+				contour.area = contourPropertyArrays[1][i];
+				contour.x = blobPropertyArrays[0][i];
+				contour.y = blobPropertyArrays[1][i];
+				contour.h = contour.area/contour.w;
+				contours[i] = contour; //make the new contour and add it
+			}
+			return contours;
+		}
+			
+			
+		catch (ArrayIndexOutOfBoundsException exc) {
+			System.out.println("Caught the killer error! About to return.");
+			return new Contour[0];
+		}
+	}
+	
+
+	
+	
 }

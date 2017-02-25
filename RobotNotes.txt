@@ -80,6 +80,13 @@ Right click on project
 Team>>Fetch from Upstream
 Team>>Revert>>Hard
 
+If pushing isn't working and you just want to push it:
+Push branch '<branch name>'...
+Check "Force overwrite branch..."
+Go through with the push.
+Then, reset>>HARD
+
+
 
 Other Errors:
 If the driver station is saying there's no robot code, it could be an issue within the code.

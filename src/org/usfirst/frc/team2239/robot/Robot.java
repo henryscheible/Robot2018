@@ -175,7 +175,7 @@ public class Robot extends IterativeRobot {
         if (speedToggleReady){
 	        if (speedTriggered) {
 	        	if (speed==1) {
-	        		speed = .5;
+	        		speed = .7;
 	        	} else {
 	        		speed = 1;
 	        	}

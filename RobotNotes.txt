@@ -103,3 +103,7 @@ How to configure network settings on the Robot's wifi network:
 11: Left click the 'Subnet Mask:' box
 12: Left click 'OK'
 You have now configured your network settings for the roboRIO network. Have a nice day
+
+
+Random robot notes:
+18 and 7/8 is how off the ground we are.

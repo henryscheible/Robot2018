@@ -49,6 +49,7 @@ public class Robot extends IterativeRobot {
 	AHRS navSensor; //The navigation sensor object
 	boolean speedToggleReady = true;
 	boolean gearToggleReady = true;
+	boolean gearOpen = false;
 	double speed = 1;
 	AccelerationHelper baseline;
 	
@@ -188,21 +189,20 @@ public class Robot extends IterativeRobot {
         
         if (gearToggleReady){
 	        if (gearTriggered) {
-	        	/*
-	        	if (speed==1) {
-	        		speed = .5;
+	        	if (gearOpen) {
+	        		gearRelease.set(false); //close it
+	        		gearOpen = false;
 	        	} else {
-	        		speed = 1;
+	        		gearRelease.set(true); //open it
+	        		gearOpen = true;
 	        	}
-	        	*/
 	        	gearToggleReady = false;
 	        }
         } else {
-        	if (!gearTriggered) {
+        	if (!speedTriggered) {
  	        	gearToggleReady = true;
  	        }
         }
-        
         if (controller.getRawButton(2)) {
         	climber.set(1);
         }

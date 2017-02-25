@@ -70,14 +70,9 @@ public class TechnoDrive extends RobotDrive {
 
         double left = -leftStick.getY();
         double right = -rightStick.getY();
+        tankDrive(left, right);
     }
 
-        //rightStick is straight, controller is full speed
-        //if the controller is triggered then it will run at full speed
-
-        //straight
-
-    
     @Override
     public void tankDrive(double left, double right) {
         tankDrive(left, right, true);
@@ -87,4 +82,37 @@ public class TechnoDrive extends RobotDrive {
     public void tankDrive(double left, double right, boolean squared) {
         super.tankDrive(left, right, squared);
     }
+   
+    /*
+     * curRotation current roatation in degrees from the nav sensor's getAngle() function
+     */
+    public void driveStraight (double curRotation, double wantedRotation, double velocity){ //TODO do not know directions
+    	double ADJUST_RATE = 1; //number from 0 to 1: how much it corrects
+    	
+    	curRotation%=360; //set it to value between 0 and 359
+    	wantedRotation%=360;
+    	double adjust;//what you can add to curRotation to get wantedRotation
+    	if (curRotation>wantedRotation) {
+    		if (curRotation-wantedRotation<=180) {
+    			adjust = wantedRotation-curRotation;
+    		} else {
+    			//for example, if curRotation is 359 and wantedRotation is 1
+    			adjust = 360-curRotation+wantedRotation;//go the other way around
+    		}
+    	} else  { //(curRotation<=wantedRotation)
+    		if ((wantedRotation-curRotation)<=180) {
+    			adjust = wantedRotation-curRotation;
+    		} else { //for example, if curRotation is 1 and wantedRotation is 359
+    			adjust = wantedRotation-curRotation-360;//go the other way around
+    		}
+    	}
+    	double turnAmount = adjust/360.0;
+    	if (turnAmount==0) {
+    		tankDrive(velocity, velocity); //a miracle has occurred and the robot is going perfectly straight
+    	} else if ((velocity>0 && turnAmount<0) || (velocity<0 && turnAmount>0)) { //need to turn clockwise //TODO check direction
+    		tankDrive(velocity*(1-turnAmount*ADJUST_RATE), velocity);
+    	} else { //need to turn counterclockwise //TODO check direction
+    		tankDrive(velocity, velocity*(1-turnAmount*ADJUST_RATE));
+    	}
+	}
 }

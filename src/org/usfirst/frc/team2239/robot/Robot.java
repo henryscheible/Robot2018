@@ -14,6 +14,7 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
 
 
@@ -41,6 +42,7 @@ public class Robot extends IterativeRobot {
     public CANTalon climber;
     public Solenoid gearRelease;
     public Compressor myCompressor;
+    public PowerDistributionPanel myPDP;
     
 	final String defaultAuto = "Default";
 	final String customAuto = "My Auto";
@@ -81,6 +83,8 @@ public class Robot extends IterativeRobot {
 		timer = new Timer();
 		controller = new XboxController(0);  
 		climber = new CANTalon(5);
+		myPDP = new PowerDistributionPanel();
+		//myPDP.getVoltage();
 		try {
 			navSensor = new AHRS(SPI.Port.kMXP); /* Alternatives: SerialPort.Port.kMXP, I2C.Port.kMXP or SerialPort.Port.kUSB */
 		} catch (RuntimeException ex) {

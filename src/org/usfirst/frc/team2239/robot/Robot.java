@@ -187,6 +187,7 @@ public class Robot extends IterativeRobot {
         boolean turnTriggered = controller.getRawButton(3);
         
         boolean[] triggers = new boolean[toggleAmt];
+        //Go through each toggle
         for (int isTriggeredIndex = 0; isTriggeredIndex<toggleAmt; isTriggeredIndex++) {
         	boolean isTriggered = triggers[isTriggeredIndex]; //is this button currently being pressed down
         	switch (isTriggeredIndex) {
@@ -204,7 +205,7 @@ public class Robot extends IterativeRobot {
         	}
         }
         
-
+        
         
         if (speedToggleReady){
 	        if (speedTriggered) {

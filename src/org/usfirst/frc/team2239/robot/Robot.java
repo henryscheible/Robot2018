@@ -13,7 +13,7 @@ import com.ctre.CANTalon;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.Solenoid;
+//import edu.wpi.first.wpilibj.Solenoid; //TODO uncomment
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
 
@@ -40,7 +40,7 @@ public class Robot extends IterativeRobot {
     public Timer timer; // Timer
     public XboxController controller; //Control for the robot
     public CANTalon climber;
-    public Solenoid gearRelease;
+    //public Solenoid gearRelease; //TODO uncomment
     public Compressor myCompressor;
     public PowerDistributionPanel myPDP;
     
@@ -49,6 +49,9 @@ public class Robot extends IterativeRobot {
 	String autoSelected;
 	SendableChooser<String> chooser = new SendableChooser<>();
 	AHRS navSensor; //The navigation sensor object
+	//TODO add a "how many triggers" int variable
+	int toggleAmt = 3; //how many different buttons are toggling
+	boolean[] toggleReady = new boolean[toggleAmt]; //{speedToggleReady, gearToggleReady, turnToggle}
 	boolean speedToggleReady = true;
 	boolean gearToggleReady = true;
 	boolean gearOpen = false;
@@ -61,12 +64,15 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
+		
+		
+		
 		chooser.addDefault("Default Auto", defaultAuto);
 		chooser.addObject("My Auto", customAuto);
 		SmartDashboard.putData("Auto choices", chooser);
 		myCompressor = new Compressor(6);
 		//myCompressor.setClosedLoopControl(true);
-		gearRelease = new Solenoid(6, 0);
+		//gearRelease = new Solenoid(6, 0); //TODO recomment
 		//gearRelease.set(false);
 		
 		/*
@@ -157,10 +163,11 @@ public class Robot extends IterativeRobot {
 	baseline.accelerate(timer.get());
 		//TODO test
 		
+	/*
 		if (timer.get()>9) {
 			gearRelease.set(true);
 		}
-		
+	*/ //TODO uncomment
 		
 	}
 
@@ -173,8 +180,31 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putBoolean("Trigger", speedToggleReady);
 		double leftVal = -controller.getY(XboxController.Hand.kLeft);
         double rightVal = -controller.getY(XboxController.Hand.kRight);
+        //TODO these should be compiled into an array as well
+        
         boolean speedTriggered = controller.getTrigger(XboxController.Hand.kLeft) || controller.getTrigger(XboxController.Hand.kRight);
         boolean gearTriggered = controller.getRawButton(5) || controller.getRawButton(6);
+        boolean turnTriggered = controller.getRawButton(3);
+        
+        boolean[] triggers = new boolean[toggleAmt];
+        for (int isTriggeredIndex = 0; isTriggeredIndex<toggleAmt; isTriggeredIndex++) {
+        	boolean isTriggered = triggers[isTriggeredIndex]; //is this button currently being pressed down
+        	switch (isTriggeredIndex) {
+	            case 0: isTriggered = controller.getTrigger(XboxController.Hand.kLeft) || controller.getTrigger(XboxController.Hand.kRight);
+	            		break;
+	            
+	            case 1: isTriggered = controller.getRawButton(5) || controller.getRawButton(6);
+	            		break;
+	            		
+	            case 2: isTriggered = controller.getRawButton(3);
+	            		break;
+	               
+	            default:
+	            	break; //we are no longer using this toggle button
+        	}
+        }
+        
+
         
         if (speedToggleReady){
 	        if (speedTriggered) {
@@ -190,6 +220,23 @@ public class Robot extends IterativeRobot {
  	        	speedToggleReady = true;
  	        }
         }
+        
+        
+        if (toggleReady[2]) {
+            if (turnTriggered) {
+	        	if (speed==1) {
+	        		speed = .7;
+	        	} else {
+	        		speed = 1;
+	        	}
+	        	speedToggleReady = false;
+	        }
+        } else {
+        	if (!speedTriggered) {
+ 	        	speedToggleReady = true;
+ 	        }
+        }
+        
         
         if (gearToggleReady){
 	        if (gearTriggered) {

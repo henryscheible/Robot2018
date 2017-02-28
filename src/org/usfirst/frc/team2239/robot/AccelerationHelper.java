@@ -7,7 +7,6 @@ public class AccelerationHelper {
 	double accelerateTime;
 	double endTime;
 	double curVelocity;
-	boolean forwards;
 	double decelerateTime;
 	double topSpeed;
 	double distance;

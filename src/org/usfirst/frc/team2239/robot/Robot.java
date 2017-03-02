@@ -51,9 +51,7 @@ public class Robot extends IterativeRobot {
 	AHRS navSensor; //The navigation sensor object
 	//TODO add a "how many triggers" int variable
 	int toggleAmt = 3; //how many different buttons are toggling
-	boolean[] toggleReady = new boolean[toggleAmt]; //{speedToggleReady, gearToggleReady, turnToggle}
-	boolean speedToggleReady = true;
-	boolean gearToggleReady = true;
+	boolean[] toggleReadys = new boolean[toggleAmt]; //{speedToggleReady, gearToggleReady, turnToggle}
 	boolean gearOpen = false;
 	double speed = 1;
 	AccelerationHelper baseline;
@@ -64,7 +62,10 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		
+		//Default all the "ready"s to true. No buttons should be pressed at the start, therefore all should be ready to be pressed.
+		for (int i=0; i<toggleReadys.length; i++) {
+			toggleReadys[i] = true;
+		}
 		
 		
 		chooser.addDefault("Default Auto", defaultAuto);
@@ -177,27 +178,22 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		
-		SmartDashboard.putBoolean("Trigger", speedToggleReady);
+		SmartDashboard.putBoolean("Trigger", toggleReadys[0]);
 		double leftVal = -controller.getY(XboxController.Hand.kLeft);
         double rightVal = -controller.getY(XboxController.Hand.kRight);
-        //TODO these should be compiled into an array as well
-        
-        boolean speedTriggered = controller.getTrigger(XboxController.Hand.kLeft) || controller.getTrigger(XboxController.Hand.kRight);
-        boolean gearTriggered = controller.getRawButton(5) || controller.getRawButton(6);
-        boolean turnTriggered = controller.getRawButton(3);
         
         boolean[] triggers = new boolean[toggleAmt];
-        //Go through each toggle
+        //Go through each toggle and see if the button is pushed down or not
+        //Set all the values in triggers appropriately.
         for (int isTriggeredIndex = 0; isTriggeredIndex<toggleAmt; isTriggeredIndex++) {
-        	boolean isTriggered = triggers[isTriggeredIndex]; //is this button currently being pressed down
         	switch (isTriggeredIndex) {
-	            case 0: isTriggered = controller.getTrigger(XboxController.Hand.kLeft) || controller.getTrigger(XboxController.Hand.kRight);
+	            case 0: triggers[isTriggeredIndex] = controller.getTrigger(XboxController.Hand.kLeft) || controller.getTrigger(XboxController.Hand.kRight);
 	            		break;
 	            
-	            case 1: isTriggered = controller.getRawButton(5) || controller.getRawButton(6);
+	            case 1: triggers[isTriggeredIndex] = controller.getRawButton(5) || controller.getRawButton(6);
 	            		break;
 	            		
-	            case 2: isTriggered = controller.getRawButton(3);
+	            case 2: triggers[isTriggeredIndex] = controller.getRawButton(3);
 	            		break;
 	               
 	            default:
@@ -206,7 +202,50 @@ public class Robot extends IterativeRobot {
         }
         
         
+      //Go through each toggle and actually update/run
+        for (int index = 0; index<toggleAmt; index++) {
+        	boolean isReady = toggleReadys[index]; //is this button ready to be activated/pressed down
+        	boolean isTriggered = triggers[index];
+	    	if (isReady){
+	    		if (isTriggered) { //button is down and this is the first time I've noticed
+	    			//fire the trigger; the button has been pressed!
+	 	        	switch (index) {
+			            case 0:
+	         	        	if (speed==1) {
+	         	        		speed = .7;
+	         	        	} else {
+	         	        		speed = 1;
+	         	        	}
+	         	        	break;
+		         	    
+		         	        /*//TODO uncomment once we have a solenoid hooked up
+			            case 1:
+			            	if (gearOpen) {
+				        		gearRelease.set(false); //close it
+				        		gearOpen = false;
+				        	} else {
+				        		gearRelease.set(true); //open it
+				        		gearOpen = true;
+				        	}
+					        */
+			            case 2:
+			            	//TODO Luke and Ryan this should trigger a turn. See "Rotation Acceleration Helper.java"
+			            	//TODO Luke and Ryan test different values to see what does a 90 degree turn
+			            		
+			            default:
+			            	break; //we are no longer using this toggle button
+		 	        	
+	 	        	}	
+	 	        	toggleReadys[index] = false; //Don't notice it anymore until the button is lifted up
+	    		} else {
+		         	if (!isTriggered) { //button is no longer up (or just isn't up)
+		         		toggleReadys[index] = true; //I'm ready for it to be pushed down again
+		  	        }
+	    		}
+	    	}
+        }
         
+        /*//TODO delete this is the old version
         if (speedToggleReady){
 	        if (speedTriggered) {
 	        	if (speed==1) {
@@ -221,40 +260,10 @@ public class Robot extends IterativeRobot {
  	        	speedToggleReady = true;
  	        }
         }
+        */
         
         
-        if (toggleReady[2]) {
-            if (turnTriggered) {
-	        	if (speed==1) {
-	        		speed = .7;
-	        	} else {
-	        		speed = 1;
-	        	}
-	        	speedToggleReady = false;
-	        }
-        } else {
-        	if (!speedTriggered) {
- 	        	speedToggleReady = true;
- 	        }
-        }
-        
-        
-        if (gearToggleReady){
-	        if (gearTriggered) {
-	        	if (gearOpen) {
-	        		gearRelease.set(false); //close it
-	        		gearOpen = false;
-	        	} else {
-	        		gearRelease.set(true); //open it
-	        		gearOpen = true;
-	        	}
-	        	gearToggleReady = false;
-	        }
-        } else {
-        	if (!speedTriggered) {
- 	        	gearToggleReady = true;
- 	        }
-        }
+       
         if (controller.getRawButton(2)) {
         	climber.set(1);
         }
@@ -262,24 +271,18 @@ public class Robot extends IterativeRobot {
         	climber.set(0);
         }
         
-        //TODO test
+        /*TODO uncomment once we have solenoid hooked up
         if (controller.getRawButton(1)){
         	gearRelease.set(true); //open it
         } else {
         	gearRelease.set(false); //close it
         }
+        */
         
-        	
-        
+
         SmartDashboard.putNumber("speed", speed);
         drive.tankDrive(speed * leftVal, speed * rightVal);
-        //TODO test
-        //if (myCompressor.getPressureSwitchValue()) {
-        	myCompressor.start();
-        //} else {
-        	//myCompressor.stop();
-        //}
-        
+        myCompressor.start();
 	}
 	
 	

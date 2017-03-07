@@ -53,6 +53,7 @@ public class Robot extends IterativeRobot {
 	int toggleAmt = 3; //how many different buttons are toggling
 	boolean[] toggleReadys = new boolean[toggleAmt]; //{speedToggleReady, gearToggleReady, turnToggle}
 	boolean gearOpen = false;
+	RotationAccelerationHelper rotator = null; 
 	double speed = 1;
 	AccelerationHelper baseline;
 	
@@ -178,7 +179,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		
-		SmartDashboard.putBoolean("Trigger", toggleReadys[0]);
+		//SmartDashboard.putBoolean("Trigger", toggleReadys[0]); //TODO uncomment
 		double leftVal = -controller.getY(XboxController.Hand.kLeft);
         double rightVal = -controller.getY(XboxController.Hand.kRight);
         
@@ -230,19 +231,25 @@ public class Robot extends IterativeRobot {
 					        */
 			            case 2:
 			            	//TODO Luke and Ryan this should trigger a turn. See "Rotation Acceleration Helper.java"
-			            	//TODO Luke and Ryan test different values to see what does a 90 degree turn
-			            		
+			            	//TODO Luke and Ryan test different values to see what does a 90 degree turn= 1.571 radians
+			            	//TODO set Rotator to be an actual Rotation Acceleration Helper
+			        
+			            	double turnAngle = (1.571);
+			            	//public RotationAccelerationHelper (TechnoDrive driveTrain, AHRS navSensor, double turnAngle, double maxVelocity) 
+			            	rotator = new RotationAccelerationHelper(drive, navSensor, turnAngle, 1);
+			            	
+			            	
 			            default:
 			            	break; //we are no longer using this toggle button
 		 	        	
 	 	        	}	
 	 	        	toggleReadys[index] = false; //Don't notice it anymore until the button is lifted up
-	    		} else {
-		         	if (!isTriggered) { //button is no longer up (or just isn't up)
-		         		toggleReadys[index] = true; //I'm ready for it to be pushed down again
-		  	        }
 	    		}
-	    	}
+	    	} else { //if not ready
+	         	if (!isTriggered) { //button is no longer up (or just isn't up)
+	         		toggleReadys[index] = true; //I'm ready for it to be pushed down again
+	  	        }
+    		}
         }
         
         /*//TODO delete this is the old version
@@ -278,7 +285,14 @@ public class Robot extends IterativeRobot {
         	gearRelease.set(false); //close it
         }
         */
-        
+        if (rotator != null)
+        {
+        	boolean doneYet;
+        	doneYet = rotator.accelerate();
+        	if (doneYet) {
+        		rotator = null;
+        	}
+        }
 
         SmartDashboard.putNumber("speed", speed);
         drive.tankDrive(speed * leftVal, speed * rightVal);

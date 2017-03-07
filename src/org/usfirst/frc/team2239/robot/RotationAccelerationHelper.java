@@ -5,7 +5,9 @@ import com.kauailabs.navx.frc.AHRS;
 public class RotationAccelerationHelper {
 	TechnoDrive driveTrain;
 	AHRS navSensor;
-	double maxVelocity; //the values we're driving with i.e. tankDrive(-maxVelocity, maxVelocity)
+	//the biggest values we're driving with i.e. tankDrive(-maxVelocity, maxVelocity).
+	//Must be in between -1 and 1. Negative if going counter-clockwise
+	double maxVelocity; 
 	double curVelocity = 0; //init to 0; we shouldn't be moving when we initiate
 	double accelerate = .005; //how quickly @param velocity will change //should be .005
 	double velocity;
@@ -19,16 +21,6 @@ public class RotationAccelerationHelper {
 	boolean clockwise; //whether or not the turnAngle is a clockwise angle
 	
 	
-	/*
-	 * 
-	 * @params
-	 * theRobot: the robot object so that has a tankDrive() method (so we can drive the robot)
-	 * startTime: the time the timer is at when we start running acceleration
-	 * runTime: how long you want the robot to run for
-	 * maxVelocity: the biggest value you want passed into tankDrive (this should be negative if going backwards)
-	 * acceleration: how quickly the robot should accelerate. (this should be negative if going backwards)
-	 * emergencyAcceleration: if we've gone over the time to stop, use this acceleration to stop really quickly
-	 */
 	public RotationAccelerationHelper (TechnoDrive driveTrain, AHRS navSensor, double turnAngle, double maxVelocity) {
 		this.clockwise = (turnAngle>0);
 		this.driveTrain = driveTrain;
@@ -38,6 +30,9 @@ public class RotationAccelerationHelper {
 		this.maxVelocity = maxVelocity;
 	}
 	
+	
+	//returns true if the rotation is complete
+	//returns false if the rotation is not complete
 	public boolean accelerate()
 	{
 		double curAngle = getAngle();

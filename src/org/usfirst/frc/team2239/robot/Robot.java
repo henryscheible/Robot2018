@@ -181,6 +181,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
+		System.out.println("Running teleop periodic!");
 		if (rotator == null) {
 			System.out.println("rotator is null");
 		} else {
@@ -314,10 +315,12 @@ public class Robot extends IterativeRobot {
         	if (doneYet) {
         		rotator = null;
         	}
+        } else {
+        	drive.tankDrive(speed * leftVal, speed * rightVal);
         }
 
         //SmartDashboard.putNumber("speed", speed); //TODO uncomment
-        drive.tankDrive(speed * leftVal, speed * rightVal);
+        
         //myCompressor.start(); //TODO uncomment
 	}
 	

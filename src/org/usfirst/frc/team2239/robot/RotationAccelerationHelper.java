@@ -10,7 +10,6 @@ public class RotationAccelerationHelper {
 	double maxVelocity; 
 	double curVelocity = 0; //init to 0; we shouldn't be moving when we initiate
 	double accelerate = .005; //how quickly @param velocity will change //should be .005
-	double velocity;
 	double offset = .001; //the constant to help aid the proportional control. The "b" in mx+b //should be .001
 	double tolerance; //How close to the final orientation should you get before stopping (should not be 0. Perfection is impossible.)
 	double topSpeed = 5; //max radians per second //should be 5
@@ -35,6 +34,7 @@ public class RotationAccelerationHelper {
 	//returns false if the rotation is not complete
 	public boolean accelerate()
 	{
+		System.out.println("Im actually rotating!");
 		double curAngle = getAngle();
 		double targetVelocity = propControl*(targetAngle-curAngle)+offset;
 		
@@ -62,6 +62,8 @@ public class RotationAccelerationHelper {
 	}
 	
 	public double getAngle() {
+		System.out.println("the degrees from nav sensor: " + navSensor.getAngle());
 		return Math.toRadians(navSensor.getAngle());
+		 
 	}
 }

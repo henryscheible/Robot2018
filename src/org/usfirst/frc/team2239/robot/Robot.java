@@ -63,6 +63,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
+		System.out.println("Robot has started init!");
 		//Default all the "ready"s to true. No buttons should be pressed at the start, therefore all should be ready to be pressed.
 		for (int i=0; i<toggleReadys.length; i++) {
 			toggleReadys[i] = true;
@@ -72,7 +73,7 @@ public class Robot extends IterativeRobot {
 		chooser.addDefault("Default Auto", defaultAuto);
 		chooser.addObject("My Auto", customAuto);
 		SmartDashboard.putData("Auto choices", chooser);
-		myCompressor = new Compressor(6);
+		//myCompressor = new Compressor(6); //TODO uncomment once we have a compressor
 		//myCompressor.setClosedLoopControl(true);
 		//gearRelease = new Solenoid(6, 0); //TODO recomment
 		//gearRelease.set(false);
@@ -87,7 +88,8 @@ public class Robot extends IterativeRobot {
 			5- Climber
 		*/
 		//public TechnoDrive(int frontLeftMotor, int rearLeftMotor, int frontRightMotor, int rearRightMotor)
-		drive = new TechnoDrive(2, 3, 1, 4);
+		//drive = new TechnoDrive(2, 3, 1, 4);//Big bot
+		drive = new TechnoDrive(4,1,3,2);//small bot
 		timer = new Timer();
 		controller = new XboxController(0);  
 		climber = new CANTalon(5);
@@ -113,7 +115,7 @@ public class Robot extends IterativeRobot {
 		}
 		*/
 			
-			
+		System.out.println("Robot has finished init");
 	}
 
 	/**
@@ -139,6 +141,7 @@ public class Robot extends IterativeRobot {
 		//TechnoDrive theRobot, double startTime, double distance, double maxVelocity
 		baseline = new AccelerationHelper(drive, timer.get(), 167.0, .7);
 		myCompressor.start();
+		
 	}
 	
 
@@ -178,22 +181,30 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
+		if (rotator == null) {
+			System.out.println("rotator is null");
+		} else {
+			System.out.println(rotator.curVelocity);
+		}
+		
 		
 		//SmartDashboard.putBoolean("Trigger", toggleReadys[0]); //TODO uncomment
 		double leftVal = -controller.getY(XboxController.Hand.kLeft);
         double rightVal = -controller.getY(XboxController.Hand.kRight);
         
+     
         boolean[] triggers = new boolean[toggleAmt];
         //Go through each toggle and see if the button is pushed down or not
         //Set all the values in triggers appropriately.
         for (int isTriggeredIndex = 0; isTriggeredIndex<toggleAmt; isTriggeredIndex++) {
         	switch (isTriggeredIndex) {
-	            case 0: triggers[isTriggeredIndex] = controller.getTrigger(XboxController.Hand.kLeft) || controller.getTrigger(XboxController.Hand.kRight);
+	            /*TODO uncomment
+	             * case 0: triggers[isTriggeredIndex] = controller.getTrigger(XboxController.Hand.kLeft) || controller.getTrigger(XboxController.Hand.kRight);
 	            		break;
 	            
 	            case 1: triggers[isTriggeredIndex] = controller.getRawButton(5) || controller.getRawButton(6);
 	            		break;
-	            		
+	            		*/
 	            case 2: triggers[isTriggeredIndex] = controller.getRawButton(3);
 	            		break;
 	               
@@ -201,7 +212,8 @@ public class Robot extends IterativeRobot {
 	            	break; //we are no longer using this toggle button
         	}
         }
-        
+      
+      SmartDashboard.putBoolean("Turn is triggered", triggers[2]);
         
       //Go through each toggle and actually update/run
         for (int index = 0; index<toggleAmt; index++) {
@@ -211,13 +223,16 @@ public class Robot extends IterativeRobot {
 	    		if (isTriggered) { //button is down and this is the first time I've noticed
 	    			//fire the trigger; the button has been pressed!
 	 	        	switch (index) {
-			            case 0:
+			            /*
+			             * TODO uncomment
+			             * case 0:
 	         	        	if (speed==1) {
 	         	        		speed = .7;
 	         	        	} else {
 	         	        		speed = 1;
 	         	        	}
 	         	        	break;
+		         	    */
 		         	    
 		         	        /*//TODO uncomment once we have a solenoid hooked up
 			            case 1:
@@ -229,11 +244,14 @@ public class Robot extends IterativeRobot {
 				        		gearOpen = true;
 				        	}
 					        */
+        
+        
 			            case 2:
 			            	//TODO Luke and Ryan this should trigger a turn. See "Rotation Acceleration Helper.java"
 			            	//TODO Luke and Ryan test different values to see what does a 90 degree turn= 1.571 radians
 			            	//TODO set Rotator to be an actual Rotation Acceleration Helper
 			        
+			            	System.out.println("Starting a new rotation!");
 			            	double turnAngle = (1.571);
 			            	//public RotationAccelerationHelper (TechnoDrive driveTrain, AHRS navSensor, double turnAngle, double maxVelocity) 
 			            	rotator = new RotationAccelerationHelper(drive, navSensor, turnAngle, 1);
@@ -251,6 +269,8 @@ public class Robot extends IterativeRobot {
 	  	        }
     		}
         }
+        
+       
         
         /*//TODO delete this is the old version
         if (speedToggleReady){
@@ -270,14 +290,14 @@ public class Robot extends IterativeRobot {
         */
         
         
-       
+       /* //TODO uncomment
         if (controller.getRawButton(2)) {
         	climber.set(1);
         }
         else {
         	climber.set(0);
         }
-        
+        */
         /*TODO uncomment once we have solenoid hooked up
         if (controller.getRawButton(1)){
         	gearRelease.set(true); //open it
@@ -285,8 +305,10 @@ public class Robot extends IterativeRobot {
         	gearRelease.set(false); //close it
         }
         */
+        
         if (rotator != null)
         {
+        	System.out.println("I'm going to turn!");
         	boolean doneYet;
         	doneYet = rotator.accelerate();
         	if (doneYet) {
@@ -294,9 +316,9 @@ public class Robot extends IterativeRobot {
         	}
         }
 
-        SmartDashboard.putNumber("speed", speed);
+        //SmartDashboard.putNumber("speed", speed); //TODO uncomment
         drive.tankDrive(speed * leftVal, speed * rightVal);
-        myCompressor.start();
+        //myCompressor.start(); //TODO uncomment
 	}
 	
 	

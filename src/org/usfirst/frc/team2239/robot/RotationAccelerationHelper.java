@@ -48,6 +48,8 @@ public class RotationAccelerationHelper {
 		boolean shouldBeClockwise = offAngle>0;
 		if (shouldBeClockwise!=clockwise) {
 			maxVelocity = Math.max(maxVelocity - swingPastDecrease, offset);
+			curVelocity = 0; //stop it from swinging past
+			System.out.println("Swung past the target!");
 		}
 		clockwise = shouldBeClockwise;
 		

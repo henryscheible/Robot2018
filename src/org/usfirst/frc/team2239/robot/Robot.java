@@ -55,7 +55,6 @@ public class Robot extends IterativeRobot {
 	String autoSelected;
 	SendableChooser<String> chooser = new SendableChooser<>();
 	AHRS navSensor; //The navigation sensor object
-	//TODO add a "how many triggers" int variable
 	int toggleAmt = 3; //how many different buttons are toggling
 	boolean[] toggleReadys = new boolean[toggleAmt]; //{speedToggleReady, gearToggleReady, turnToggle}
 	boolean gearOpen = false;
@@ -205,10 +204,9 @@ public class Robot extends IterativeRobot {
         //Set all the values in triggers appropriately.
         for (int isTriggeredIndex = 0; isTriggeredIndex<toggleAmt; isTriggeredIndex++) {
         	switch (isTriggeredIndex) {
-	            /*TODO uncomment
-	             * case 0: triggers[isTriggeredIndex] = controller.getTrigger(XboxController.Hand.kLeft) || controller.getTrigger(XboxController.Hand.kRight);
+	            case 0: triggers[isTriggeredIndex] = controller.getTrigger(XboxController.Hand.kLeft) || controller.getTrigger(XboxController.Hand.kRight);
 	            		break;
-	            
+	            /* TODO uncomment
 	            case 1: triggers[isTriggeredIndex] = controller.getRawButton(5) || controller.getRawButton(6);
 	            		break;
 	            		*/
@@ -230,16 +228,13 @@ public class Robot extends IterativeRobot {
 	    		if (isTriggered) { //button is down and this is the first time I've noticed
 	    			//fire the trigger; the button has been pressed!
 	 	        	switch (index) {
-			            /*
-			             * TODO uncomment
-			             * case 0:
+			            case 0:
 	         	        	if (speed==1) {
-	         	        		speed = .7;
+	         	        		speed = .6;
 	         	        	} else {
 	         	        		speed = 1;
 	         	        	}
 	         	        	break;
-		         	    */
 		         	    
 		         	        /*//TODO uncomment once we have a solenoid hooked up
 			            case 1:

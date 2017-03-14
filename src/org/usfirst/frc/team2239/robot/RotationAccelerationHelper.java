@@ -7,17 +7,17 @@ public class RotationAccelerationHelper {
 	AHRS navSensor;
 	//the biggest values we're driving with i.e. tankDrive(-maxVelocity, maxVelocity).
 	//Must be in between -1 and 1. Negative if going counter-clockwise
-	double maxVelocity; 
+	double maxVelocity;
 	double curVelocity = 0; //init to 0; we shouldn't be moving when we initiate //positive if turning clockwise
-	double accelerate = .005; //how quickly @param velocity will change //should be .005
-	double offset = .5; //the constant to help aid the proportional control. The "b" in mx+b //should be .001 //always positive
-	double tolerance; //How close to the final orientation should you get before stopping (should not be 0. Perfection is impossible.)
-	double topSpeed = 5; //max radians per second //should be 5
-	double turnAngle; //how much to turn (in radians, positive means clockwise)
+	double swingPastDecrease = .1; //how much we decrease maxVelocity by if we overshoot.
+	double accelerate = .05; //how quickly @param velocity will change //should be .005
+	double offset = .5; //the lowest power the motors should ever be at //always positive
+	double tolerance = 3; //How close to the final orientation should you get before stopping (should not be 0. Perfection is impossible.)
+	double turnAngle; //how much to turn (in degrees, positive means clockwise)
 	double targetAngle; //the angle we aspire to be at. This can be greater than 2Pi //TODO test if this can be negative
 	//short for "proportional control". How fast we go should be proportional to how far we have to go. The "m" in mx+b
 	double propControl = 1; //should be 1
-	double maxVelocityAngle = Math.toRadians(10); //The angle we start to decrease velocity at //always positive
+	double maxVelocityAngle = 30; //The angle (in degrees) we start to decrease velocity at //always positive
 	boolean clockwise; //whether or not the turnAngle is a clockwise angle
 	
 	
@@ -38,19 +38,31 @@ public class RotationAccelerationHelper {
 	{
 		System.out.println("Im actually rotating!");
 		double curAngle = getAngle();
-		double targetVelocity;
-		if (clockwise) {
-			targetVelocity = Math.min(((maxVelocity-offset)/maxVelocityAngle)*(targetAngle-curAngle)+offset, maxVelocity);
-		} else {
-			targetVelocity = Math.max(((maxVelocity-offset)/maxVelocityAngle)*(targetAngle-curAngle)-offset, -maxVelocity);
-		}
-		//double targetVelocity = propControl*(targetAngle-curAngle)+offset; //TODO delete old formula
-		
+		double offAngle = (targetAngle-curAngle);
+		System.out.println("I'm this far off: "+offAngle);
 		if (targetAngle-tolerance < curAngle && curAngle < targetAngle+tolerance) { //we did it!
+			driveTrain.tankDrive(0, 0); //stop driving
 			return true;
 		}
 		
+		boolean shouldBeClockwise = offAngle>0;
+		if (shouldBeClockwise!=clockwise) {
+			maxVelocity = Math.max(maxVelocity - swingPastDecrease, offset);
+		}
+		clockwise = shouldBeClockwise;
+		
+		double targetVelocity;
 		if (clockwise) {
+			targetVelocity = Math.min(((maxVelocity-offset)/maxVelocityAngle)*offAngle+offset, maxVelocity);
+		} else {
+			targetVelocity = Math.max(((maxVelocity-offset)/maxVelocityAngle)*offAngle-offset, -maxVelocity);
+		}
+		//double targetVelocity = propControl*(targetAngle-curAngle)+offset; //TODO delete old formula
+		
+		System.out.println("Target velocity before setting is: "+targetVelocity);
+		System.out.println("cutVelocity before setting is: "+curVelocity);
+		if (clockwise) {
+			System.out.println("We're going clockwise");
 			if (targetVelocity > curVelocity+accelerate) { //if I'm going slower than I should, ramp up to it
 				curVelocity = curVelocity+accelerate;
 			} else {
@@ -58,12 +70,13 @@ public class RotationAccelerationHelper {
 			}
 			curVelocity = Math.min(curVelocity, maxVelocity);
 		} else {
+			System.out.println("We're going counterclockwise");
 			if (targetVelocity < curVelocity-accelerate) { //if I'm going slower than I should, ramp up to it
 				curVelocity = curVelocity-accelerate;
 			} else {
 				curVelocity = targetVelocity; //this handles deceleration with the proportionality stuff
 			}
-			curVelocity = Math.max(curVelocity, maxVelocity);
+			curVelocity = Math.max(curVelocity, -maxVelocity);
 		}
 		System.out.println("Target velocity is: "+targetVelocity);
 		System.out.println("Actually driving at: " + curVelocity);
@@ -73,7 +86,7 @@ public class RotationAccelerationHelper {
 	
 	public double getAngle() {
 		System.out.println("the degrees from nav sensor: " + navSensor.getAngle());
-		return Math.toRadians(navSensor.getAngle());
+		return navSensor.getAngle();
 		 
 	}
 }

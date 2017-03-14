@@ -1,5 +1,11 @@
 package org.usfirst.frc.team2239.robot;
 
+/*
+ * Jess controls:
+ * Left on arrows should do 180 degree turn
+ * Right on arrows should be cancel autonomous
+ */
+
 import edu.wpi.first.wpilibj.IterativeRobot;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -253,9 +259,9 @@ public class Robot extends IterativeRobot {
 			            	//TODO set Rotator to be an actual Rotation Acceleration Helper
 			        
 			            	System.out.println("Starting a new rotation!");
-			            	double turnAngle = (1.571);
+			            	double turnAngle = 10;
 			            	//public RotationAccelerationHelper (TechnoDrive driveTrain, AHRS navSensor, double turnAngle, double maxVelocity) 
-			            	rotator = new RotationAccelerationHelper(drive, navSensor, turnAngle, 1);
+			            	rotator = new RotationAccelerationHelper(drive, navSensor, turnAngle, .8);
 			            	
 			            	
 			            default:
@@ -330,5 +336,9 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void testPeriodic() {
+	}
+	
+	public void disabledInit() {
+		rotator = null;
 	}
 }

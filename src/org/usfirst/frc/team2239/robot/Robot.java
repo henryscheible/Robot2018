@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.hal.CompressorJNI;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.DriverStation;
 
@@ -19,7 +18,7 @@ import com.ctre.CANTalon;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.Compressor;
-//import edu.wpi.first.wpilibj.Solenoid; //TODO uncomment
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
 
@@ -46,7 +45,7 @@ public class Robot extends IterativeRobot {
     public Timer timer; // Timer
     public XboxController controller; //Control for the robot
     public CANTalon climber;
-    //public Solenoid gearRelease; //TODO uncomment
+    public Solenoid gearRelease;
     public Compressor myCompressor;
     public PowerDistributionPanel myPDP;
     
@@ -78,10 +77,12 @@ public class Robot extends IterativeRobot {
 		chooser.addDefault("Default Auto", defaultAuto);
 		chooser.addObject("My Auto", customAuto);
 		SmartDashboard.putData("Auto choices", chooser);
-		//myCompressor = new Compressor(6); //TODO uncomment once we have a compressor
-		//myCompressor.setClosedLoopControl(true);
-		//gearRelease = new Solenoid(6, 0); //TODO recomment
-		//gearRelease.set(false);
+		myCompressor = new Compressor(6); 
+		myCompressor.setClosedLoopControl(true);
+		//gearRelease = new Solenoid(CAN ID on dashboard, channel on PCM (what's it plugged into));
+		//gearRelease = new Solenoid(6, 0); //TODO SpiderBot
+		gearRelease = new Solenoid(7, 0);
+		gearRelease.set(false);
 		
 		/*
 		MOTORS:
@@ -93,10 +94,10 @@ public class Robot extends IterativeRobot {
 			5- Climber
 		*/
 		//public TechnoDrive(int frontLeftMotor, int rearLeftMotor, int frontRightMotor, int rearRightMotor)
-		//drive = new TechnoDrive(2, 3, 1, 4);//Big bot
+		//drive = new TechnoDrive(2, 3, 1, 4);//Big SpiderBot //TODO switch back
 		drive = new TechnoDrive(4,1,3,2);//small bot
 		timer = new Timer();
-		controller = new XboxController(0);  
+		controller = new XboxController(0);
 		climber = new CANTalon(5);
 		myPDP = new PowerDistributionPanel();
 		//myPDP.getVoltage();
@@ -206,13 +207,10 @@ public class Robot extends IterativeRobot {
         	switch (isTriggeredIndex) {
 	            case 0: triggers[isTriggeredIndex] = controller.getTrigger(XboxController.Hand.kLeft) || controller.getTrigger(XboxController.Hand.kRight);
 	            		break;
-	            /* TODO uncomment
 	            case 1: triggers[isTriggeredIndex] = controller.getRawButton(5) || controller.getRawButton(6);
 	            		break;
-	            		*/
 	            case 2: triggers[isTriggeredIndex] = controller.getRawButton(3);
 	            		break;
-	               
 	            default:
 	            	break; //we are no longer using this toggle button
         	}
@@ -236,7 +234,6 @@ public class Robot extends IterativeRobot {
 	         	        	}
 	         	        	break;
 		         	    
-		         	        /*//TODO uncomment once we have a solenoid hooked up
 			            case 1:
 			            	if (gearOpen) {
 				        		gearRelease.set(false); //close it
@@ -245,8 +242,7 @@ public class Robot extends IterativeRobot {
 				        		gearRelease.set(true); //open it
 				        		gearOpen = true;
 				        	}
-					        */
-        
+			            	break;
         
 			            case 2:
 			            	//TODO Luke and Ryan this should trigger a turn. See "Rotation Acceleration Helper.java"
@@ -257,6 +253,7 @@ public class Robot extends IterativeRobot {
 			            	double turnAngle = 10;
 			            	//public RotationAccelerationHelper (TechnoDrive driveTrain, AHRS navSensor, double turnAngle, double maxVelocity) 
 			            	rotator = new RotationAccelerationHelper(drive, navSensor, turnAngle, .8);
+			            	break;
 			            	
 			            	
 			            default:
@@ -322,7 +319,7 @@ public class Robot extends IterativeRobot {
 
         //SmartDashboard.putNumber("speed", speed); //TODO uncomment
         
-        //myCompressor.start(); //TODO uncomment
+        myCompressor.start();
 	}
 	
 	

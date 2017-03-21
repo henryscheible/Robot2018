@@ -42,6 +42,10 @@ public class XboxController extends GenericHID {
 		return station.getStickPOV(port, pov);
 	}
 	
+	public int getSimplePOV() {
+		return this.getPOV()/45;
+	}
+	
 	@Override
 	public int getPOVCount() {
 		throw new UnsupportedOperationException("POVCount is not used");

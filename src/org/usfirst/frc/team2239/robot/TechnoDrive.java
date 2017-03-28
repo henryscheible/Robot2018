@@ -26,21 +26,6 @@ public class TechnoDrive extends RobotDrive {
         return new double[] {super.m_rearLeftMotor.get(), -super.m_rearRightMotor.get()};
     }
 
-    /* Writing our own encoder/tick/wheel-rotation based function //TODO delete
-    public void accelerateTo(double left, double right) {
-        double[] speed = getMotorValues();
-        tankDrive(accelerateHelper(speed[0], left), accelerateHelper(speed[1], right));
-    }
-
-    private double accelerateHelper(double from, double to) {
-        if(from < to) {
-            return Math.max(to, from - .005);
-        } else {
-            return Math.min(to, from + .005);
-        }
-    }
-    */
-
     /*
      * Goal: Write a program to ramp up at acceleration until halfway there, and then ramp down afterwards
      * 

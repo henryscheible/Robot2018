@@ -59,7 +59,7 @@ public class Robot extends IterativeRobot {
 	int toggleAmt = 3; //how many different buttons are toggling
 	boolean[] toggleReadys = new boolean[toggleAmt]; //{speedToggleReady, gearToggleReady, turnToggle}
 	boolean gearOpen = false;
-	RotationAccelerationHelper rotator = null;
+	RotationAccelerator rotator = null;
 	double speed = 1;
 	AccelerationHelper baseline;
 	//drive = new TechnoDrive(4,1,3,2);//small bot
@@ -134,6 +134,8 @@ public class Robot extends IterativeRobot {
 	 * switch structure below with additional strings. If using the
 	 * SendableChooser make sure to add them to the chooser code above as well.
 	 */
+	
+	
 	@Override
 	public void autonomousInit() {
 		//myCompressor.start(); //TODO test
@@ -150,10 +152,13 @@ public class Robot extends IterativeRobot {
 		testEncoders = true;
 	}
 	
+	
 
 	/**
 	 * This function is called periodically during autonomous
 	 */
+	
+	
 	@Override
 	public void autonomousPeriodic() {
 		if (testEncoders) {
@@ -164,6 +169,9 @@ public class Robot extends IterativeRobot {
 		}
 		System.out.println("How far the rearRightMotor has gone: "+rearRightMotor.get());
 		myCompressor.start();
+	
+		
+				
 		/*
 		switch (autoSelected) {
 		case customAuto:
@@ -201,11 +209,11 @@ public class Robot extends IterativeRobot {
 			System.out.println(rotator.curVelocity);
 		}
 		
-		System.out.println("How far the rearRightMotor has gone: "+rearRightMotor.getEncVelocity());
+		System.out.println("How fast the rearRightMotor is going: "+rearRightMotor.getEncVelocity());
 		System.out.println("How far the rearRightMotor has gone: "+rearRightMotor.getEncPosition());
 		
-		System.out.println("How far the leftRightMotor has gone: "+rearLeftMotor.getEncVelocity());
-		System.out.println("How far the leftRightMotor has gone: "+rearLeftMotor.getEncPosition());
+		System.out.println("How fast the rearLeftMotor is going: "+rearLeftMotor.getEncVelocity());
+		System.out.println("How far the rearLeftMotor has gone: "+rearLeftMotor.getEncPosition());
 		
 		//SmartDashboard.putBoolean("Trigger", toggleReadys[0]); //TODO uncomment
 		double leftVal = -controller.getY(XboxController.Hand.kLeft);
@@ -226,7 +234,7 @@ public class Robot extends IterativeRobot {
 	            		break;
 	            case 1: triggers[index] = controller.getRawButton(5) || controller.getRawButton(6);
 	            		break;
-	            case 2: triggers[index] = controller.getSimplePOV() == 6; //TODO change this to a POV for Jess
+	            case 2: triggers[index] = controller.getSimplePOV() == 6;
 	            		break;
 	            default:
 	            	break; //we are no longer using this toggle button
@@ -241,7 +249,7 @@ public class Robot extends IterativeRobot {
 	 	        	switch (index) {
 			            case 0:
 	         	        	if (speed==1) {
-	         	        		speed = .6;
+	         	        		speed = .7;
 	         	        	} else {
 	         	        		speed = 1;
 	         	        	}
@@ -263,7 +271,7 @@ public class Robot extends IterativeRobot {
 			            	System.out.println("Starting a new rotation!");
 			            	double turnAngle = 180;
 			            	//public RotationAccelerationHelper (TechnoDrive driveTrain, AHRS navSensor, double turnAngle, double maxVelocity) 
-			            	rotator = new RotationAccelerationHelper(drive, navSensor, turnAngle, .8);
+			            	rotator = new RotationAccelerator(drive, navSensor, turnAngle, .8);
 			            	break;
 			            	
 			            	
@@ -284,11 +292,15 @@ public class Robot extends IterativeRobot {
         
         if (rotator != null)
         {
-        	System.out.println("I'm going to turn!");
-        	boolean doneYet;
-        	doneYet = rotator.accelerate();
-        	if (doneYet) {
+        	if (controller.getSimplePOV()==3){ //If the button that cancels the turn is pressed then cancel the turn.
         		rotator = null;
+        	} else {
+        		System.out.println("I'm going to turn!"); //If we don't tell the robot not to turn, it turns. This isn't rocket science.
+        		boolean doneYet;
+        		doneYet = rotator.accelerate();
+        		if (doneYet) {
+        			rotator = null;
+        		}
         	}
         } else {
         	drive.tankDrive(speed * leftVal, speed * rightVal);
@@ -309,7 +321,7 @@ public class Robot extends IterativeRobot {
 	public void disabledInit() {
 		rotator = null;
 	}
-	
+	//TODO set values to 0 to start match
 	public void makeMotorsUseEncoders(CANTalon[] motors) {
 		for (CANTalon motor : motors) {
 			motor.setFeedbackDevice(FeedbackDevice.QuadEncoder); //Set the feedback device that is hooked up to the talon

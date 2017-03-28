@@ -2,7 +2,7 @@ package org.usfirst.frc.team2239.robot;
 
 import com.kauailabs.navx.frc.AHRS;
 
-public class RotationAccelerationHelper {
+public class RotationAccelerator {
 	TechnoDrive driveTrain;
 	AHRS navSensor;
 	//the biggest values we're driving with i.e. tankDrive(-maxVelocity, maxVelocity).
@@ -15,14 +15,12 @@ public class RotationAccelerationHelper {
 	double tolerance = 3; //How close to the final orientation should you get before stopping (should not be 0. Perfection is impossible.)
 	double turnAngle; //how much to turn (in degrees, positive means clockwise)
 	double targetAngle; //the angle we aspire to be at. This can be greater than 2Pi //TODO test if this can be negative
-	//short for "proportional control". How fast we go should be proportional to how far we have to go. The "m" in mx+b
-	double propControl = 1; //should be 1
 	double maxVelocityAngle = 30; //The angle (in degrees) we start to decrease velocity at //always positive
 	boolean clockwise; //whether or not the turnAngle is a clockwise angle
 	
 	
 	
-	public RotationAccelerationHelper (TechnoDrive driveTrain, AHRS navSensor, double turnAngle, double maxVelocity) {
+	public RotationAccelerator (TechnoDrive driveTrain, AHRS navSensor, double turnAngle, double maxVelocity) {
 		this.clockwise = (turnAngle>0);
 		this.driveTrain = driveTrain;
 		this.navSensor = navSensor;
@@ -59,7 +57,6 @@ public class RotationAccelerationHelper {
 		} else {
 			targetVelocity = Math.max(((maxVelocity-offset)/maxVelocityAngle)*offAngle-offset, -maxVelocity);
 		}
-		//double targetVelocity = propControl*(targetAngle-curAngle)+offset; //TODO delete old formula
 		
 		System.out.println("Target velocity before setting is: "+targetVelocity);
 		System.out.println("cutVelocity before setting is: "+curVelocity);

@@ -70,8 +70,16 @@ public class TechnoDrive extends RobotDrive {
 
         double left = -leftStick.getY();
         double right = -rightStick.getY();
+        this.tankDrive(left, right);
+
     }
 
+    public void tankDrive(XboxController controller) {
+    	System.out.println("Running tankDrive"); //TODO delete
+    	System.out.println("left: "+controller.getY(XboxController.Hand.kLeft)+" right: "+controller.getY(XboxController.Hand.kRight));
+    	this.tankDrive(-controller.getY(XboxController.Hand.kLeft), -controller.getY(XboxController.Hand.kRight));
+    }
+    
         //rightStick is straight, controller is full speed
         //if the controller is triggered then it will run at full speed
 

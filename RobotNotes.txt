@@ -55,6 +55,11 @@ ifconfig on kangaroo. Look at inet address. Type that into outline viewer and us
 ipconfig on windows computer. Look at IPv4 address. Type that into GRIP. (It's usually 10.22.39.82)
 Done.
 
+How to get connect the Kangaroo to the robot:
+Make sure the Kangaroo is connected to the robot's internet
+Grip settings should be set to roboRIO-2239-FRC.local
+
+
 Camera:
 Striped power cord = black = ground
 Plug into the port closest to the kangaroo's power cable in order to get it as Webcam 0.

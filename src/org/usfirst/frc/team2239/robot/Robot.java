@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID;
+
 import com.kauailabs.navx.frc.AHRS;
 
 
@@ -22,19 +24,23 @@ import com.kauailabs.navx.frc.AHRS;
 public class Robot extends IterativeRobot {
 	NetworkTable contoursTable;
 	NetworkTable blobsTable; 
-	final double halfFov = Math.toRadians(20); //half the field of vision (radians)
+	final double halfYFov = Math.toRadians(40)/2.0; //half the vertical field of vision (radians) //fiddleable (you can change this value for calibration)
+	final double halfXFov = Math.toRadians(60)/2.0; //half the horizontal field of vision (radians) //fiddleable
 	final double realTapeHeight = 5; //height of the strip of tape (inches)
 	final double spread = 8.25; //distance between the centers of the strips of tape (inches)
 	final double pixelScreenHeight = 480; //height of screen (pixels)
 	final double pixelScreenWidth = 640; //width of screen (pixels)
-	
+	final double away = 12; //how many inches away from the peg you want the robot to move to before its charge. Determines target.
+	XboxController controller;
+	TechnoDrive drive;
 	public Robot() {
 		contoursTable = NetworkTable.getTable("GRIP/myContoursReport");
 		blobsTable = NetworkTable.getTable("GRIP/myBlobsReport");
 	}
 	
 	public void robotInit() {
-		
+		controller = new XboxController(0);
+		drive = new TechnoDrive(4,1,3,2); //small bot	
 	}
 	
 	public void autonomousInit() {
@@ -43,7 +49,20 @@ public class Robot extends IterativeRobot {
 	
 	public void autonomousPeriodic() {
 		
+		/*
+			Thinking for autonomous program
+			if (camera is working) {
+				run the camera auto chosen
+			} else {
+				run the non-camera auto chosen
+			}
+			
+			I should have 1 program that assumes
+			*the robot is in a position where it is looking at the tape
+		 */
+		
 		double[] defaultValue = new double[0];
+		
 		
 		
 		SmartDashboard.putNumber("Running", (int )(Math.random() * 100 + 1));
@@ -57,8 +76,9 @@ public class Robot extends IterativeRobot {
 		}
 		System.out.println();
 		
-		String[] propertiesToGet;
 		
+		
+				
 		double[][] contourPropertyArrays = getDataFromGRIPContours(new String[] {"width", "area"});
 		double[][] blobPropertyArrays = getDataFromGRIPBlobs(new String[] {"x", "y"});
 		
@@ -85,19 +105,38 @@ public class Robot extends IterativeRobot {
 			for (int i=0; i<2; i++) {
 				Contour contour = contours[i];
 				//getDistanceToTape(double pixelTapeHeight, double pixelScreenHeight, double realTapeHeight, double halfFov)
-				double distanceToContour = VisionHelper.getDistanceToTape(contour.h, pixelScreenHeight, realTapeHeight, halfFov);
+				double distanceToContour = VisionHelper.getDistanceToTape(contour.h, pixelScreenHeight, realTapeHeight, halfYFov);
 				System.out.println("Distance to contour "+distanceToContour);
 				distanceToContours[i] = distanceToContour;
 			}
+			
+			
+			//static public double[] getPositionToGoal(double left, double right, double spread)
+			double[] positionToGoal = VisionHelper.getPositionToGoal(distanceToContours[0], distanceToContours[1], spread);
+			
+			double middleXPixel = contours[0].x+((contours[1].x-contours[0].x)/2); //the pixel that the peg should be at in the photo
+			
+			//static public double[] getValuesToPeg(double dx, double dy, double middleXPixel, double pixelScreenWidth, double halfXFov, double away)
+			double[] valuesToPeg  = VisionHelper.getValuesToPeg(positionToGoal[0], positionToGoal[1], middleXPixel, pixelScreenWidth, halfXFov, away);
+			 /* ans[0] the angle to turn to point towards the target (radians)
+			 * ans[1] the distance to travel to hit the target (inches)
+			 * ans[2] the angle to turn to point towards the peg (radians)
+			 */ 
+			System.out.println("Angle to point towards the target: "+valuesToPeg[0]);
+			System.out.println("distance to travel to hit the target: "+valuesToPeg[1]);
+			System.out.println("the angle to turn to point towards the peg: "+valuesToPeg[2]);
 			
 			//double distanceToGoal = getPositionToGoal()
 
 		} else {
 			System.out.println("Did not find 2 countours. Instead, I found " + contours.length);
 		}
+		double leftVal = -controller.getY(XboxController.Hand.kLeft);
+		double rightVal = -controller.getY(XboxController.Hand.kRight);
+		System.out.println("l and r vals: "+leftVal+""+rightVal);
+		drive.tankDrive(controller);
 		
-		
-		Timer.delay(1); //TODO delete
+		//Timer.delay(.01); //TODO delete
 	}
 	
 	public void teleopInit() {
@@ -105,7 +144,11 @@ public class Robot extends IterativeRobot {
 	}
 	
 	public void teleopPeriodic() {
-		
+		double leftVal = -controller.getY(XboxController.Hand.kLeft);
+		double rightVal = -controller.getY(XboxController.Hand.kRight);
+		System.out.println("l and r vals: "+leftVal+""+rightVal);
+		drive.tankDrive(controller);
+		//drive.tankDrive(-controller.getY(XboxController.Hand.kLeft), -controller.getY(XboxController.Hand.kRight));
 	}
 	
 	//get the requested values from the contours table posted by GRIP
@@ -144,7 +187,7 @@ public class Robot extends IterativeRobot {
 	}
 	
 	//Take all the data from GRIP and return the tape contours.
-	//This is where finding the tape (ignoring other things) takes place.
+	//This is where finding the tape (and ignoring other things, including the peg covering the tape) takes place.
 	public Contour[] getContours(double[][] contourPropertyArrays, double[][] blobPropertyArrays) {
 		//The class/final result is called "Contours" even though it has some info from blobsTable and some from contoursTable
 		Contour[] contours = new Contour[contourPropertyArrays[0].length];
@@ -158,6 +201,22 @@ public class Robot extends IterativeRobot {
 				contour.h = contour.area/contour.w;
 				contours[i] = contour; //make the new contour and add it
 			}
+			
+			//2 inches wide
+			//5 inches tall
+			//So, ratio should be 5/2
+			double targetRatio = 5.0/2.0;
+			double scores[] = new double[contours.length];
+			for (int i=0; i<contours.length; i++) {
+				Contour contour = contours[i];
+				double ratio = contour.h/contour.w;
+				double score = Math.abs(ratio-targetRatio);
+				scores[i] = score;
+			}
+			
+			int[] indexes = getIndexesOfLargestTwoNums(scores);
+			contours = new Contour[] {contours[indexes[0]], contours[indexes[1]]};
+			
 			return contours;
 		}
 			
@@ -168,7 +227,39 @@ public class Robot extends IterativeRobot {
 		}
 	}
 	
-
+	public double getLargestNum(double[] myArr) {
+	    double largest = myArr[0];
+	    for(double num : myArr) {
+	        if(largest < num) {
+	            largest = num;
+	        }
+	    }
+	    return largest;
+	}
 	
+	public int[] getIndexesOfLargestTwoNums(double[] myArr) {
+		if (myArr.length<2) { //if myArr has less than two doubles in it, just return an empty array.
+			return new int[2];
+		}
+		
+		int index1 = 0;
+		int index2 = 1;
+		double bigNum1 = myArr[0];
+		double bigNum2 = myArr[1];
+		
+		for (int i=2; i<myArr.length; i++) {
+			double num = myArr[i];
+			if (num>bigNum1 || num>bigNum2) {
+				if (bigNum1>bigNum2) { //bigNum2 is smaller so replace it
+					bigNum2 = num;
+					index2 = i;
+				} else { //replace bigNum1
+					bigNum1 = num;
+					index1 = i;
+				}
+			}
+		}
+		return new int[] {index1, index2};
+	}
 	
 }

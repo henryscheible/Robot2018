@@ -2,7 +2,7 @@ package org.usfirst.frc.team2239.robot;
 
 import com.kauailabs.navx.frc.AHRS;
 
-public class RotationAccelerator {
+public class RotationAccelerator implements Accelerator {
 	TechnoDrive driveTrain;
 	AHRS navSensor;
 	//the biggest values we're driving with i.e. tankDrive(-maxVelocity, maxVelocity).
@@ -10,7 +10,7 @@ public class RotationAccelerator {
 	double maxVelocity;
 	double curVelocity = 0; //init to 0; we shouldn't be moving when we initiate //positive if turning clockwise
 	double swingPastDecrease = .1; //how much we decrease maxVelocity by if we overshoot.
-	double accelerate = .05; //how quickly @param velocity will change //should be .005
+	double accelerate = .05; //how quickly @param velocity will change
 	double offset = .5; //the lowest power the motors should ever be at //always positive
 	double tolerance = 3; //How close to the final orientation should you get before stopping (should not be 0. Perfection is impossible.)
 	double turnAngle; //how much to turn (in degrees, positive means clockwise)

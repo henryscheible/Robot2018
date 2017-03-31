@@ -69,6 +69,15 @@ public class TechnoDrive extends RobotDrive {
     	System.out.println("What the tankDrive is doing: " +left+ " " +right);
         super.tankDrive(left, right, squared);
     }
+    
+    public void tankDrive(XboxController controller, double speed) {
+    	tankDrive(-controller.getY(XboxController.Hand.kLeft)*speed, -controller.getY(XboxController.Hand.kRight)*speed);
+    }
+    
+    public void tankDrive(XboxController controller) {
+    	tankDrive(controller, 1);
+    }
+    
    
     /*
      * curRotation current roatation in degrees from the nav sensor's getAngle() function

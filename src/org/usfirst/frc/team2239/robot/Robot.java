@@ -69,7 +69,7 @@ public class Robot extends IterativeRobot {
 	int toggleAmt = 3; //how many different buttons are toggling
 	boolean[] toggleReadys = new boolean[toggleAmt]; //{speedToggleReady, gearToggleReady, turnToggle}
 	boolean gearOpen = false;
-	RotationAccelerator rotator = null;
+	Accelerator accelerator = null;
 	double speed = 1;
 	AccelerationHelper baseline;
 	//drive = new TechnoDrive(4,1,3,2);//small bot
@@ -166,6 +166,7 @@ public class Robot extends IterativeRobot {
 		//baseline = new AccelerationHelper(drive, timer.get(), 167.0, .7); //The old timed acceleration //TODO delete once we get encoder acceleration to work 
 		timer.start(); //TODO delete once we get encoder working (though this may be useful to figure out when to do a last second charge)
 		myCompressor.start();
+		accelerator = new EncoderAccelerator(drive, new CANTalon[] {rearRightMotor}, 500, 1);  //TODO delete (just testing right now)
 	}
 	
 	
@@ -188,7 +189,10 @@ public class Robot extends IterativeRobot {
 		I should have 1 program that assumes
 		*the robot is in a position where it is looking at the tape
 		*/
-	
+		
+		runAccelerator(false);
+		
+		/* TODO uncomment
 		double[] defaultValue = new double[0];
 		
 		SmartDashboard.putNumber("Running", (int )(Math.random() * 100 + 1));
@@ -242,10 +246,9 @@ public class Robot extends IterativeRobot {
 			
 			//static public double[] getValuesToPeg(double dx, double dy, double middleXPixel, double pixelScreenWidth, double halfXFov, double away)
 			double[] valuesToPeg  = VisionHelper.getValuesToPeg(positionToGoal[0], positionToGoal[1], middleXPixel, pixelScreenWidth, halfXFov, away);
-			 /* ans[0] the angle to turn to point towards the target (radians)
-			 * ans[1] the distance to travel to hit the target (inches)
-			 * ans[2] the angle to turn to point towards the peg (radians)
-			 */ 
+			//ans[0] the angle to turn to point towards the target (radians)
+			//ans[1] the distance to travel to hit the target (inches)
+			//ans[2] the angle to turn to point towards the peg (radians) 
 			System.out.println("Angle to point towards the target: "+valuesToPeg[0]);
 			System.out.println("distance to travel to hit the target: "+valuesToPeg[1]);
 			System.out.println("the angle to turn to point towards the peg: "+valuesToPeg[2]);
@@ -255,6 +258,8 @@ public class Robot extends IterativeRobot {
 		} else {
 			System.out.println("Did not find 2 countours. Instead, I found " + contours.length);
 		}
+		
+		*/
 		
 		//TODO put in the nice driving function
 			
@@ -271,16 +276,20 @@ public class Robot extends IterativeRobot {
 		*/
 	}
 
+	//Called in between the end of autonomous and the start of teleop
+	@Override
+	public void teleopInit() {
+		speed = 1;
+	}
+	
 	/**
 	 * This function is called periodically during operator control
 	 */
 	@Override
 	public void teleopPeriodic() {
 		System.out.println("Running teleop periodic!");
-		if (rotator == null) {
-			System.out.println("rotator is null");
-		} else {
-			System.out.println(rotator.curVelocity);
+		if (accelerator == null) {
+			System.out.println("auto accelerator is null");
 		}
 		
 		System.out.println("How fast the rearRightMotor is going: "+rearRightMotor.getEncVelocity());
@@ -345,7 +354,7 @@ public class Robot extends IterativeRobot {
 			            	System.out.println("Starting a new rotation!");
 			            	double turnAngle = 180;
 			            	//public RotationAccelerationHelper (TechnoDrive driveTrain, AHRS navSensor, double turnAngle, double maxVelocity) 
-			            	rotator = new RotationAccelerator(drive, navSensor, turnAngle, .8);
+			            	accelerator = new RotationAccelerator(drive, navSensor, turnAngle, .8);
 			            	break;
 			            	
 			            	
@@ -364,21 +373,8 @@ public class Robot extends IterativeRobot {
       
       SmartDashboard.putBoolean("Turn is triggered", triggers[2]);
         
-        if (rotator != null)
-        {
-        	if (controller.getSimplePOV()==3){ //If the button that cancels the turn is pressed then cancel the turn.
-        		rotator = null;
-        	} else {
-        		System.out.println("I'm going to turn!"); //If we don't tell the robot not to turn, it turns. This isn't rocket science.
-        		boolean doneYet;
-        		doneYet = rotator.accelerate();
-        		if (doneYet) {
-        			rotator = null;
-        		}
-        	}
-        } else {
-        	drive.tankDrive(speed * leftVal, speed * rightVal);
-        }
+      runAccelerator();
+      
     //Up=0, up-right = 1, right = 2. Goes to 7.
     int POV = controller.getSimplePOV();
     System.out.print(POV);
@@ -393,8 +389,9 @@ public class Robot extends IterativeRobot {
 	}
 	
 	public void disabledInit() {
-		rotator = null;
+		accelerator = null;
 	}
+	
 	//TODO set values to 0 to start match
 	public void makeMotorsUseEncoders(CANTalon[] motors) {
 		for (CANTalon motor : motors) {
@@ -407,6 +404,27 @@ public class Robot extends IterativeRobot {
 			//f is feedforward which gives you a push
 			//i you don't really use much
 		}
+	}
+	
+	public void runAccelerator(boolean teleop) {
+		if (accelerator != null) {
+        	if (teleop && controller.getSimplePOV()==3){ //If the button that cancels the turn is pressed then cancel the turn.
+        		accelerator = null;
+        	} else {
+        		System.out.println("I'm going to move autonomously!"); //If we don't tell the robot not to turn, it turns. This isn't rocket science.
+        		boolean doneYet;
+        		doneYet = accelerator.accelerate();
+        		if (doneYet) {
+        			accelerator = null;
+        		}
+        	}
+        } else if (teleop) {
+        	drive.tankDrive(controller, speed);
+        }
+	}
+	
+	public void runAccelerator() {
+		runAccelerator(true);
 	}
 	
 	//get the requested values from the contours table posted by GRIP

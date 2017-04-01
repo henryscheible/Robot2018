@@ -39,7 +39,7 @@ public class Robot extends IterativeRobot {
 	NetworkTable table;
 	NetworkTable contoursTable;
 	NetworkTable blobsTable; 
-	final double halfYFov = Math.toRadians(40)/2.0; //half the vertical field of vision (radians) //fiddleable (you can change this value for calibration)
+	final double halfYFov = Math.toRadians(35)/2.0; //half the vertical field of vision (radians) //fiddleable (you can change this value for calibration)
 	final double halfXFov = Math.toRadians(60)/2.0; //half the horizontal field of vision (radians) //fiddleable
 	final double realTapeHeight = 5; //height of the strip of tape (inches)
 	final double spread = 8.25; //distance between the centers of the strips of tape (inches)
@@ -205,8 +205,9 @@ public class Robot extends IterativeRobot {
 		System.out.println();
 		
 		
-		double[][] contourPropertyArrays = getDataFromGRIPContours(new String[] {"width", "area"});
-		double[][] blobPropertyArrays = getDataFromGRIPBlobs(new String[] {"x", "y"});
+		double[][] contourPropertyArrays = getDataFromGRIPContours(new String[] {"centerX", "centerY", "width", "height", "area"});
+		//double[][] blobPropertyArrays = getDataFromGRIPBlobs(new String[] {"x", "y"}); //TODO delete if just using contours works
+		double[][] blobPropertyArrays = new double[0][0]; //TODO delete
 		
 		//Get the contour objects 
 		Contour[] contours = getContours(contourPropertyArrays, blobPropertyArrays);
@@ -468,11 +469,20 @@ public class Robot extends IterativeRobot {
 		try {
 			for (int i=0; i<contours.length; i++) { //for each contour
 				Contour contour = new Contour(); //create default Contour with all values at default value
+				contour.x = contourPropertyArrays[0][i];
+				contour.y = contourPropertyArrays[1][i];
+				contour.w = contourPropertyArrays[2][i];
+				contour.h = contourPropertyArrays[3][i];
+				contour.area = contourPropertyArrays[4][i];
+
+				
+				/* TODO delete old version
 				contour.w = contourPropertyArrays[0][i];
 				contour.area = contourPropertyArrays[1][i];
 				contour.x = blobPropertyArrays[0][i];
 				contour.y = blobPropertyArrays[1][i];
 				contour.h = contour.area/contour.w;
+				*/
 				contours[i] = contour; //make the new contour and add it
 			}
 			

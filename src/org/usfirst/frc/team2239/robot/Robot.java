@@ -39,7 +39,7 @@ public class Robot extends IterativeRobot {
 	NetworkTable table;
 	NetworkTable contoursTable;
 	NetworkTable blobsTable; 
-	final double halfYFov = Math.toRadians(35)/2.0; //half the vertical field of vision (radians) //fiddleable (you can change this value for calibration)
+	final double halfYFov = Math.toRadians(32.5)/2.0; //half the vertical field of vision (radians) //fiddleable (you can change this value for calibration)
 	final double halfXFov = Math.toRadians(60)/2.0; //half the horizontal field of vision (radians) //fiddleable
 	final double realTapeHeight = 5; //height of the strip of tape (inches)
 	final double spread = 8.25; //distance between the centers of the strips of tape (inches)
@@ -473,7 +473,7 @@ public class Robot extends IterativeRobot {
 				contour.y = contourPropertyArrays[1][i];
 				contour.w = contourPropertyArrays[2][i];
 				contour.h = contourPropertyArrays[3][i];
-				contour.area = contourPropertyArrays[4][i];
+				contour.area = contour.w*contour.h;
 
 				
 				/* TODO delete old version
@@ -492,10 +492,16 @@ public class Robot extends IterativeRobot {
 			double targetRatio = 5.0/2.0;
 			double scores[] = new double[contours.length];
 			for (int i=0; i<contours.length; i++) {
+				double score = 0;
 				Contour contour = contours[i];
-				double ratio = contour.h/contour.w;
-				double score = Math.abs(ratio-targetRatio);
-				System.out.println("Score: "+score);
+				if (contour.area>100) {
+					double ratio = contour.h/contour.w;
+					score = Math.abs(ratio-targetRatio);
+					System.out.println("Score: "+score);
+				} else {
+					score = 1000; //Give it a super high score
+				}
+				
 				scores[i] = score;
 			}
 			

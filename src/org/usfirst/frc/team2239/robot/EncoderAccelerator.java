@@ -15,11 +15,11 @@ public class EncoderAccelerator implements Accelerator {
 	double curVelocity = 0; //init to 0; we shouldn't be moving when we initiate //positive if moving forwards
 	double rollPastDecrease = .1; //how much we decrease maxVelocity by if we overshoot.
 	double accelerate = .05; //how quickly @param velocity will change
-	double offset = .5; //the lowest power the motors should ever be at //always positive
-	double tolerance = 100; //How close to the final destination should you get before stopping (should not be 0. Perfection is impossible.)
+	double offset = .3; //the lowest power the motors should ever be at //always positive
+	double tolerance = 5; //How close to the final destination should you get before stopping (should not be 0. Perfection is impossible.)
 	double moveDistance; //how much to move, in inches (positive means forwards)
 	double targetDistance; //the encoder value we aspire to be at when done.
-	double maxVelocityDistance = 30; //The distance travelled at which we start to decrease velocity at //always positive
+	double maxVelocityDistance = 1500; //The distance travelled at which we start to decrease velocity at //always positive
 	boolean forward; //true if we should be moving forwards, false otherwise (still or moving backwards)	
 	
 	
@@ -42,7 +42,7 @@ public class EncoderAccelerator implements Accelerator {
 		double offDistance = (targetDistance-curValue);
 		System.out.println("I'm this far off: "+offDistance);
 		if (targetDistance-tolerance < curValue && curValue < targetDistance+tolerance) { //we did it!
-			driveTrain.tankDrive(0, 0); //stop driving
+			driveTrain.tankDrive(0, 0); //stop driving //TODO this causes a lot of slippage when moving forwards and bakwards
 			return true;
 		}
 		
@@ -62,7 +62,7 @@ public class EncoderAccelerator implements Accelerator {
 		}
 		
 		System.out.println("Target velocity before setting is: "+targetVelocity);
-		System.out.println("cutVelocity before setting is: "+curVelocity);
+		System.out.println("curVelocity before setting is: "+curVelocity);
 		if (forward) {
 			System.out.println("We're going clockwise");
 			if (targetVelocity > curVelocity+accelerate) { //if I'm going slower than I should, ramp up to it

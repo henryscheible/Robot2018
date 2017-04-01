@@ -166,10 +166,9 @@ public class Robot extends IterativeRobot {
 		//baseline = new AccelerationHelper(drive, timer.get(), 167.0, .7); //The old timed acceleration //TODO delete once we get encoder acceleration to work 
 		timer.start(); //TODO delete once we get encoder working (though this may be useful to figure out when to do a last second charge)
 		myCompressor.start();
-		accelerator = new EncoderAccelerator(drive, new CANTalon[] {rearRightMotor}, 500, 1);  //TODO delete (just testing right now)
+		//53.5 ticks per inch
+		//accelerator = new EncoderAccelerator(drive, new CANTalon[] {rearRightMotor}, 5350, .8);  //TODO delete (just testing right now)
 	}
-	
-	
 
 	/**
 	 * This function is called periodically during autonomous
@@ -189,10 +188,9 @@ public class Robot extends IterativeRobot {
 		I should have 1 program that assumes
 		*the robot is in a position where it is looking at the tape
 		*/
+
 		
-		runAccelerator(false);
 		
-		/* TODO uncomment
 		double[] defaultValue = new double[0];
 		
 		SmartDashboard.putNumber("Running", (int )(Math.random() * 100 + 1));
@@ -245,7 +243,7 @@ public class Robot extends IterativeRobot {
 			double middleXPixel = contours[0].x+((contours[1].x-contours[0].x)/2); //the pixel that the peg should be at in the photo
 			
 			//static public double[] getValuesToPeg(double dx, double dy, double middleXPixel, double pixelScreenWidth, double halfXFov, double away)
-			double[] valuesToPeg  = VisionHelper.getValuesToPeg(positionToGoal[0], positionToGoal[1], middleXPixel, pixelScreenWidth, halfXFov, away);
+			double[] valuesToPeg = VisionHelper.getValuesToPeg(positionToGoal[0], positionToGoal[1], middleXPixel, pixelScreenWidth, halfXFov, away);
 			//ans[0] the angle to turn to point towards the target (radians)
 			//ans[1] the distance to travel to hit the target (inches)
 			//ans[2] the angle to turn to point towards the peg (radians) 
@@ -256,12 +254,10 @@ public class Robot extends IterativeRobot {
 			//double distanceToGoal = getPositionToGoal()
 	
 		} else {
-			System.out.println("Did not find 2 countours. Instead, I found " + contours.length);
+			System.out.println("Did not find 2 countours.");
 		}
 		
-		*/
 		
-		//TODO put in the nice driving function
 			
 		/*FRC default code - keep here for now
 		switch (autoSelected) {
@@ -280,6 +276,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopInit() {
 		speed = 1;
+		accelerator = null;
 	}
 	
 	/**
@@ -467,6 +464,7 @@ public class Robot extends IterativeRobot {
 	public Contour[] getContours(double[][] contourPropertyArrays, double[][] blobPropertyArrays) {
 		//The class/final result is called "Contours" even though it has some info from blobsTable and some from contoursTable
 		Contour[] contours = new Contour[contourPropertyArrays[0].length];
+		System.out.println("How many contours are seen: "+contours.length);
 		try {
 			for (int i=0; i<contours.length; i++) { //for each contour
 				Contour contour = new Contour(); //create default Contour with all values at default value
@@ -487,10 +485,11 @@ public class Robot extends IterativeRobot {
 				Contour contour = contours[i];
 				double ratio = contour.h/contour.w;
 				double score = Math.abs(ratio-targetRatio);
+				System.out.println("Score: "+score);
 				scores[i] = score;
 			}
 			
-			int[] indexes = getIndexesOfLargestTwoNums(scores);
+			int[] indexes = getIndexesOfSmallestTwoNums(scores);
 			contours = new Contour[] {contours[indexes[0]], contours[indexes[1]]};
 			
 			return contours;
@@ -531,6 +530,31 @@ public class Robot extends IterativeRobot {
 					index2 = i;
 				} else { //replace bigNum1
 					bigNum1 = num;
+					index1 = i;
+				}
+			}
+		}
+		return new int[] {index1, index2};
+	}
+	
+	public int[] getIndexesOfSmallestTwoNums(double[] myArr) {
+		if (myArr.length<2) { //if myArr has less than two doubles in it, just return an empty array.
+			return new int[2];
+		}
+		
+		int index1 = 0;
+		int index2 = 1;
+		double smallNum1 = myArr[0];
+		double smallNum2 = myArr[1];
+		
+		for (int i=2; i<myArr.length; i++) {
+			double num = myArr[i];
+			if (num<smallNum1 || num<smallNum2) {
+				if (smallNum1<smallNum2) { //bigNum2 is smaller so replace it
+					smallNum2 = num;
+					index2 = i;
+				} else { //replace bigNum1
+					smallNum1 = num;
 					index1 = i;
 				}
 			}

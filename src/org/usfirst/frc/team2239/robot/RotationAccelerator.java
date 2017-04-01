@@ -59,7 +59,7 @@ public class RotationAccelerator implements Accelerator {
 		}
 		
 		System.out.println("Target velocity before setting is: "+targetVelocity);
-		System.out.println("cutVelocity before setting is: "+curVelocity);
+		System.out.println("curVelocity before setting is: "+curVelocity);
 		if (clockwise) {
 			System.out.println("We're going clockwise");
 			if (targetVelocity > curVelocity+accelerate) { //if I'm going slower than I should, ramp up to it

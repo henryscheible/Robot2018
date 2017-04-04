@@ -17,9 +17,10 @@ public class EncoderAccelerator implements Accelerator {
 	double accelerate = .05; //how quickly @param velocity will change
 	double offset = .3; //the lowest power the motors should ever be at //always positive
 	double tolerance = 5; //How close to the final destination should you get before stopping (should not be 0. Perfection is impossible.)
-	double moveDistance; //how much to move, in inches (positive means forwards)
+	double moveTicks; //how much to move, in inches (positive means forwards)
+	double ticksPerInch = 53.5;
 	double targetDistance; //the encoder value we aspire to be at when done.
-	double maxVelocityDistance = 1500; //The distance travelled at which we start to decrease velocity at //always positive
+	double maxVelocityTicks = 1500; //The ticks travelled at which we start to decrease velocity at //always positive
 	boolean forward; //true if we should be moving forwards, false otherwise (still or moving backwards)	
 	
 	
@@ -27,7 +28,7 @@ public class EncoderAccelerator implements Accelerator {
 		this.forward = (distance>0);
 		this.driveTrain = driveTrain;
 		this.valueMotors = motorsToLookAt;
-		this.moveDistance = distance;
+		this.moveTicks = distance*ticksPerInch;
 		this.targetDistance = getEncoderValue()+distance;
 		this.maxVelocity = maxVelocity;
 	}
@@ -56,9 +57,9 @@ public class EncoderAccelerator implements Accelerator {
 		
 		double targetVelocity;
 		if (forward) {
-			targetVelocity = Math.min(((maxVelocity-offset)/maxVelocityDistance)*offDistance+offset, maxVelocity);
+			targetVelocity = Math.min(((maxVelocity-offset)/maxVelocityTicks)*offDistance+offset, maxVelocity);
 		} else {
-			targetVelocity = Math.max(((maxVelocity-offset)/maxVelocityDistance)*offDistance-offset, -maxVelocity);
+			targetVelocity = Math.max(((maxVelocity-offset)/maxVelocityTicks)*offDistance-offset, -maxVelocity);
 		}
 		
 		System.out.println("Target velocity before setting is: "+targetVelocity);

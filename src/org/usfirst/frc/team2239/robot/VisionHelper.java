@@ -12,16 +12,32 @@ public class VisionHelper { //create a class to do the math
 	}
 	
 	/*
-	 * height is probably in inches, which would mean our distance is in inches as well //TODO check what unit height is
-	 * @param left robot's distance to the left piece of tape
-	 * @param right robot's distance to the right piece of tape
+	 * @param left robot's distance to the left piece of tape (inches)
+	 * @param right robot's distance to the right piece of tape (inches)
 	 * @param spread the real distance between the two pieces of tape (inches)
+	 * returns {horiz distance to  get to peg, vertical distance to get to peg}
+	 * 
+	 * TODO if the robot is within the two pieces of tape, this might not be accurate, but it doesn't matter because it will be close enough
 	 */
 	static public double[] getPositionToGoal(double left, double right, double spread) {
+		double x1;
+		double dy;
+		/*
+		if (left<right) { //we're to the left of the peg
+			//just swapping right and left
+			double temp = right;
+			right = left;
+			left = temp;
+		}	
+		*/
 		//Calculate the parallel (to the peg's wall) distance between the robot and the closer tape
-		double x1 = (left*left - right*right - spread*spread) / 2*spread;
-		double dy = Math.sqrt(spread*spread - x1*x1); //Calculate perpendicular distance between the robot and the peg
-		double dx = x1 + spread/2; //Same as x1 but with the peg instead of tape
+		x1 = (left*left - right*right - spread*spread) / (2*spread);
+		System.out.println("x1: "+x1);
+		dy = Math.sqrt(Math.abs(right*right - x1*x1)); //Calculate perpendicular distance between the robot and the peg
+
+		double dx;
+		//Calculate the parallel distance between the robot and the peg
+		dx = -x1 - spread/2;
 		double[] ans = {dx, dy}; //Create an array to send the answers back to the program
 		return ans; //Send answer back to the main program
 	}
@@ -49,6 +65,7 @@ public class VisionHelper { //create a class to do the math
 	 * ans[0] the angle to turn to point towards the target (radians)
 	 * ans[1] the distance to travel to hit the target (inches)
 	 * ans[2] the angle to turn to point towards the peg (radians)
+	 * ans[3] theta: the angle from the wall to the peg to the robot
 	 */
 	
 	static public double[] getValuesToPeg(double dx, double dy, double middleXPixel, double pixelScreenWidth, double halfXFov, double away) {
@@ -60,11 +77,17 @@ public class VisionHelper { //create a class to do the math
 		//Same as (halfXFov*pixelsOffCenter)/(.5*pixelScreenWidth)
 		double alpha = (2.0*halfXFov*pixelsOffCenter)/pixelScreenWidth; //the angle in radians to turn to the peg
 		System.out.println("Angle to turn to point towards the peg in degrees: "+Math.toDegrees(alpha));
+		System.out.println("What I'm putting into atan: "+((dy-away)/dx));
 		double b2t = -Math.atan((dy-away)/dx); //angle from the horizontal line to the robot to the target
+		System.out.println("b2t: "+b2t);
 		double a1 = alpha+theta+b2t; //angle the robot needs to turn to point at the target
 		//The reason for the sign "(b2t/Math.abs(b2t))" term is because a2 always needs to be in the direction of b2t
 		double a2 = (b2t/Math.abs(b2t))*(Math.PI/2)-b2t; //angle the robot should turn after it hits the target to point towards the peg
-		return new double[] {a1, dx/Math.cos(b2t), a2}; //{ans[0] the angle to turn to point towards the target (radians), the distance to travel to hit the target (inches), the angle to turn to point towards the peg (radians)}
+		System.out.println("The three values coming up:");
+		System.out.println(a1);
+		System.out.println(dx/Math.cos(b2t));
+		System.out.println(a2);
+		return new double[] {a1, dx/Math.cos(b2t), a2, theta}; //TODO add theta into comment --> //{ans[0] the angle to turn to point towards the target (radians), the distance to travel to hit the target (inches), the angle to turn to point towards the peg (radians)}
 	} 
 	
 	

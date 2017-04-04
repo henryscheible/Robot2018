@@ -57,6 +57,7 @@ public class Robot extends IterativeRobot {
     public Solenoid gearRelease;
     public Compressor myCompressor;
     public PowerDistributionPanel myPDP;
+    GearStateMachine autoGear;
     
     /*FRC default code - keep here for now
 	final String defaultAuto = "Default";
@@ -77,6 +78,7 @@ public class Robot extends IterativeRobot {
 	CANTalon rearLeftMotor = new CANTalon(1);
 	CANTalon frontRightMotor = new CANTalon(3);
 	CANTalon rearRightMotor = new CANTalon(2);
+	CANTalon[] encoderMotors = new CANTalon[] {rearRightMotor};
 		
 	//This is the constructor. Whenever a new Robot object is made
 	//this is the function that will be called to make it
@@ -134,9 +136,9 @@ public class Robot extends IterativeRobot {
 			DriverStation.reportError("Error instantiating navX-MXP: " + ex.getMessage(), true);
 		}
 		
-		makeMotorsUseEncoders(new CANTalon[] {rearRightMotor, rearLeftMotor});
+		makeMotorsUseEncoders(encoderMotors);
 		
-		
+		autoGear = new GearStateMachine(drive, navSensor, encoderMotors);
 		System.out.println("Robot has finished init");
 	}
 
@@ -191,8 +193,8 @@ public class Robot extends IterativeRobot {
 
 		
 		
-		double[] defaultValue = new double[0];
 		
+		/* TODO delete
 		SmartDashboard.putNumber("Running", (int )(Math.random() * 100 + 1));
 		double[] areas = contoursTable.getNumberArray("area", defaultValue);
 		SmartDashboard.putNumber("Areas table length", areas.length);
@@ -203,62 +205,75 @@ public class Robot extends IterativeRobot {
 			SmartDashboard.putNumber("Area", area);
 		}
 		System.out.println();
+		*/
 		
-		
-		double[][] contourPropertyArrays = getDataFromGRIPContours(new String[] {"centerX", "centerY", "width", "height", "area"});
-		//double[][] blobPropertyArrays = getDataFromGRIPBlobs(new String[] {"x", "y"}); //TODO delete if just using contours works
-		double[][] blobPropertyArrays = new double[0][0]; //TODO delete
-		
-		//Get the contour objects 
-		Contour[] contours = getContours(contourPropertyArrays, blobPropertyArrays);
-		System.out.println("contourAmount is: "+contours.length);
-		
-		if (contours.length==2) {
-			System.out.println("Found the tape!");
-			System.out.println(contours[0]);
-			System.out.println(contours[1]);
-			
-			//Sort contours so that the one on the left comes first
-			Arrays.sort(contours, new Comparator<Contour>() {
-			    public int compare(Contour c1, Contour c2) {
-			        return Double.compare(c1.x, c2.x);
-			    }
-			});
-			System.out.println("x value of contour on left: "+contours[0].x);
-			System.out.println("x value of contour on right: "+contours[1].x);
-			
-			double[] distanceToContours = new double[2];
-			
-			for (int i=0; i<2; i++) {
-				Contour contour = contours[i];
-				//getDistanceToTape(double pixelTapeHeight, double pixelScreenHeight, double realTapeHeight, double halfFov)
-				double distanceToContour = VisionHelper.getDistanceToTape(contour.h, pixelScreenHeight, realTapeHeight, halfYFov);
-				System.out.println("Distance to contour "+distanceToContour);
-				distanceToContours[i] = distanceToContour;
-			}
-			
-			
-			//static public double[] getPositionToGoal(double left, double right, double spread)
-			double[] positionToGoal = VisionHelper.getPositionToGoal(distanceToContours[0], distanceToContours[1], spread);
-			
-			double middleXPixel = contours[0].x+((contours[1].x-contours[0].x)/2); //the pixel that the peg should be at in the photo
-			
-			//static public double[] getValuesToPeg(double dx, double dy, double middleXPixel, double pixelScreenWidth, double halfXFov, double away)
-			double[] valuesToPeg = VisionHelper.getValuesToPeg(positionToGoal[0], positionToGoal[1], middleXPixel, pixelScreenWidth, halfXFov, away);
-			//ans[0] the angle to turn to point towards the target (radians)
-			//ans[1] the distance to travel to hit the target (inches)
-			//ans[2] the angle to turn to point towards the peg (radians) 
-			System.out.println("Angle to point towards the target: "+valuesToPeg[0]);
-			System.out.println("distance to travel to hit the target: "+valuesToPeg[1]);
-			System.out.println("the angle to turn to point towards the peg: "+valuesToPeg[2]);
-			
-			//double distanceToGoal = getPositionToGoal()
-	
+		//TODO check other null code
+		if (!(accelerator==null)) { //we have something to do
+			runAccelerator(false);
+			System.out.println(accelerator.accelerate());
 		} else {
-			System.out.println("Did not find 2 countours.");
+		
+			if (autoGear.futureAccelerators.length>0) {
+				accelerator = autoGear.getNextAccelerator();
+			} else {
+				double[][] contourPropertyArrays = getDataFromGRIPContours(new String[] {"centerX", "centerY", "width", "height", "area"});
+				//double[][] blobPropertyArrays = getDataFromGRIPBlobs(new String[] {"x", "y"}); //only use if the contours fail
+				
+				//Get the contour objects 
+				Contour[] contours = getContours(contourPropertyArrays);
+				//Contour[] contours = getContours(contourPropertyArrays, blobPropertyArrays); //only use if the contours fail
+				System.out.println("contourAmount is: "+contours.length);
+				
+				if (contours.length==2) {
+					System.out.println("Found the tape!");
+					System.out.println(contours[0]);
+					System.out.println(contours[1]);
+					
+					//Sort contours so that the one on the left comes first
+					Arrays.sort(contours, new Comparator<Contour>() {
+					    public int compare(Contour c1, Contour c2) {
+					        return Double.compare(c1.x, c2.x);
+					    }
+					});
+					
+					double[] distanceToContours = new double[2];
+					
+					for (int i=0; i<2; i++) {
+						Contour contour = contours[i];
+						//getDistanceToTape(double pixelTapeHeight, double pixelScreenHeight, double realTapeHeight, double halfFov)
+						double distanceToContour = VisionHelper.getDistanceToTape(contour.h, pixelScreenHeight, realTapeHeight, halfYFov);
+						System.out.println("Distance to contour "+distanceToContour);
+						distanceToContours[i] = distanceToContour;
+					}
+					
+					
+					//static public double[] getPositionToGoal(double left, double right, double spread)
+					double[] positionToGoal = VisionHelper.getPositionToGoal(distanceToContours[0], distanceToContours[1], spread);
+					System.out.println("Position to goal: x: "+positionToGoal[0]+" y: "+positionToGoal[1]);
+					
+					double middleXPixel = contours[0].x+((contours[1].x-contours[0].x)/2); //the pixel that the peg should be at in the photo
+					
+					//static public double[] getValuesToPeg(double dx, double dy, double middleXPixel, double pixelScreenWidth, double halfXFov, double away)
+					double[] valuesToPeg = VisionHelper.getValuesToPeg(positionToGoal[0], positionToGoal[1], middleXPixel, pixelScreenWidth, halfXFov, away);
+					//ans[0] the angle to turn to point towards the target (radians)
+					//ans[1] the distance to travel to hit the target (inches)
+					//ans[2] the angle to turn to point towards the peg (radians)
+					//ans[3] theta: the angle from the wall to the peg to the robot
+					System.out.println("Angle to point towards the target: "+valuesToPeg[0]);
+					System.out.println("distance to travel to hit the target: "+valuesToPeg[1]);
+					System.out.println("the angle to turn to point towards the peg: "+valuesToPeg[2]);
+					System.out.println("Theta: "+Math.toDegrees(valuesToPeg[3]));
+					
+					autoGear.computeNextAccelerator(valuesToPeg[3], VisionHelper.getDistanceToGoal(positionToGoal[0], positionToGoal[1]), valuesToPeg[2]);
+					accelerator = autoGear.getNextAccelerator();
+					//double distanceToGoal = getPositionToGoal()
+					
+			
+				} else {
+					System.out.println("Did not find 2 countours.");
+				}
+			}
 		}
-		
-		
 			
 		/*FRC default code - keep here for now
 		switch (autoSelected) {
@@ -296,10 +311,7 @@ public class Robot extends IterativeRobot {
 		System.out.println("How fast the rearLeftMotor is going: "+rearLeftMotor.getEncVelocity());
 		System.out.println("How far the rearLeftMotor has gone: "+rearLeftMotor.getEncPosition());
 		
-		//SmartDashboard.putBoolean("Trigger", toggleReadys[0]); //TODO uncomment
-		double leftVal = -controller.getY(XboxController.Hand.kLeft);
-        double rightVal = -controller.getY(XboxController.Hand.kRight);
-        
+		//SmartDashboard.putBoolean("Trigger", toggleReadys[0]); //TODO uncomment        
      
         boolean[] triggers = new boolean[toggleAmt];
         //Go through each toggle 
@@ -462,7 +474,9 @@ public class Robot extends IterativeRobot {
 	
 	//Take all the data from GRIP and return the tape contours.
 	//This is where finding the tape (and ignoring other things, including the peg covering the tape) takes place.
-	public Contour[] getContours(double[][] contourPropertyArrays, double[][] blobPropertyArrays) {
+	public Contour[] getContours(double[][] contourPropertyArrays) {
+		if (contourPropertyArrays[0].length<2) return new Contour[2]; //If there aren't even two contours to look at, return empty
+		
 		//The class/final result is called "Contours" even though it has some info from blobsTable and some from contoursTable
 		Contour[] contours = new Contour[contourPropertyArrays[0].length];
 		System.out.println("How many contours are seen: "+contours.length);
@@ -476,7 +490,7 @@ public class Robot extends IterativeRobot {
 				contour.area = contour.w*contour.h;
 
 				
-				/* TODO delete old version
+				/* //only use if the contours fail
 				contour.w = contourPropertyArrays[0][i];
 				contour.area = contourPropertyArrays[1][i];
 				contour.x = blobPropertyArrays[0][i];
@@ -499,13 +513,18 @@ public class Robot extends IterativeRobot {
 					score = Math.abs(ratio-targetRatio);
 					System.out.println("Score: "+score);
 				} else {
-					score = 1000; //Give it a super high score
+					score = 1000; //Give it a super high score so it won't be chosen
 				}
 				
 				scores[i] = score;
 			}
 			
 			int[] indexes = getIndexesOfSmallestTwoNums(scores);
+			for (int i=0; i<indexes.length; i++) {
+				if (scores[indexes[i]] >= 1000) { //if either of the scores is really bad, return empty list
+					return new Contour[2];
+				}
+			}
 			contours = new Contour[] {contours[indexes[0]], contours[indexes[1]]};
 			
 			return contours;

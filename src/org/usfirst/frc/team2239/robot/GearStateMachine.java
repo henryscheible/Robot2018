@@ -5,17 +5,18 @@ import com.kauailabs.navx.frc.AHRS;
 
 public class GearStateMachine {
 	
-	public Accelerator[] futureAccelerators; //TODO delete old comments about state
-	public double attackAngle; //Angle (radians) the physical robot must be within from the peg in order to start charging
-	public double chargeDist; //Distance (inches) the physical robot must be within from the peg in order to start charging
+	public Accelerator[] futureAccelerators = new Accelerator[] {}; //TODO delete old comments about state
+	public double attackAngle = Math.toRadians(10); //Angle (radians) the physical robot must be within from the peg in order to start charging
+	public double chargeDist = 60; //Distance (inches) the physical robot must be within from the peg in order to start charging
 	public TechnoDrive driveTrain;
 	public AHRS navSensor;
 	public CANTalon[] motorsToLookAt;
-	public double overChargeAmt = 0; //How many inches it should try to overcharge when placing a gear
+	public double overChargeAmt = -5; //How many inches it should try to overcharge when placing a gear
 	
 	public GearStateMachine(TechnoDrive driveTrain, AHRS navSensor, CANTalon[] motorsToLookAt) {
 		this.driveTrain = driveTrain;
 		this.navSensor = navSensor;
+		System.out.println("Navtest "+this.navSensor.getAngle());//TODO delete
 		this.motorsToLookAt = motorsToLookAt;
 	}
 	
@@ -49,21 +50,28 @@ public class GearStateMachine {
 	//EncoderAccelerator (TechnoDrive driveTrain, CANTalon[] motorsToLookAt, double distance, double maxVelocity) {
 
 	
-	public Accelerator move(double theta, double distToPeg, double rotationToPeg) {	
+	public void computeNextAccelerator(double theta, double distToPeg, double rotationToPeg) {	
 		if (futureAccelerators.length==0) {
-			if (((Math.PI/2)-theta)<=attackAngle) {
+			if (Math.abs(((Math.PI/2)-theta))<=attackAngle) {
 				if (distToPeg<chargeDist) {
-					futureAccelerators = new Accelerator[] {new EncoderAccelerator(driveTrain, motorsToLookAt, distToPeg+overChargeAmt, .8)};
-					return new RotationAccelerator(driveTrain, navSensor, rotationToPeg, 1);
+					System.out.println("Navtest "+navSensor.getAngle());//TODO delete
+					futureAccelerators = new Accelerator[] {new RotationAccelerator(driveTrain, navSensor, rotationToPeg, .8), new EncoderAccelerator(driveTrain, motorsToLookAt, distToPeg+overChargeAmt, .8)};
 				}
 			}
 		} else {
-			Accelerator[] newFutureAccelerators = new Accelerator[futureAccelerators.length-1];
-			for (int i=1; i<futureAccelerators.length; i++) {
-				newFutureAccelerators[i-1] = futureAccelerators[i];
-			}
-			return futureAccelerators[0];
+			
 		}
-		return null;
+	}
+	
+	public Accelerator getNextAccelerator() {
+		//Just return the next accelerator in the sequence and update the sequence
+		
+		//make a new futureAccelerators that just doesn't have the first accelerator
+		//we will return that first accelerator so the robot can run it
+		Accelerator[] newFutureAccelerators = new Accelerator[futureAccelerators.length-1];
+		for (int i=1; i<futureAccelerators.length; i++) {
+			newFutureAccelerators[i-1] = futureAccelerators[i];
+		}
+		return futureAccelerators[0];
 	}
 }

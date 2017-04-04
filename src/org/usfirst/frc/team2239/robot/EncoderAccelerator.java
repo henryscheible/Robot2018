@@ -20,7 +20,7 @@ public class EncoderAccelerator implements Accelerator {
 	double moveTicks; //how much to move, in inches (positive means forwards)
 	double ticksPerInch = 53.5;
 	double targetDistance; //the encoder value we aspire to be at when done.
-	double maxVelocityTicks = 1500; //The ticks travelled at which we start to decrease velocity at //always positive
+	double maxVelocityTicks = 1500; //The ticks traveled at which we start to decrease velocity at //always positive
 	boolean forward; //true if we should be moving forwards, false otherwise (still or moving backwards)	
 	
 	
@@ -29,7 +29,7 @@ public class EncoderAccelerator implements Accelerator {
 		this.driveTrain = driveTrain;
 		this.valueMotors = motorsToLookAt;
 		this.moveTicks = distance*ticksPerInch;
-		this.targetDistance = getEncoderValue()+distance;
+		this.targetDistance = getEncoderValue()+this.moveTicks;
 		this.maxVelocity = maxVelocity;
 	}
 	
@@ -65,7 +65,7 @@ public class EncoderAccelerator implements Accelerator {
 		System.out.println("Target velocity before setting is: "+targetVelocity);
 		System.out.println("curVelocity before setting is: "+curVelocity);
 		if (forward) {
-			System.out.println("We're going clockwise");
+			System.out.println("We're going forwards");
 			if (targetVelocity > curVelocity+accelerate) { //if I'm going slower than I should, ramp up to it
 				curVelocity = curVelocity+accelerate;
 			} else {

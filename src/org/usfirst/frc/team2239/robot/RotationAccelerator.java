@@ -12,7 +12,7 @@ public class RotationAccelerator implements Accelerator {
 	double swingPastDecrease = .1; //how much we decrease maxVelocity by if we overshoot.
 	double accelerate = .05; //how quickly @param velocity will change
 	double offset = .5; //the lowest power the motors should ever be at //always positive
-	double tolerance = 3; //How close to the final orientation should you get before stopping (should not be 0. Perfection is impossible.)
+	double tolerance = 2; //How close to the final orientation should you get before stopping (degrees) (should not be 0. Perfection is impossible.)
 	double turnAngle; //how much to turn (in degrees, positive means clockwise)
 	double targetAngle; //the angle we aspire to be at. This can be greater than 2Pi //TODO test if this can be negative
 	double maxVelocityAngle = 30; //The angle (in degrees) we start to decrease velocity at //always positive

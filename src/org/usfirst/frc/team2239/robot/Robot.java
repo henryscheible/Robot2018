@@ -59,6 +59,11 @@ public class Robot extends IterativeRobot {
     public PowerDistributionPanel myPDP;
     GearStateMachine autoGear;
     
+    int autoStep = 0; //0 if autonomous has not been planned, 1 if planned but not done, 2 if done
+    double testAngle = 0; //TODO delete
+    double testDistance = 0; //TODO delete
+    double testTheta = 0; //TODO delete
+    
     /*FRC default code - keep here for now
 	final String defaultAuto = "Default";
 	final String customAuto = "My Auto";
@@ -207,73 +212,83 @@ public class Robot extends IterativeRobot {
 		System.out.println();
 		*/
 		
-		//TODO check other null code
-		if (!(accelerator==null)) { //we have something to do
-			runAccelerator(false);
-			System.out.println(accelerator.accelerate());
-		} else {
+		System.out.println("Running autonomousPeriodic()");
 		
-			if (autoGear.futureAccelerators.length>0) {
-				accelerator = autoGear.getNextAccelerator();
-			} else {
-				double[][] contourPropertyArrays = getDataFromGRIPContours(new String[] {"centerX", "centerY", "width", "height", "area"});
-				//double[][] blobPropertyArrays = getDataFromGRIPBlobs(new String[] {"x", "y"}); //only use if the contours fail
-				
-				//Get the contour objects 
-				Contour[] contours = getContours(contourPropertyArrays);
-				//Contour[] contours = getContours(contourPropertyArrays, blobPropertyArrays); //only use if the contours fail
-				System.out.println("contourAmount is: "+contours.length);
-				
-				if (contours.length==2) {
-					System.out.println("Found the tape!");
-					System.out.println(contours[0]);
-					System.out.println(contours[1]);
-					
-					//Sort contours so that the one on the left comes first
-					Arrays.sort(contours, new Comparator<Contour>() {
-					    public int compare(Contour c1, Contour c2) {
-					        return Double.compare(c1.x, c2.x);
-					    }
-					});
-					
-					double[] distanceToContours = new double[2];
-					
-					for (int i=0; i<2; i++) {
-						Contour contour = contours[i];
-						//getDistanceToTape(double pixelTapeHeight, double pixelScreenHeight, double realTapeHeight, double halfFov)
-						double distanceToContour = VisionHelper.getDistanceToTape(contour.h, pixelScreenHeight, realTapeHeight, halfYFov);
-						System.out.println("Distance to contour "+distanceToContour);
-						distanceToContours[i] = distanceToContour;
-					}
-					
-					
-					//static public double[] getPositionToGoal(double left, double right, double spread)
-					double[] positionToGoal = VisionHelper.getPositionToGoal(distanceToContours[0], distanceToContours[1], spread);
-					System.out.println("Position to goal: x: "+positionToGoal[0]+" y: "+positionToGoal[1]);
-					
-					double middleXPixel = contours[0].x+((contours[1].x-contours[0].x)/2); //the pixel that the peg should be at in the photo
-					
-					//static public double[] getValuesToPeg(double dx, double dy, double middleXPixel, double pixelScreenWidth, double halfXFov, double away)
-					double[] valuesToPeg = VisionHelper.getValuesToPeg(positionToGoal[0], positionToGoal[1], middleXPixel, pixelScreenWidth, halfXFov, away);
-					//ans[0] the angle to turn to point towards the target (radians)
-					//ans[1] the distance to travel to hit the target (inches)
-					//ans[2] the angle to turn to point towards the peg (radians)
-					//ans[3] theta: the angle from the wall to the peg to the robot
-					System.out.println("Angle to point towards the target: "+valuesToPeg[0]);
-					System.out.println("distance to travel to hit the target: "+valuesToPeg[1]);
-					System.out.println("the angle to turn to point towards the peg: "+valuesToPeg[2]);
-					System.out.println("Theta: "+Math.toDegrees(valuesToPeg[3]));
-					
-					autoGear.computeNextAccelerator(valuesToPeg[3], VisionHelper.getDistanceToGoal(positionToGoal[0], positionToGoal[1]), valuesToPeg[2]);
-					accelerator = autoGear.getNextAccelerator();
-					//double distanceToGoal = getPositionToGoal()
-					
+		if (autoStep==0) {
+			double[][] contourPropertyArrays = getDataFromGRIPContours(new String[] {"centerX", "centerY", "width", "height", "area"});
+			//double[][] blobPropertyArrays = getDataFromGRIPBlobs(new String[] {"x", "y"}); //only use if the contours fail
 			
-				} else {
-					System.out.println("Did not find 2 countours.");
+			//Get the contour objects 
+			Contour[] contours = getContours(contourPropertyArrays);
+			//Contour[] contours = getContours(contourPropertyArrays, blobPropertyArrays); //only use if the contours fail
+			System.out.println("contourAmount is: "+contours.length);
+			
+			if (contours.length==2) {
+				System.out.println("Found the tape!");
+				System.out.println(contours[0]);
+				System.out.println(contours[1]);
+				
+				//Sort contours so that the one on the left comes first
+				Arrays.sort(contours, new Comparator<Contour>() {
+				    public int compare(Contour c1, Contour c2) {
+				        return Double.compare(c1.x, c2.x);
+				    }
+				});
+				
+				double[] distanceToContours = new double[2];
+				
+				for (int i=0; i<2; i++) {
+					Contour contour = contours[i];
+					//getDistanceToTape(double pixelTapeHeight, double pixelScreenHeight, double realTapeHeight, double halfFov)
+					double distanceToContour = VisionHelper.getDistanceToTape(contour.h, pixelScreenHeight, realTapeHeight, halfYFov);
+					System.out.println("Distance to contour "+distanceToContour);
+					distanceToContours[i] = distanceToContour;
+				}
+				
+				
+				//static public double[] getPositionToGoal(double left, double right, double spread)
+				double[] positionToGoal = VisionHelper.getPositionToGoal(distanceToContours[0], distanceToContours[1], spread);
+				System.out.println("Position to goal: x: "+positionToGoal[0]+" y: "+positionToGoal[1]);
+				
+				double middleXPixel = contours[0].x+((contours[1].x-contours[0].x)/2); //the pixel that the peg should be at in the photo
+				
+				//static public double[] getValuesToPeg(double dx, double dy, double middleXPixel, double pixelScreenWidth, double halfXFov, double away)
+				double[] valuesToPeg = VisionHelper.getValuesToPeg(positionToGoal[0], positionToGoal[1], middleXPixel, pixelScreenWidth, halfXFov);
+				//ans[0] the angle to turn to point towards the target (radians)
+				//ans[1] the distance to travel to hit the target (inches)
+				//ans[2] the angle to turn to point towards the peg (radians)
+				//ans[3] theta: the angle from the wall to the peg to the robot
+				System.out.println("Angle to point towards the target: "+valuesToPeg[0]);
+				System.out.println("distance to travel to hit the target: "+valuesToPeg[1]);
+				System.out.println("the angle to turn to point towards the peg: "+valuesToPeg[2]);
+				System.out.println("Theta: "+Math.toDegrees(valuesToPeg[3]));
+				
+				testAngle = valuesToPeg[2];
+				testDistance = VisionHelper.getDistanceToGoal(positionToGoal[0], positionToGoal[1]);
+				testTheta = valuesToPeg[3];
+				
+				autoGear.computeNextAccelerator(valuesToPeg[3], VisionHelper.getDistanceToGoal(positionToGoal[0], positionToGoal[1]), valuesToPeg[2]);
+				accelerator = autoGear.getNextAccelerator();
+				if (accelerator!=null) autoStep = 1; //we have planned out our acceleration
+			
+			} else {
+				System.out.println("Did not find 2 countours.");
+			}
+		} else if (autoStep==1) {
+			System.out.println("printing test values: ");
+			System.out.println(Math.toDegrees(testAngle));
+			System.out.println(testDistance);
+			System.out.println(testTheta);
+			if (accelerator==null) {
+				accelerator = autoGear.getNextAccelerator();
+				if (accelerator==null) {
+					autoStep = 2; //done running
+					return;
 				}
 			}
+			runAccelerator(false);
 		}
+		
 			
 		/*FRC default code - keep here for now
 		switch (autoSelected) {
@@ -423,9 +438,13 @@ public class Robot extends IterativeRobot {
         	} else {
         		System.out.println("I'm going to move autonomously!"); //If we don't tell the robot not to turn, it turns. This isn't rocket science.
         		boolean doneYet;
+        		System.out.println("Running accel in runAccelerator()");
         		doneYet = accelerator.accelerate();
         		if (doneYet) {
+        			System.out.println("Accelerator has finished. Stopping it.");
         			accelerator = null;
+        		} else {
+        			System.out.println("Accelerator not finished yet.");
         		}
         	}
         } else if (teleop) {
@@ -442,6 +461,7 @@ public class Robot extends IterativeRobot {
 		double[][] ans = new double[propertiesToGet.length][];
 		for (int i=0; i<propertiesToGet.length; i++) {
 			String property = propertiesToGet[i];
+			System.out.print("Getting new data!!");
 			double[] propertyArray = contoursTable.getNumberArray(property, new double[0]);
 			System.out.print("Got a propertyArray "+property+": ");
 			for (double value : propertyArray) {
@@ -475,7 +495,7 @@ public class Robot extends IterativeRobot {
 	//Take all the data from GRIP and return the tape contours.
 	//This is where finding the tape (and ignoring other things, including the peg covering the tape) takes place.
 	public Contour[] getContours(double[][] contourPropertyArrays) {
-		if (contourPropertyArrays[0].length<2) return new Contour[2]; //If there aren't even two contours to look at, return empty
+		if (contourPropertyArrays[0].length<2) return new Contour[0]; //If there aren't even two contours to look at, return empty
 		
 		//The class/final result is called "Contours" even though it has some info from blobsTable and some from contoursTable
 		Contour[] contours = new Contour[contourPropertyArrays[0].length];
@@ -522,7 +542,7 @@ public class Robot extends IterativeRobot {
 			int[] indexes = getIndexesOfSmallestTwoNums(scores);
 			for (int i=0; i<indexes.length; i++) {
 				if (scores[indexes[i]] >= 1000) { //if either of the scores is really bad, return empty list
-					return new Contour[2];
+					return new Contour[0];
 				}
 			}
 			contours = new Contour[] {contours[indexes[0]], contours[indexes[1]]};

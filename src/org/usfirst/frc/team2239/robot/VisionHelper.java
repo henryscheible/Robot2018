@@ -68,7 +68,7 @@ public class VisionHelper { //create a class to do the math
 	 * ans[3] theta: the angle from the wall to the peg to the robot
 	 */
 	
-	static public double[] getValuesToPeg(double dx, double dy, double middleXPixel, double pixelScreenWidth, double halfXFov, double away) {
+	static public double[] getValuesToTarget(double dx, double dy, double middleXPixel, double pixelScreenWidth, double halfXFov, double away) {
 		//All angles in here have a direction. Positive is clockwise.
 		double dc = getDistanceToGoal(dx, dy); //compute the distance to the peg in inches
 		//the angle from the robot to the peg to the wall the peg is on
@@ -78,18 +78,21 @@ public class VisionHelper { //create a class to do the math
 		double alpha = (2.0*halfXFov*pixelsOffCenter)/pixelScreenWidth; //the angle in radians to turn to the peg
 		System.out.println("Angle to turn to point towards the peg in degrees: "+Math.toDegrees(alpha));
 		System.out.println("What I'm putting into atan: "+((dy-away)/dx));
-		double b2t = -Math.atan((dy-away)/dx); //angle from the horizontal line to the robot to the target
-		System.out.println("b2t: "+b2t);
-		double a1 = alpha+theta+b2t; //angle the robot needs to turn to point at the target
+		//double b2t = -Math.atan((dy-away)/dx); //angle from the horizontal line to the robot to the target
+		//System.out.println("b2t: "+b2t);
+		double a1 = alpha+theta+theta; //angle the robot needs to turn to point at the target
 		//The reason for the sign "(b2t/Math.abs(b2t))" term is because a2 always needs to be in the direction of b2t
-		double a2 = (b2t/Math.abs(b2t))*(Math.PI/2)-b2t; //angle the robot should turn after it hits the target to point towards the peg
+		double a2 = (theta/Math.abs(theta))*(Math.PI/2)-theta; //angle the robot should turn after it hits the target to point towards the peg
 		System.out.println("The three values coming up:");
 		System.out.println(a1);
-		System.out.println(dx/Math.cos(b2t));
+		System.out.println(dx/Math.cos(theta));
 		System.out.println(a2);
-		return new double[] {a1, dx/Math.cos(b2t), a2, theta}; //TODO add theta into comment --> //{ans[0] the angle to turn to point towards the target (radians), the distance to travel to hit the target (inches), the angle to turn to point towards the peg (radians)}
-	} 
+		return new double[] {a1, dx/Math.cos(theta), a2, theta}; //TODO add theta into comment --> //{ans[0] the angle to turn to point towards the target (radians), the distance to travel to hit the target (inches), the angle to turn to point towards the peg (radians)}
+	}
 	
+	static public double[] getValuesToPeg(double dx, double dy, double middleXPixel, double pixelScreenWidth, double halfXFov) {
+		return getValuesToTarget(dx, dy, middleXPixel, pixelScreenWidth, halfXFov, 0);
+	}
 	
 	//takes two doubles; the heights of the tape
 	//takes a third double - a constant that we multiply by the ratio

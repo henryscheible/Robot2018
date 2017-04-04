@@ -7,7 +7,7 @@ public class GearStateMachine {
 	
 	public Accelerator[] futureAccelerators = new Accelerator[] {}; //TODO delete old comments about state
 	public double attackAngle = Math.toRadians(10); //Angle (radians) the physical robot must be within from the peg in order to start charging
-	public double chargeDist = 60; //Distance (inches) the physical robot must be within from the peg in order to start charging
+	public double chargeDist = 70; //Distance (inches) the physical robot must be within from the peg in order to start charging
 	public TechnoDrive driveTrain;
 	public AHRS navSensor;
 	public CANTalon[] motorsToLookAt;
@@ -52,19 +52,20 @@ public class GearStateMachine {
 	
 	public void computeNextAccelerator(double theta, double distToPeg, double rotationToPeg) {	
 		if (futureAccelerators.length==0) {
+			
+			
 			if (Math.abs(((Math.PI/2)-theta))<=attackAngle) {
 				if (distToPeg<chargeDist) {
 					System.out.println("Navtest "+navSensor.getAngle());//TODO delete
-					futureAccelerators = new Accelerator[] {new RotationAccelerator(driveTrain, navSensor, rotationToPeg, .8), new EncoderAccelerator(driveTrain, motorsToLookAt, distToPeg+overChargeAmt, .8)};
+					futureAccelerators = new Accelerator[] {new RotationAccelerator(driveTrain, navSensor, Math.toDegrees(rotationToPeg), .8), new EncoderAccelerator(driveTrain, motorsToLookAt, distToPeg+overChargeAmt, .8)};
 				}
 			}
-		} else {
-			
 		}
 	}
 	
 	public Accelerator getNextAccelerator() {
 		//Just return the next accelerator in the sequence and update the sequence
+		if (futureAccelerators.length==0) return null;
 		
 		//make a new futureAccelerators that just doesn't have the first accelerator
 		//we will return that first accelerator so the robot can run it
@@ -72,6 +73,8 @@ public class GearStateMachine {
 		for (int i=1; i<futureAccelerators.length; i++) {
 			newFutureAccelerators[i-1] = futureAccelerators[i];
 		}
-		return futureAccelerators[0];
+		Accelerator ans = futureAccelerators[0]; //return the next accelerator in the sequence!
+		futureAccelerators = newFutureAccelerators;
+		return ans;
 	}
 }

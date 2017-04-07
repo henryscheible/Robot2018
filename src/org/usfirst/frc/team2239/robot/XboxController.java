@@ -42,6 +42,11 @@ public class XboxController extends GenericHID {
 		return station.getStickPOV(port, pov);
 	}
 	
+	//0 if nothing or top button //TODO fix
+	//2 if right
+	//4 if bottom
+	//6 if left
+	//in-between numbers are in-between
 	public int getSimplePOV() {
 		return this.getPOV()/45;
 	}

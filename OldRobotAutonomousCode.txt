@@ -1,0 +1,119 @@
+/*
+		Thinking for autonomous program
+		if (camera is working) {
+			run the camera auto chosen
+		} else {
+			run the non-camera auto chosen
+		}
+		
+		I should have 1 program that assumes
+		*the robot is in a position where it is looking at the tape
+		*/
+
+		
+		
+		
+		/* TODO delete
+		SmartDashboard.putNumber("Running", (int )(Math.random() * 100 + 1));
+		double[] areas = contoursTable.getNumberArray("area", defaultValue);
+		SmartDashboard.putNumber("Areas table length", areas.length);
+		System.out.print("areas:");
+		for (double area : areas) {
+			System.out.print(" area: ");
+			System.out.print(area);
+			SmartDashboard.putNumber("Area", area);
+		}
+		System.out.println();
+		*/
+		
+		System.out.println("Running autonomousPeriodic()");
+		
+		/*
+		if (autoStep==0) {
+			double[][] contourPropertyArrays = getDataFromGRIPContours(new String[] {"centerX", "centerY", "width", "height", "area"});
+			//double[][] blobPropertyArrays = getDataFromGRIPBlobs(new String[] {"x", "y"}); //only use if the contours fail
+			
+			//Get the contour objects 
+			Contour[] contours = getContours(contourPropertyArrays);
+			//Contour[] contours = getContours(contourPropertyArrays, blobPropertyArrays); //only use if the contours fail
+			System.out.println("contourAmount is: "+contours.length);
+			
+			if (contours.length==2) {
+				System.out.println("Found the tape!");
+				System.out.println(contours[0]);
+				System.out.println(contours[1]);
+				
+				//Sort contours so that the one on the left comes first
+				Arrays.sort(contours, new Comparator<Contour>() {
+				    public int compare(Contour c1, Contour c2) {
+				        return Double.compare(c1.x, c2.x);
+				    }
+				});
+				
+				double[] distanceToContours = new double[2];
+				
+				for (int i=0; i<2; i++) {
+					Contour contour = contours[i];
+					//getDistanceToTape(double pixelTapeHeight, double pixelScreenHeight, double realTapeHeight, double halfFov)
+					double distanceToContour = VisionHelper.getDistanceToTape(contour.h, pixelScreenHeight, realTapeHeight, halfYFov);
+					System.out.println("Distance to contour "+distanceToContour);
+					distanceToContours[i] = distanceToContour;
+				}
+				
+				
+				//static public double[] getPositionToGoal(double left, double right, double spread)
+				double[] positionToGoal = VisionHelper.getPositionToGoal(distanceToContours[0], distanceToContours[1], spread);
+				System.out.println("Position to goal: x: "+positionToGoal[0]+" y: "+positionToGoal[1]);
+				
+				double middleXPixel = contours[0].x+((contours[1].x-contours[0].x)/2); //the pixel that the peg should be at in the photo
+				
+				//static public double[] getValuesToPeg(double dx, double dy, double middleXPixel, double pixelScreenWidth, double halfXFov, double away)
+				double[] valuesToPeg = VisionHelper.getValuesToPeg(positionToGoal[0], positionToGoal[1], middleXPixel, pixelScreenWidth, halfXFov);
+				//ans[0] the angle to turn to point towards the target (radians)
+				//ans[1] the distance to travel to hit the target (inches)
+				//ans[2] the angle to turn to point towards the peg (radians)
+				//ans[3] theta: the angle from the wall to the peg to the robot
+				System.out.println("Angle to point towards the target: "+valuesToPeg[0]);
+				System.out.println("distance to travel to hit the target: "+valuesToPeg[1]);
+				System.out.println("the angle to turn to point towards the peg: "+valuesToPeg[2]);
+				System.out.println("Theta: "+Math.toDegrees(valuesToPeg[3]));
+				
+				testAngle = valuesToPeg[2];
+				testDistance = VisionHelper.getDistanceToGoal(positionToGoal[0], positionToGoal[1]);
+				testTheta = valuesToPeg[3];
+				
+				autoGear.computeNextAccelerator(valuesToPeg[3], VisionHelper.getDistanceToGoal(positionToGoal[0], positionToGoal[1]), valuesToPeg[2]);
+				accelerator = autoGear.getNextAccelerator();
+				if (accelerator!=null) autoStep = 1; //we have planned out our acceleration
+			
+			} else {
+				System.out.println("Did not find 2 countours.");
+			}
+		} else if (autoStep==1) {
+			System.out.println("printing test values: ");
+			System.out.println(Math.toDegrees(testAngle));
+			System.out.println(testDistance);
+			System.out.println(testTheta);
+			if (accelerator==null) {
+				accelerator = autoGear.getNextAccelerator();
+				if (accelerator==null) {
+					autoStep = 2; //done running
+					return;
+				}
+			}
+			runAccelerator(false);
+		}
+		
+		*/
+			
+		/*FRC default code - keep here for now
+		switch (autoSelected) {
+		case customAuto:
+			// Put custom auto code here
+			break;
+		case defaultAuto:
+		default:
+			// put custom default here
+			break;
+		}
+		*/

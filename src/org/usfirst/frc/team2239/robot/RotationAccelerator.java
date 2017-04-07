@@ -2,7 +2,7 @@ package org.usfirst.frc.team2239.robot;
 
 import com.kauailabs.navx.frc.AHRS;
 
-public class RotationAccelerator implements Accelerator {
+public class RotationAccelerator implements Action {
 	TechnoDrive driveTrain;
 	AHRS navSensor;
 	//the biggest values we're driving with i.e. tankDrive(-maxVelocity, maxVelocity).
@@ -32,7 +32,7 @@ public class RotationAccelerator implements Accelerator {
 	
 	//returns true if the rotation is complete
 	//returns false if the rotation is not complete
-	public boolean accelerate()
+	public boolean run()
 	{
 		System.out.println("Im actually rotating!");
 		double curAngle = getAngle();

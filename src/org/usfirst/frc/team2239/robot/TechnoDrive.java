@@ -21,6 +21,10 @@ public class TechnoDrive extends RobotDrive {
         super(new CANTalon(frontLeftMotor), new CANTalon(rearLeftMotor),
                 new CANTalon(frontRightMotor), new CANTalon(rearRightMotor)); //calls the RobotDrive constructor
     }
+    
+    public TechnoDrive(CANTalon frontLeftMotor, CANTalon rearLeftMotor, CANTalon frontRightMotor, CANTalon rearRightMotor) {
+        super(frontLeftMotor, rearLeftMotor, frontRightMotor, rearRightMotor); //calls the RobotDrive constructor
+    }
 
     public double[] getMotorValues() {
         return new double[] {super.m_rearLeftMotor.get(), -super.m_rearRightMotor.get()};
@@ -60,7 +64,6 @@ public class TechnoDrive extends RobotDrive {
 
     @Override
     public void tankDrive(double left, double right) {
-    	System.out.println("What the tankDrive is doing: " +left+ " " +right);
         tankDrive(left, right, true);
     }
 

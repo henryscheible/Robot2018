@@ -15,6 +15,8 @@ Radio Configuration:
 Need to be plugged into the robot via usb cable
 C:\Program Files (x86)\FRC Radio Configuration Utility\FRC Radio Configuration Utility.exe
 
+SmartDashboard (smart dashboard):
+C:\Users\hopki\wpilib\tools\
 
 Kangaroo:
 
@@ -46,6 +48,8 @@ Connect both computers to 2239 internet via wifi.
 ifconfig on kangaroo. Look at inet address. Type that into outline viewer and use host. (it's usually 10.22.39.14)
 ipconfig on windows computer. Look at IPv4 address. Type that into GRIP. (It's usually 10.22.39.82)
 Done.
+Once the Kangaroo is up and working, run C:\Users\hopki\wpilib\tools\OutlineViewer.jar
+Put in "roboRIO-2239-FRC.local" as host and then choose "client"
 
 Camera:
 Striped power cord = black = ground

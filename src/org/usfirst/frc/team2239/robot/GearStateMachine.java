@@ -5,7 +5,7 @@ import com.kauailabs.navx.frc.AHRS;
 
 public class GearStateMachine {
 	
-	public Accelerator[] futureAccelerators = new Accelerator[] {}; //TODO delete old comments about state
+	public Action[] futureActions = new Action[] {}; //TODO delete old comments about state
 	public double attackAngle = Math.toRadians(10); //Angle (radians) the physical robot must be within from the peg in order to start charging
 	public double chargeDist = 70; //Distance (inches) the physical robot must be within from the peg in order to start charging
 	public TechnoDrive driveTrain;
@@ -50,31 +50,31 @@ public class GearStateMachine {
 	//EncoderAccelerator (TechnoDrive driveTrain, CANTalon[] motorsToLookAt, double distance, double maxVelocity) {
 
 	
-	public void computeNextAccelerator(double theta, double distToPeg, double rotationToPeg) {	
-		if (futureAccelerators.length==0) {
+	public void computeNextAction(double theta, double distToPeg, double rotationToPeg) {	
+		if (futureActions.length==0) {
 			
 			
 			if (Math.abs(((Math.PI/2)-theta))<=attackAngle) {
 				if (distToPeg<chargeDist) {
 					System.out.println("Navtest "+navSensor.getAngle());//TODO delete
-					futureAccelerators = new Accelerator[] {new RotationAccelerator(driveTrain, navSensor, Math.toDegrees(rotationToPeg), .8), new EncoderAccelerator(driveTrain, motorsToLookAt, distToPeg+overChargeAmt, .8)};
+					futureActions = new Action[] {new RotationAccelerator(driveTrain, navSensor, Math.toDegrees(rotationToPeg), .8), new EncoderAccelerator(driveTrain, motorsToLookAt, distToPeg+overChargeAmt, .8)};
 				}
 			}
 		}
 	}
 	
-	public Accelerator getNextAccelerator() {
+	public Action getNextAction() {
 		//Just return the next accelerator in the sequence and update the sequence
-		if (futureAccelerators.length==0) return null;
+		if (futureActions.length==0) return null;
 		
 		//make a new futureAccelerators that just doesn't have the first accelerator
 		//we will return that first accelerator so the robot can run it
-		Accelerator[] newFutureAccelerators = new Accelerator[futureAccelerators.length-1];
-		for (int i=1; i<futureAccelerators.length; i++) {
-			newFutureAccelerators[i-1] = futureAccelerators[i];
+		Action[] newFutureActions = new Action[futureActions.length-1];
+		for (int i=1; i<futureActions.length; i++) {
+			newFutureActions[i-1] = futureActions[i];
 		}
-		Accelerator ans = futureAccelerators[0]; //return the next accelerator in the sequence!
-		futureAccelerators = newFutureAccelerators;
+		Action ans = futureActions[0]; //return the next accelerator in the sequence!
+		futureActions = newFutureActions;
 		return ans;
 	}
 }

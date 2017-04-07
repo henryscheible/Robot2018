@@ -11,7 +11,7 @@ package org.usfirst.frc.team2239.robot;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import java.util.Comparator;
 import java.util.Arrays;
-//import edu.wpi.first.wpilibj.smartdashboard.SendableChooser; //default FRC code; leave for now
+//import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.SPI;
@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
+import edu.wpi.first.wpilibj.CameraServer;
 
 
 
@@ -50,19 +51,22 @@ public class Robot extends IterativeRobot {
 	public static Robot instance;
     //from http://wpilib.screenstepslive.com/s/4485/m/26401/l/255419-choosing-an-autonomous-program-from-smartdashboard
 
-    public TechnoDrive drive;  // class that handles basic drive operations
+    
     public Timer timer; // Timer
     public XboxController controller; //Control for the robot
     public CANTalon climber;
     public Solenoid gearRelease;
     public Compressor myCompressor;
     public PowerDistributionPanel myPDP;
-    GearStateMachine autoGear;
+    public GearStateMachine autoGear;
+    public String defaultAutoName = "middle";
     
     int autoStep = 0; //0 if autonomous has not been planned, 1 if planned but not done, 2 if done
-    double testAngle = 0; //TODO delete
-    double testDistance = 0; //TODO delete
-    double testTheta = 0; //TODO delete
+    double autoVolts = 0;
+    double maxAutoVolts = .8;
+    //double testAngle = 0;
+    //double testDistance = 0;
+    //double testTheta = 0;
     
     /*FRC default code - keep here for now
 	final String defaultAuto = "Default";
@@ -75,15 +79,21 @@ public class Robot extends IterativeRobot {
 	int toggleAmt = 3; //how many different buttons are toggling
 	boolean[] toggleReadys = new boolean[toggleAmt]; //{speedToggleReady, gearToggleReady, turnToggle}
 	boolean gearOpen = false;
-	Accelerator accelerator = null;
+	Action curAction = null;
 	double speed = 1;
 	AccelerationHelper baseline;
 	//drive = new TechnoDrive(4,1,3,2);//small bot
-	CANTalon frontLeftMotor = new CANTalon(4);
-	CANTalon rearLeftMotor = new CANTalon(1);
-	CANTalon frontRightMotor = new CANTalon(3);
-	CANTalon rearRightMotor = new CANTalon(2);
-	CANTalon[] encoderMotors = new CANTalon[] {rearRightMotor};
+	//TODO make sure you change this for SpiderBot
+	CANTalon frontLeftMotor = new CANTalon(2);
+	CANTalon rearLeftMotor = new CANTalon(3);
+	CANTalon frontRightMotor = new CANTalon(1);
+	CANTalon rearRightMotor = new CANTalon(4);
+	CANTalon[] encoderMotors = new CANTalon[] {rearLeftMotor};
+	//TechnoDrive(int frontLeftMotor, int rearLeftMotor, int frontRightMotor, int rearRightMotor)
+	//TODO fix just testing
+	//public TechnoDrive drive = new TechnoDrive(2, 3, 1, 4);
+	public TechnoDrive drive = new TechnoDrive(frontLeftMotor, rearLeftMotor, frontRightMotor, rearRightMotor);  // class that handles basic drive operations
+	Boolean open = true;
 		
 	//This is the constructor. Whenever a new Robot object is made
 	//this is the function that will be called to make it
@@ -99,23 +109,19 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		System.out.println("Robot has started init!");
+		CameraServer.getInstance().startAutomaticCapture();
 		//Default all the "ready"s to true. No buttons should be pressed at the start, therefore all should be ready to be pressed.
 		for (int i=0; i<toggleReadys.length; i++) {
 			toggleReadys[i] = true;
 		}
 		
-		/*FRC default code - keep here for now
-		chooser.addDefault("Default Auto", defaultAuto);
-		chooser.addObject("My Auto", customAuto);
-		SmartDashboard.putData("Auto choices", chooser);
-		*/
 		
 		myCompressor = new Compressor(6); 
 		myCompressor.setClosedLoopControl(true);
 		//gearRelease = new Solenoid(CAN ID on dashboard, channel on PCM (what's it plugged into));
-		//gearRelease = new Solenoid(6, 0); //TODO SpiderBot
-		gearRelease = new Solenoid(7, 0);
-		gearRelease.set(false); //TODO figure out if false means closed or open
+		gearRelease = new Solenoid(6, 0);
+		//gearRelease = new Solenoid(7, 0); //practicebot
+		gearRelease.set(!open); //TODO figure out if false means closed or open
 		
 		
 		/*
@@ -128,8 +134,8 @@ public class Robot extends IterativeRobot {
 			5- Climber
 		*/
 		//public TechnoDrive(int frontLeftMotor, int rearLeftMotor, int frontRightMotor, int rearRightMotor)
-		//drive = new TechnoDrive(2, 3, 1, 4);//TODO SpiderBot
-		drive = new TechnoDrive(4,1,3,2);//small bot
+		//drive = new TechnoDrive(2, 3, 1, 4); //SpiderBot
+		//drive = new TechnoDrive(4,1,3,2);//small bot
 		timer = new Timer();
 		controller = new XboxController(0);
 		climber = new CANTalon(5);
@@ -141,9 +147,26 @@ public class Robot extends IterativeRobot {
 			DriverStation.reportError("Error instantiating navX-MXP: " + ex.getMessage(), true);
 		}
 		
+		//"movement name", inches
+		//9'6'' = 114'' from baseline to wall
+		//Robot is about 32''
+		//Want to travel 114-32+4
+		//Want it to be 4173 ticks
+		
+		SmartDashboard.putNumber("Forwards1", 90);
+		SmartDashboard.putNumber("Forwards2", 20);
+		SmartDashboard.putNumber("Forwards3", 20);
+		SmartDashboard.putNumber("Backwards1", 10);
+		SmartDashboard.putNumber("Turn1", 30);
+		SmartDashboard.putNumber("Turn2", -30);
+		SmartDashboard.putString("Auto", defaultAutoName);
+		
+		
+		
 		makeMotorsUseEncoders(encoderMotors);
 		
 		autoGear = new GearStateMachine(drive, navSensor, encoderMotors);
+		
 		System.out.println("Robot has finished init");
 	}
 
@@ -170,11 +193,52 @@ public class Robot extends IterativeRobot {
 		navSensor.reset();
 		
 		//TechnoDrive theRobot, double startTime, double distance, double maxVelocity
-		//baseline = new AccelerationHelper(drive, timer.get(), 167.0, .7); //The old timed acceleration //TODO delete once we get encoder acceleration to work 
-		timer.start(); //TODO delete once we get encoder working (though this may be useful to figure out when to do a last second charge)
+		//baseline = new AccelerationHelper(drive, timer.get(), 167.0, .7); //The old timed acceleration 
+		timer.start(); //should be deleted once we get encoder working (though this may be useful to figure out when to do a last second charge)
 		myCompressor.start();
 		//53.5 ticks per inch
-		//accelerator = new EncoderAccelerator(drive, new CANTalon[] {rearRightMotor}, 5350, .8);  //TODO delete (just testing right now)
+		
+		String auto = SmartDashboard.getString("Auto", defaultAutoName);
+		//Encoder: TechnoDrive driveTrain, CANTalon[] motorsToLookAt, double distance, double maxVelocity
+		//Rotation: TechnoDrive driveTrain, AHRS navSensor, double turnAngle, double maxVelocity
+		double forwardsMaxVolts = .8;
+		double backwardsMaxVolts = .8;
+		double turnMaxVolts = .8;
+		
+		if (auto.equals("middle")) {
+			System.out.println("auto picked: "+auto);
+			//new GearCollectorAction(gearRelease, open),
+			autoGear.futureActions = new Action[] {
+					new GearCollectorAction(gearRelease, open),
+					new EncoderAccelerator(drive, encoderMotors, 91, forwardsMaxVolts),
+					new GearCollectorAction(gearRelease, open),
+					new EncoderAccelerator(drive, encoderMotors, -10, backwardsMaxVolts)
+			};
+		} else if (auto.equals("right") || auto.equals("left")) {
+			//multiplied by the angles to flip the sign.
+			//1 if going for the right peg
+			//-1 if going for the left peg
+			int flipTurns = 1; 
+			if (auto.equals("left")) {
+				flipTurns = -1;
+			}
+			autoGear.futureActions = new Action[] {
+					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards1", 0), forwardsMaxVolts),
+					new RotationAccelerator(drive, navSensor, flipTurns*SmartDashboard.getNumber("Turn1", 0), turnMaxVolts),
+					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards2", 0), forwardsMaxVolts),
+					new RotationAccelerator(drive, navSensor, -flipTurns*SmartDashboard.getNumber("Turn2", 0), turnMaxVolts),
+					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards3", 0), forwardsMaxVolts),
+					new GearCollectorAction(gearRelease, open),
+					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Backwards1", 0), backwardsMaxVolts),
+			};
+			
+		} else if (auto.equals("baseline")) {
+			autoGear.futureActions = new Action[] {
+					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards1", 0), forwardsMaxVolts),
+			};
+		}
+		
+		curAction = null;
 	}
 
 	/**
@@ -184,130 +248,20 @@ public class Robot extends IterativeRobot {
 	
 	@Override
 	public void autonomousPeriodic() {
-		/*
-		Thinking for autonomous program
-		if (camera is working) {
-			run the camera auto chosen
-		} else {
-			run the non-camera auto chosen
-		}
-		
-		I should have 1 program that assumes
-		*the robot is in a position where it is looking at the tape
-		*/
-
-		
-		
-		
-		/* TODO delete
-		SmartDashboard.putNumber("Running", (int )(Math.random() * 100 + 1));
-		double[] areas = contoursTable.getNumberArray("area", defaultValue);
-		SmartDashboard.putNumber("Areas table length", areas.length);
-		System.out.print("areas:");
-		for (double area : areas) {
-			System.out.print(" area: ");
-			System.out.print(area);
-			SmartDashboard.putNumber("Area", area);
-		}
-		System.out.println();
-		*/
-		
-		System.out.println("Running autonomousPeriodic()");
-		
-		if (autoStep==0) {
-			double[][] contourPropertyArrays = getDataFromGRIPContours(new String[] {"centerX", "centerY", "width", "height", "area"});
-			//double[][] blobPropertyArrays = getDataFromGRIPBlobs(new String[] {"x", "y"}); //only use if the contours fail
-			
-			//Get the contour objects 
-			Contour[] contours = getContours(contourPropertyArrays);
-			//Contour[] contours = getContours(contourPropertyArrays, blobPropertyArrays); //only use if the contours fail
-			System.out.println("contourAmount is: "+contours.length);
-			
-			if (contours.length==2) {
-				System.out.println("Found the tape!");
-				System.out.println(contours[0]);
-				System.out.println(contours[1]);
-				
-				//Sort contours so that the one on the left comes first
-				Arrays.sort(contours, new Comparator<Contour>() {
-				    public int compare(Contour c1, Contour c2) {
-				        return Double.compare(c1.x, c2.x);
-				    }
-				});
-				
-				double[] distanceToContours = new double[2];
-				
-				for (int i=0; i<2; i++) {
-					Contour contour = contours[i];
-					//getDistanceToTape(double pixelTapeHeight, double pixelScreenHeight, double realTapeHeight, double halfFov)
-					double distanceToContour = VisionHelper.getDistanceToTape(contour.h, pixelScreenHeight, realTapeHeight, halfYFov);
-					System.out.println("Distance to contour "+distanceToContour);
-					distanceToContours[i] = distanceToContour;
-				}
-				
-				
-				//static public double[] getPositionToGoal(double left, double right, double spread)
-				double[] positionToGoal = VisionHelper.getPositionToGoal(distanceToContours[0], distanceToContours[1], spread);
-				System.out.println("Position to goal: x: "+positionToGoal[0]+" y: "+positionToGoal[1]);
-				
-				double middleXPixel = contours[0].x+((contours[1].x-contours[0].x)/2); //the pixel that the peg should be at in the photo
-				
-				//static public double[] getValuesToPeg(double dx, double dy, double middleXPixel, double pixelScreenWidth, double halfXFov, double away)
-				double[] valuesToPeg = VisionHelper.getValuesToPeg(positionToGoal[0], positionToGoal[1], middleXPixel, pixelScreenWidth, halfXFov);
-				//ans[0] the angle to turn to point towards the target (radians)
-				//ans[1] the distance to travel to hit the target (inches)
-				//ans[2] the angle to turn to point towards the peg (radians)
-				//ans[3] theta: the angle from the wall to the peg to the robot
-				System.out.println("Angle to point towards the target: "+valuesToPeg[0]);
-				System.out.println("distance to travel to hit the target: "+valuesToPeg[1]);
-				System.out.println("the angle to turn to point towards the peg: "+valuesToPeg[2]);
-				System.out.println("Theta: "+Math.toDegrees(valuesToPeg[3]));
-				
-				testAngle = valuesToPeg[2];
-				testDistance = VisionHelper.getDistanceToGoal(positionToGoal[0], positionToGoal[1]);
-				testTheta = valuesToPeg[3];
-				
-				autoGear.computeNextAccelerator(valuesToPeg[3], VisionHelper.getDistanceToGoal(positionToGoal[0], positionToGoal[1]), valuesToPeg[2]);
-				accelerator = autoGear.getNextAccelerator();
-				if (accelerator!=null) autoStep = 1; //we have planned out our acceleration
-			
-			} else {
-				System.out.println("Did not find 2 countours.");
+		if (curAction==null) {
+			curAction = autoGear.getNextAction();
+			if (curAction==null) {
+				return;
 			}
-		} else if (autoStep==1) {
-			System.out.println("printing test values: ");
-			System.out.println(Math.toDegrees(testAngle));
-			System.out.println(testDistance);
-			System.out.println(testTheta);
-			if (accelerator==null) {
-				accelerator = autoGear.getNextAccelerator();
-				if (accelerator==null) {
-					autoStep = 2; //done running
-					return;
-				}
-			}
-			runAccelerator(false);
 		}
-		
-			
-		/*FRC default code - keep here for now
-		switch (autoSelected) {
-		case customAuto:
-			// Put custom auto code here
-			break;
-		case defaultAuto:
-		default:
-			// put custom default here
-			break;
-		}
-		*/
+		runAction(false);
 	}
 
 	//Called in between the end of autonomous and the start of teleop
 	@Override
 	public void teleopInit() {
 		speed = 1;
-		accelerator = null;
+		curAction = null;
 	}
 	
 	/**
@@ -316,7 +270,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		System.out.println("Running teleop periodic!");
-		if (accelerator == null) {
+		if (curAction == null) {
 			System.out.println("auto accelerator is null");
 		}
 		
@@ -366,11 +320,11 @@ public class Robot extends IterativeRobot {
 			            case 1:
 			            	if (gearOpen) {
 			            		//TODO if these are changed, make sure the pipes are switched on SpiderBot
-				        		gearRelease.set(false); //close it //TODO make sure these are accurate
-				        		gearOpen = false;
+				        		gearRelease.set(!open); //close it //TODO make sure these are accurate
+				        		gearOpen = !open;
 				        	} else {
-				        		gearRelease.set(true); //open it
-				        		gearOpen = true;
+				        		gearRelease.set(open); //open it
+				        		gearOpen = open;
 				        	}
 			            	System.out.println("gearRelease is value is "+gearOpen); //TODO delete
 			            	break;
@@ -379,7 +333,7 @@ public class Robot extends IterativeRobot {
 			            	System.out.println("Starting a new rotation!");
 			            	double turnAngle = 180;
 			            	//public RotationAccelerationHelper (TechnoDrive driveTrain, AHRS navSensor, double turnAngle, double maxVelocity) 
-			            	accelerator = new RotationAccelerator(drive, navSensor, turnAngle, .8);
+			            	curAction = new RotationAccelerator(drive, navSensor, turnAngle, .8);
 			            	break;
 			            	
 			            	
@@ -398,7 +352,14 @@ public class Robot extends IterativeRobot {
       
       SmartDashboard.putBoolean("Turn is triggered", triggers[2]);
         
-      runAccelerator();
+      runAction();
+    
+    if (controller.getRawButton(2)) {
+    	climber.set(1);
+    } else {
+    	climber.set(0);
+    }
+      
       
     //Up=0, up-right = 1, right = 2. Goes to 7.
     int POV = controller.getSimplePOV();
@@ -414,7 +375,7 @@ public class Robot extends IterativeRobot {
 	}
 	
 	public void disabledInit() {
-		accelerator = null;
+		curAction = null;
 	}
 	
 	//TODO set values to 0 to start match
@@ -431,18 +392,19 @@ public class Robot extends IterativeRobot {
 		}
 	}
 	
-	public void runAccelerator(boolean teleop) {
-		if (accelerator != null) {
-        	if (teleop && controller.getSimplePOV()==3){ //If the button that cancels the turn is pressed then cancel the turn.
-        		accelerator = null;
+	public void runAction(boolean teleop) {
+		System.out.println("POV: "+controller.getSimplePOV());
+		if (curAction != null) {
+        	if (teleop && controller.getSimplePOV()==2){ //If the button that cancels the turn is pressed then cancel the turn.
+        		curAction = null;
         	} else {
         		System.out.println("I'm going to move autonomously!"); //If we don't tell the robot not to turn, it turns. This isn't rocket science.
         		boolean doneYet;
         		System.out.println("Running accel in runAccelerator()");
-        		doneYet = accelerator.accelerate();
+        		doneYet = curAction.run();
         		if (doneYet) {
         			System.out.println("Accelerator has finished. Stopping it.");
-        			accelerator = null;
+        			curAction = null;
         		} else {
         			System.out.println("Accelerator not finished yet.");
         		}
@@ -452,8 +414,8 @@ public class Robot extends IterativeRobot {
         }
 	}
 	
-	public void runAccelerator() {
-		runAccelerator(true);
+	public void runAction() {
+		runAction(true);
 	}
 	
 	//get the requested values from the contours table posted by GRIP

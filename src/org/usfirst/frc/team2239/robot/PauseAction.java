@@ -5,25 +5,25 @@ import edu.wpi.first.wpilibj.Timer;
 public class PauseAction implements Action {
 
 	public Timer timer;
-	double timerTarget;
-	public boolean timerOn = false;
+	public double targetTime;
+	public boolean timerRunning = false;
 	
-	//how many seconds to pause for
 	public PauseAction(double time) {
-		timerTarget = time;
+		this.targetTime = time;
 	}
 	
 	@Override
 	public boolean run() {
-		if (timerOn) {
-			if (timer.get()<timerTarget) {
-				return false;
-			} else {
+		if (timerRunning) {
+			if (timer.get()>=targetTime) {
+				timer.stop(); //Don't need the timer running anymore
 				return true;
+			} else {
+				return false;
 			}
 		} else {
 			timer.start();
-			timerOn = true;
+			timerRunning = true;
 			return false;
 		}
 	}

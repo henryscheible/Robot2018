@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.DriverStation;
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
+import com.ctre.CANTalon.TalonControlMode;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.Compressor;
@@ -54,11 +55,11 @@ public class Robot extends IterativeRobot {
     
     public Timer timer; // Timer
     public XboxController controller; //Control for the robot
-    public CANTalon climber;
-    public Solenoid gearRelease;
-    public Compressor myCompressor;
+//    public CANTalon climber;
+//    public Solenoid gearRelease;
+//    public Compressor myCompressor;
     public PowerDistributionPanel myPDP;
-    public GearStateMachine autoGear;
+//    public GearStateMachine autoGear;
     public String defaultAutoName = "middle";
     
     int autoStep = 0; //0 if autonomous has not been planned, 1 if planned but not done, 2 if done
@@ -84,15 +85,17 @@ public class Robot extends IterativeRobot {
 	AccelerationHelper baseline;
 	//drive = new TechnoDrive(4,1,3,2);//small bot
 	//TODO make sure you change this for SpiderBot
-	CANTalon frontLeftMotor = new CANTalon(2);
-	CANTalon rearLeftMotor = new CANTalon(3);
-	CANTalon frontRightMotor = new CANTalon(1);
-	CANTalon rearRightMotor = new CANTalon(4);
-	CANTalon[] encoderMotors = new CANTalon[] {rearLeftMotor};
+	CANTalon leftFollowerMotor2 = new CANTalon(5);//6
+	CANTalon leftFollowerMotor1 = new CANTalon(3);//4
+	CANTalon rightFollowerMotor2 = new CANTalon(6);//5
+	CANTalon rightFollowerMotor1 = new CANTalon(4);//3
+	CANTalon leftLeaderMotor = new CANTalon(1);//2
+	CANTalon rightLeaderMotor = new CANTalon(2);//1
+	//CANTalon[] encoderMotors = new CANTalon[] {rearLeftMotor};
 	//TechnoDrive(int frontLeftMotor, int rearLeftMotor, int frontRightMotor, int rearRightMotor)
 	//TODO fix just testing
 	//public TechnoDrive drive = new TechnoDrive(2, 3, 1, 4);
-	public TechnoDrive drive = new TechnoDrive(frontLeftMotor, rearLeftMotor, frontRightMotor, rearRightMotor);  // class that handles basic drive operations
+	public TechnoDrive drive = new TechnoDrive(leftLeaderMotor, rightLeaderMotor);  // class that handles basic drive operations
 	Boolean open = true;
 		
 	//This is the constructor. Whenever a new Robot object is made
@@ -109,20 +112,22 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		System.out.println("Robot has started init!");
-		CameraServer.getInstance().startAutomaticCapture();
-		//Default all the "ready"s to true. No buttons should be pressed at the start, therefore all should be ready to be pressed.
+		
+		//CameraServer.getInstance().startAutomaticCapture();
+		
+ 		//Default all the "ready"s to true. No buttons should be pressed at the start, therefore all should be ready to be pressed.
 		for (int i=0; i<toggleReadys.length; i++) {
 			toggleReadys[i] = true;
 		}
 		
 		
-		myCompressor = new Compressor(6); 
-		myCompressor.setClosedLoopControl(true);
-		//gearRelease = new Solenoid(CAN ID on dashboard, channel on PCM (what's it plugged into));
-		gearRelease = new Solenoid(6, 0);
-		//gearRelease = new Solenoid(7, 0); //practicebot
-		gearRelease.set(!open); //TODO figure out if false means closed or open
-		
+//		myCompressor = new Compressor(6); 
+//		myCompressor.setClosedLoopControl(true);
+//		//gearRelease = new Solenoid(CAN ID on dashboard, channel on PCM (what's it plugged into));
+//		gearRelease = new Solenoid(6, 0); //TODO SpiderBot
+//		//gearRelease = new Solenoid(7, 0); //practicebot
+//		gearRelease.set(!open); //TODO figure out if false means closed or open
+//		
 		
 		/*
 		MOTORS:
@@ -138,7 +143,7 @@ public class Robot extends IterativeRobot {
 		//drive = new TechnoDrive(4,1,3,2);//small bot
 		timer = new Timer();
 		controller = new XboxController(0);
-		climber = new CANTalon(5);
+//		climber = new CANTalon(5);
 		myPDP = new PowerDistributionPanel();
 		//myPDP.getVoltage();
 		try {
@@ -163,11 +168,20 @@ public class Robot extends IterativeRobot {
 		
 		
 		
-		makeMotorsUseEncoders(encoderMotors);
+		//makeMotorsUseEncoders(encoderMotors);
+		initFollower(rightLeaderMotor, rightFollowerMotor1);
+		initFollower(rightLeaderMotor, rightFollowerMotor2);
+		initFollower(leftLeaderMotor, leftFollowerMotor1);
+		initFollower(leftLeaderMotor, leftFollowerMotor2);
 		
-		autoGear = new GearStateMachine(drive, navSensor, encoderMotors);
+		//autoGear = new GearStateMachine(drive, navSensor, encoderMotors);
 		
 		System.out.println("Robot has finished init");
+	}
+	
+	public void initFollower(CANTalon leader, CANTalon follower) {
+		follower.changeControlMode(TalonControlMode.Follower);
+		follower.set(leader.getDeviceID());
 	}
 
 	/**
@@ -182,61 +196,64 @@ public class Robot extends IterativeRobot {
 	 * SendableChooser make sure to add them to the chooser code above as well.
 	 */
 	
-	
+
 	@Override
 	public void autonomousInit() {
+
 		/* default FRC code; leave it for now
 		autoSelected = chooser.getSelected();
 		autoSelected = SmartDashboard.getString("Auto Selector", defaultAuto);
 		System.out.println("Auto selected: " + autoSelected);
 		*/
+	
 		navSensor.reset();
 		
 		//TechnoDrive theRobot, double startTime, double distance, double maxVelocity
 		//baseline = new AccelerationHelper(drive, timer.get(), 167.0, .7); //The old timed acceleration 
-		timer.start(); //should be deleted once we get encoder working (though this may be useful to figure out when to do a last second charge)
-		myCompressor.start();
+		//myCompressor.start();
 		//53.5 ticks per inch
 		
-		String auto = SmartDashboard.getString("Auto", defaultAutoName);
-		//Encoder: TechnoDrive driveTrain, CANTalon[] motorsToLookAt, double distance, double maxVelocity
-		//Rotation: TechnoDrive driveTrain, AHRS navSensor, double turnAngle, double maxVelocity
-		double forwardsMaxVolts = .8;
-		double backwardsMaxVolts = .8;
-		double turnMaxVolts = .8;
+//		String auto = SmartDashboard.getString("Auto", defaultAutoName);
+//		//Encoder: TechnoDrive driveTrain, CANTalon[] motorsToLookAt, double distance, double maxVelocity
+//		//Rotation: TechnoDrive driveTrain, AHRS navSensor, double turnAngle, double maxVelocity
+//		double forwardsMaxVolts = .8;
+//		double backwardsMaxVolts = .8;
+//		double turnMaxVolts = .8;
+//		
+//		autoVolts = 0;
+//		maxAutoVolts = .7;
 		
-		if (auto.equals("middle")) {
-			System.out.println("auto picked: "+auto);
-			//new GearCollectorAction(gearRelease, open),
-			autoGear.futureActions = new Action[] {
-					new GearCollectorAction(gearRelease, open),
-					new EncoderAccelerator(drive, encoderMotors, 91, forwardsMaxVolts),
-					new GearCollectorAction(gearRelease, open),
-					new EncoderAccelerator(drive, encoderMotors, -10, backwardsMaxVolts)
-			};
-		} else if (auto.equals("right") || auto.equals("left")) {
-			//multiplied by the angles to flip the sign.
-			//1 if going for the right peg
-			//-1 if going for the left peg
-			int flipTurns = 1; 
-			if (auto.equals("left")) {
-				flipTurns = -1;
-			}
-			autoGear.futureActions = new Action[] {
-					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards1", 0), forwardsMaxVolts),
-					new RotationAccelerator(drive, navSensor, flipTurns*SmartDashboard.getNumber("Turn1", 0), turnMaxVolts),
-					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards2", 0), forwardsMaxVolts),
-					new RotationAccelerator(drive, navSensor, -flipTurns*SmartDashboard.getNumber("Turn2", 0), turnMaxVolts),
-					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards3", 0), forwardsMaxVolts),
-					new GearCollectorAction(gearRelease, open),
-					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Backwards1", 0), backwardsMaxVolts),
-			};
-			
-		} else if (auto.equals("baseline")) {
-			autoGear.futureActions = new Action[] {
-					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards1", 0), forwardsMaxVolts),
-			};
-		}
+//		if (auto.equals("middle")) {
+//			System.out.println("auto picked: "+auto);
+//			autoGear.futureActions = new Action[] {
+//					new GearCollectorAction(gearRelease, open),
+//					new EncoderAccelerator(drive, encoderMotors, 89, forwardsMaxVolts),
+//					new GearCollectorAction(gearRelease, open),
+//					new EncoderAccelerator(drive, encoderMotors, -10, backwardsMaxVolts)
+//			};
+//		} else if (auto.equals("right") || auto.equals("left")) {
+//			//multiplied by the angles to flip the sign.
+//			//1 if going for the right peg
+//			//-1 if going for the left peg
+//			int flipTurns = 1; 
+//			if (auto.equals("left")) {
+//				flipTurns = -1;
+//			}
+//			autoGear.futureActions = new Action[] {
+//					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards1", 0), forwardsMaxVolts),
+//					new RotationAccelerator(drive, navSensor, flipTurns*SmartDashboard.getNumber("Turn1", 0), turnMaxVolts),
+//					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards2", 0), forwardsMaxVolts),
+//					new RotationAccelerator(drive, navSensor, -flipTurns*SmartDashboard.getNumber("Turn2", 0), turnMaxVolts),
+//					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards3", 0), forwardsMaxVolts),
+//					new GearCollectorAction(gearRelease, open),
+//					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Backwards1", 0), backwardsMaxVolts),
+//			};
+//			
+//		} else if (auto.equals("baseline")) {
+//			autoGear.futureActions = new Action[] {
+//					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards1", 0), forwardsMaxVolts),
+//			};
+//		}
 		
 		curAction = null;
 	}
@@ -246,16 +263,17 @@ public class Robot extends IterativeRobot {
 	 */
 	
 	
-	@Override
-	public void autonomousPeriodic() {
-		if (curAction==null) {
-			curAction = autoGear.getNextAction();
-			if (curAction==null) {
-				return;
-			}
-		}
-		runAction(false);
-	}
+//	@Override
+//	public void autonomousPeriodic() {
+//		if (curAction==null) {
+//			curAction = autoGear.getNextAction();
+//			if (curAction==null) {
+//				return;
+//			}
+//		}
+//		runAction(false);
+//	}
+//	
 
 	//Called in between the end of autonomous and the start of teleop
 	@Override
@@ -274,12 +292,12 @@ public class Robot extends IterativeRobot {
 			System.out.println("auto accelerator is null");
 		}
 		
-		System.out.println("How fast the rearRightMotor is going: "+rearRightMotor.getEncVelocity());
-		System.out.println("How far the rearRightMotor has gone: "+rearRightMotor.getEncPosition());
-		
-		System.out.println("How fast the rearLeftMotor is going: "+rearLeftMotor.getEncVelocity());
-		System.out.println("How far the rearLeftMotor has gone: "+rearLeftMotor.getEncPosition());
-		
+//		System.out.println("How fast the rearRightMotor is going: "+rearRightMotor.getEncVelocity());
+//		System.out.println("How far the rearRightMotor has gone: "+rearRightMotor.getEncPosition());
+//		
+//		System.out.println("How fast the rearLeftMotor is going: "+rearLeftMotor.getEncVelocity());
+//		System.out.println("How far the rearLeftMotor has gone: "+rearLeftMotor.getEncPosition());
+//		
 		//SmartDashboard.putBoolean("Trigger", toggleReadys[0]); //TODO uncomment        
      
         boolean[] triggers = new boolean[toggleAmt];
@@ -317,25 +335,25 @@ public class Robot extends IterativeRobot {
 	         	        	}
 	         	        	break;
 		         	    
-			            case 1:
-			            	if (gearOpen) {
-			            		//TODO if these are changed, make sure the pipes are switched on SpiderBot
-				        		gearRelease.set(!open); //close it //TODO make sure these are accurate
-				        		gearOpen = !open;
-				        	} else {
-				        		gearRelease.set(open); //open it
-				        		gearOpen = open;
-				        	}
-			            	System.out.println("gearRelease is value is "+gearOpen); //TODO delete
-			            	break;
-        
-			            case 2:
-			            	System.out.println("Starting a new rotation!");
-			            	double turnAngle = 180;
-			            	//public RotationAccelerationHelper (TechnoDrive driveTrain, AHRS navSensor, double turnAngle, double maxVelocity) 
-			            	curAction = new RotationAccelerator(drive, navSensor, turnAngle, .8);
-			            	break;
-			            	
+//			            case 1:
+//			            	if (gearOpen) {
+//			            		//TODO if these are changed, make sure the pipes are switched on SpiderBot
+//				        		gearRelease.set(!open); //close it //TODO make sure these are accurate
+//				        		gearOpen = !open;
+//				        	} else {
+//				        		gearRelease.set(open); //open it
+//				        		gearOpen = open;
+//				        	}
+//			            	System.out.println("gearRelease is value is "+gearOpen); //TODO delete
+//			            	break;
+//        
+//			            case 2:
+//			            	System.out.println("Starting a new rotation!");
+//			            	double turnAngle = 180;
+//			            	//public RotationAccelerationHelper (TechnoDrive driveTrain, AHRS navSensor, double turnAngle, double maxVelocity) 
+//			            	curAction = new RotationAccelerator(drive, navSensor, turnAngle, .8);
+//			            	break;
+//			            	
 			            	
 			            default:
 			            	break; //we are no longer using this toggle button
@@ -353,13 +371,13 @@ public class Robot extends IterativeRobot {
       SmartDashboard.putBoolean("Turn is triggered", triggers[2]);
         
       runAction();
-    
-    if (controller.getRawButton(2)) {
-    	climber.set(1);
-    } else {
-    	climber.set(0);
-    }
-      
+//    
+//    if (controller.getRawButton(2)) {
+//    	climber.set(1);
+//    } else {
+//    	climber.set(0);
+//    }
+//      
       
     //Up=0, up-right = 1, right = 2. Goes to 7.
     int POV = controller.getSimplePOV();
@@ -378,19 +396,19 @@ public class Robot extends IterativeRobot {
 		curAction = null;
 	}
 	
-	//TODO set values to 0 to start match
-	public void makeMotorsUseEncoders(CANTalon[] motors) {
-		for (CANTalon motor : motors) {
-			motor.setFeedbackDevice(FeedbackDevice.QuadEncoder); //Set the feedback device that is hooked up to the talon
-			motor.setPID(0.5, 0.001, 0.0); //Set the PID constants (p, i, d)
-			motor.enableControl(); //Enable PID control on the talon
-			//Notes from Trent
-			//p helps you get there if you're not getting there
-			//d helps you limit oscillation
-			//f is feedforward which gives you a push
-			//i you don't really use much
-		}
-	}
+//	//TODO set values to 0 to start match
+//	public void makeMotorsUseEncoders(CANTalon[] motors) {
+//		for (CANTalon motor : motors) {
+//			motor.setFeedbackDevice(FeedbackDevice.QuadEncoder); //Set the feedback device that is hooked up to the talon
+//			motor.setPID(0.5, 0.001, 0.0); //Set the PID constants (p, i, d)
+//			motor.enableControl(); //Enable PID control on the talon
+//			//Notes from Trent
+//			//p helps you get there if you're not getting there
+//			//d helps you limit oscillation
+//			//f is feedforward which gives you a push
+//			//i you don't really use much
+//		}
+//	}
 	
 	public void runAction(boolean teleop) {
 		System.out.println("POV: "+controller.getSimplePOV());

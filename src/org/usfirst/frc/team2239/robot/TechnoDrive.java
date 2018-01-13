@@ -25,11 +25,16 @@ public class TechnoDrive extends RobotDrive {
     public TechnoDrive(CANTalon frontLeftMotor, CANTalon rearLeftMotor, CANTalon frontRightMotor, CANTalon rearRightMotor) {
         super(frontLeftMotor, rearLeftMotor, frontRightMotor, rearRightMotor); //calls the RobotDrive constructor
     }
-
+    
+    public TechnoDrive(CANTalon leftMotor, CANTalon rightMotor){
+    	super(leftMotor, rightMotor);
+    }
+    
     public double[] getMotorValues() {
         return new double[] {super.m_rearLeftMotor.get(), -super.m_rearRightMotor.get()};
     }
-
+    
+    
     /*
      * Goal: Write a program to ramp up at acceleration until halfway there, and then ramp down afterwards
      * 
@@ -70,7 +75,7 @@ public class TechnoDrive extends RobotDrive {
     @Override
     public void tankDrive(double left, double right, boolean squared) {
     	System.out.println("What the tankDrive is doing: " +left+ " " +right);
-        super.tankDrive(left, right, squared);
+        super.tankDrive(-left, -right, squared);
     }
     
     public void tankDrive(XboxController controller, double speed) {

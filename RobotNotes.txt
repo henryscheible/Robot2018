@@ -114,6 +114,7 @@ How to configure network settings on the Robot's wifi network:
 11: Left click the 'Subnet Mask:' box
 12: Left click 'OK'
 You have now configured your network settings for the roboRIO network. Have a nice day
+If you would like to disconnect (i.e. use the normal internet) just choose to have it automatically choose an IP address and DNS server address.
 
 
 Random robot notes:

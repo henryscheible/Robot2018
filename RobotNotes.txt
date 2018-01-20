@@ -66,13 +66,13 @@ Copy what files you need. Then try combinations of "pull...", "fetch from upstre
 Then paste your files back in and commit.
 
 How to upload project:
-Right click Robot2017>>Team>>Commit
+Right click Robot2018>>Team>>Commit
 Drag the files from unstaged changes to staged changes
 Type a commit message.
 Commit if you just want to store it on your computer. Commit and push if you want to do both.
 
 How to revert back to old version:
-Right click on project (Robot2017)
+Right click on project (Robot2018)
 Team>>Show in History
 Find the revision you want. Right-click it and rebase. You will need to redownload the current version.
 There may be a way to look at the code without having to redownload everything.
@@ -118,4 +118,3 @@ If you would like to disconnect (i.e. use the normal internet) just choose to ha
 
 
 Random robot notes:
-18 and 7/8 is how off the ground we are.

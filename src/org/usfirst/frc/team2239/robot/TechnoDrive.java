@@ -1,8 +1,8 @@
 package org.usfirst.frc.team2239.robot;
 
-import com.ctre.CANTalon;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 /**
  * Utility for driving the robot
@@ -10,30 +10,15 @@ import edu.wpi.first.wpilibj.RobotDrive;
  *
  * Author: Dean Bassett and London Lowmanstone
  */
-public class TechnoDrive extends RobotDrive {
+
+
+public class TechnoDrive extends DifferentialDrive {
     public static final double MAIN_SPEED = 1;
-
-    public TechnoDrive(int leftMotorChannel, int rightMotorChannel) {
-        super(new CANTalon(leftMotorChannel), new CANTalon(rightMotorChannel));
-    }
-
-    public TechnoDrive(int frontLeftMotor, int rearLeftMotor, int frontRightMotor, int rearRightMotor) {
-        super(new CANTalon(frontLeftMotor), new CANTalon(rearLeftMotor),
-                new CANTalon(frontRightMotor), new CANTalon(rearRightMotor)); //calls the RobotDrive constructor
-    }
     
-    public TechnoDrive(CANTalon frontLeftMotor, CANTalon rearLeftMotor, CANTalon frontRightMotor, CANTalon rearRightMotor) {
-        super(frontLeftMotor, rearLeftMotor, frontRightMotor, rearRightMotor); //calls the RobotDrive constructor
+//
+    public TechnoDrive(SpeedControllerGroup left, SpeedControllerGroup right) {
+    	super(left, right);
     }
-    
-    public TechnoDrive(CANTalon leftMotor, CANTalon rightMotor){
-    	super(leftMotor, rightMotor);
-    }
-    
-    public double[] getMotorValues() {
-        return new double[] {super.m_rearLeftMotor.get(), -super.m_rearRightMotor.get()};
-    }
-    
     
     /*
      * Goal: Write a program to ramp up at acceleration until halfway there, and then ramp down afterwards
@@ -55,8 +40,9 @@ public class TechnoDrive extends RobotDrive {
     	tankDrive(mySpeed, mySpeed);
     	return mySpeed;
     }
-    
-    @Override
+
+  
+ 
     public void tankDrive(GenericHID leftStick, GenericHID rightStick) {
         if (leftStick == null || rightStick == null) {
             throw new NullPointerException("Null HID provided");

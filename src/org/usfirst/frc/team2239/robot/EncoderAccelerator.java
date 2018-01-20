@@ -1,14 +1,17 @@
 package org.usfirst.frc.team2239.robot;
 
-import com.ctre.CANTalon;
-import com.ctre.CANTalon.FeedbackDevice; //TODO delete if not needed
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 //TODO finish documentation and changing this from rotationAccelerator into the EncoderAccelerator
 //TODO upgrade (this is just something that doesn't need to be done, but would make the program better.) Make a Accelerator class or framework that both of these are just versions of.
 
 public class EncoderAccelerator implements Action {
+	
+	private static int ENCODER_CLOSED_LOOP_PRIMARY = 0;
+	private static int ENCODER_CLOSED_LOOP_CASCADING = 1;
+	
 	TechnoDrive driveTrain;
-	CANTalon[] valueMotors;
+	TalonSRX[] valueMotors;
 	//the biggest values we're driving with i.e. tankDrive(-maxVelocity, maxVelocity).
 	//Must be in between -1 and 1. Negative if going counter-clockwise
 	double maxVelocity;
@@ -25,7 +28,7 @@ public class EncoderAccelerator implements Action {
 	boolean forward; //true if we should be moving forwards, false otherwise (still or moving backwards)	
 	
 	
-	public EncoderAccelerator (TechnoDrive driveTrain, CANTalon[] motorsToLookAt, double distance, double maxVelocity) {
+	public EncoderAccelerator (TechnoDrive driveTrain, TalonSRX[] motorsToLookAt, double distance, double maxVelocity) {
 		this.forward = (distance>0);
 		this.driveTrain = driveTrain;
 		this.valueMotors = motorsToLookAt;
@@ -88,12 +91,13 @@ public class EncoderAccelerator implements Action {
 		driveTrain.tankDrive(curVelocity, curVelocity); //actually drive
 		return false;
 	}
-	
+
 	public double getEncoderValue() {
 		//TODO don't just average - also check to see if any of the encoders are way off or may be broken and ignore those ones.
 		double sum = 0;
-		for (CANTalon motor : this.valueMotors) {
-			sum+=motor.getEncPosition();
+		for (TalonSRX motor : this.valueMotors) {
+			
+			sum+=motor.getSelectedSensorPosition(ENCODER_CLOSED_LOOP_PRIMARY);
 		}
 		double avg = sum/this.valueMotors.length; //compute the average encoder value
 		System.out.println("the average encoder values from sensors: " + avg);

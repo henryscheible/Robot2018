@@ -1,6 +1,6 @@
 package org.usfirst.frc.team2239.robot;
 
-import com.ctre.CANTalon;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
 
 public class GearStateMachine {
@@ -10,10 +10,10 @@ public class GearStateMachine {
 	public double chargeDist = 70; //Distance (inches) the physical robot must be within from the peg in order to start charging
 	public TechnoDrive driveTrain;
 	public AHRS navSensor;
-	public CANTalon[] motorsToLookAt;
+	public TalonSRX[] motorsToLookAt;
 	public double overChargeAmt = -5; //How many inches it should try to overcharge when placing a gear
 	
-	public GearStateMachine(TechnoDrive driveTrain, AHRS navSensor, CANTalon[] motorsToLookAt) {
+	public GearStateMachine(TechnoDrive driveTrain, AHRS navSensor, TalonSRX[] motorsToLookAt) {
 		this.driveTrain = driveTrain;
 		this.navSensor = navSensor;
 		System.out.println("Navtest "+this.navSensor.getAngle());//TODO delete
@@ -50,19 +50,19 @@ public class GearStateMachine {
 	//EncoderAccelerator (TechnoDrive driveTrain, CANTalon[] motorsToLookAt, double distance, double maxVelocity) {
 
 	
-	public void computeNextAction(double theta, double distToPeg, double rotationToPeg) {	
-		if (futureActions.length==0) {
-			
-			
-			if (Math.abs(((Math.PI/2)-theta))<=attackAngle) {
-				if (distToPeg<chargeDist) {
-					System.out.println("Navtest "+navSensor.getAngle());//TODO delete
-					futureActions = new Action[] {new RotationAccelerator(driveTrain, navSensor, Math.toDegrees(rotationToPeg), .8), new EncoderAccelerator(driveTrain, motorsToLookAt, distToPeg+overChargeAmt, .8)};
-				}
-			}
-		}
-	}
-	
+//	public void computeNextAction(double theta, double distToPeg, double rotationToPeg) {	
+//		if (futureActions.length==0) {
+//			
+//			
+//			if (Math.abs(((Math.PI/2)-theta))<=attackAngle) {
+//				if (distToPeg<chargeDist) {
+//					System.out.println("Navtest "+navSensor.getAngle());//TODO delete
+//					futureActions = new Action[] {new RotationAccelerator(driveTrain, navSensor, Math.toDegrees(rotationToPeg), .8), new EncoderAccelerator(driveTrain, motorsToLookAt, distToPeg+overChargeAmt, .8)};
+//				}
+//			}
+//		}
+//	}
+//	
 	public Action getNextAction() {
 		//Just return the next accelerator in the sequence and update the sequence
 		if (futureActions.length==0) return null;

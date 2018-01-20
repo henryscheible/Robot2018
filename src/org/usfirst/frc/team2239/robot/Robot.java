@@ -1,5 +1,11 @@
 package org.usfirst.frc.team2239.robot;
 
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.kauailabs.navx.frc.AHRS;
+
+import edu.wpi.first.wpilibj.DriverStation;
+
 /*
  * Jess controls:
  * Left on arrows should do 180 degree turn
@@ -9,22 +15,14 @@ package org.usfirst.frc.team2239.robot;
 //TODO double check for double imports
 //TODO check for unused imports (don't just delete them; think about if what was using them is missing)
 import edu.wpi.first.wpilibj.IterativeRobot;
-import java.util.Comparator;
-import java.util.Arrays;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
+import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 //import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.DriverStation;
-import com.ctre.CANTalon;
-import com.ctre.CANTalon.FeedbackDevice;
-import com.ctre.CANTalon.TalonControlMode;
-import com.kauailabs.navx.frc.AHRS;
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
-import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.PowerDistributionPanel;
-import edu.wpi.first.wpilibj.CameraServer;
 
 
 
@@ -55,8 +53,8 @@ public class Robot extends IterativeRobot {
     
     public Timer timer; // Timer
     public XboxController controller; //Control for the robot
-//    public CANTalon climber;
-//    public Solenoid gearRelease;
+//    public TalonSRX climber;
+      public Solenoid gearRelease;
 //    public Compressor myCompressor;
     public PowerDistributionPanel myPDP;
 //    public GearStateMachine autoGear;
@@ -85,17 +83,23 @@ public class Robot extends IterativeRobot {
 	AccelerationHelper baseline;
 	//drive = new TechnoDrive(4,1,3,2);//small bot
 	//TODO make sure you change this for SpiderBot
-	CANTalon leftFollowerMotor2 = new CANTalon(5);//6
-	CANTalon leftFollowerMotor1 = new CANTalon(3);//4
-	CANTalon rightFollowerMotor2 = new CANTalon(6);//5
-	CANTalon rightFollowerMotor1 = new CANTalon(4);//3
-	CANTalon leftLeaderMotor = new CANTalon(1);//2
-	CANTalon rightLeaderMotor = new CANTalon(2);//1
-	//CANTalon[] encoderMotors = new CANTalon[] {rearLeftMotor};
-	//TechnoDrive(int frontLeftMotor, int rearLeftMotor, int frontRightMotor, int rearRightMotor)
-	//TODO fix just testing
-	//public TechnoDrive drive = new TechnoDrive(2, 3, 1, 4);
-	public TechnoDrive drive = new TechnoDrive(leftLeaderMotor, rightLeaderMotor);  // class that handles basic drive operations
+//	void MotorGroupLeft(leftMotor1 leftMotor2 leftMotor3);
+//	MotorGroupRight(rightMotor2, rightMotor2, rightMotor3);
+	
+	WPI_TalonSRX leftFollowerMotor2 = new 	WPI_TalonSRX(5);
+	WPI_TalonSRX leftFollowerMotor1 = new 	WPI_TalonSRX(3);
+	WPI_TalonSRX rightFollowerMotor1 = new 	WPI_TalonSRX(6);
+	WPI_TalonSRX rightFollowerMotor2 = new 	WPI_TalonSRX(4);
+	WPI_TalonSRX leftLeaderMotor = new 	WPI_TalonSRX(1);
+	WPI_TalonSRX rightLeaderMotor = new WPI_TalonSRX(2);
+//	3s are old lead motors
+	SpeedControllerGroup left = new SpeedControllerGroup(leftLeaderMotor, leftFollowerMotor1, leftFollowerMotor2);
+	SpeedControllerGroup right = new SpeedControllerGroup(rightLeaderMotor, rightFollowerMotor1, rightFollowerMotor2);
+
+	
+	
+//	TODO fix just testing
+	TechnoDrive drive = new TechnoDrive(left, right);  // class that handles basic drive operations
 	Boolean open = true;
 		
 	//This is the constructor. Whenever a new Robot object is made
@@ -123,10 +127,10 @@ public class Robot extends IterativeRobot {
 		
 //		myCompressor = new Compressor(6); 
 //		myCompressor.setClosedLoopControl(true);
-//		//gearRelease = new Solenoid(CAN ID on dashboard, channel on PCM (what's it plugged into));
-//		gearRelease = new Solenoid(6, 0); //TODO SpiderBot
-//		//gearRelease = new Solenoid(7, 0); //practicebot
-//		gearRelease.set(!open); //TODO figure out if false means closed or open
+		// gearRelease = new Solenoid(CAN ID on dashboard, channel on PCM (what's it plugged into));
+		gearRelease = new Solenoid(8, 0); //TODO SpiderBot
+		//gearRelease = new Solenoid(7, 0); //practicebot
+		gearRelease.set(!open); //TODO figure out if false means closed or open
 //		
 		
 		/*
@@ -143,7 +147,7 @@ public class Robot extends IterativeRobot {
 		//drive = new TechnoDrive(4,1,3,2);//small bot
 		timer = new Timer();
 		controller = new XboxController(0);
-//		climber = new CANTalon(5);
+//		climber = new TalonSRX(5);
 		myPDP = new PowerDistributionPanel();
 		//myPDP.getVoltage();
 		try {
@@ -169,20 +173,23 @@ public class Robot extends IterativeRobot {
 		
 		
 		//makeMotorsUseEncoders(encoderMotors);
-		initFollower(rightLeaderMotor, rightFollowerMotor1);
-		initFollower(rightLeaderMotor, rightFollowerMotor2);
-		initFollower(leftLeaderMotor, leftFollowerMotor1);
-		initFollower(leftLeaderMotor, leftFollowerMotor2);
+//		initFollower(rightLeaderMotor, rightFollowerMotor1);
+//		initFollower(rightLeaderMotor, rightFollowerMotor2);
+//		initFollower(leftLeaderMotor, leftFollowerMotor1);
+//		initFollower(leftLeaderMotor, leftFollowerMotor2);
 		
 		//autoGear = new GearStateMachine(drive, navSensor, encoderMotors);
 		
 		System.out.println("Robot has finished init");
 	}
 	
-	public void initFollower(CANTalon leader, CANTalon follower) {
-		follower.changeControlMode(TalonControlMode.Follower);
-		follower.set(leader.getDeviceID());
-	}
+//	public void initFollower(TalonSRX leader, TalonSRX follower) {
+//		follower.changeControlMode(TalonControlMode.Follower);
+//		follower.set(leader.getDeviceID());
+//	}
+	//leader and slave code
+	
+	
 
 	/**
 	 * This autonomous (along with the chooser code above) shows how to select
@@ -214,7 +221,7 @@ public class Robot extends IterativeRobot {
 		//53.5 ticks per inch
 		
 //		String auto = SmartDashboard.getString("Auto", defaultAutoName);
-//		//Encoder: TechnoDrive driveTrain, CANTalon[] motorsToLookAt, double distance, double maxVelocity
+//		//Encoder: TechnoDrive driveTrain, TalonSRX[] motorsToLookAt, double distance, double maxVelocity
 //		//Rotation: TechnoDrive driveTrain, AHRS navSensor, double turnAngle, double maxVelocity
 //		double forwardsMaxVolts = .8;
 //		double backwardsMaxVolts = .8;
@@ -335,17 +342,17 @@ public class Robot extends IterativeRobot {
 	         	        	}
 	         	        	break;
 		         	    
-//			            case 1:
-//			            	if (gearOpen) {
-//			            		//TODO if these are changed, make sure the pipes are switched on SpiderBot
-//				        		gearRelease.set(!open); //close it //TODO make sure these are accurate
-//				        		gearOpen = !open;
-//				        	} else {
-//				        		gearRelease.set(open); //open it
-//				        		gearOpen = open;
-//				        	}
-//			            	System.out.println("gearRelease is value is "+gearOpen); //TODO delete
-//			            	break;
+			            case 1:
+			            	if (gearOpen) {
+			            		//TODO if these are changed, make sure the pipes are switched on SpiderBot
+				        		gearRelease.set(!open); //close it //TODO make sure these are accurate
+				        		gearOpen = !open;
+				        	} else {
+				        		gearRelease.set(open); //open it
+				        		gearOpen = open;
+				        	}
+			            	System.out.println("gearRelease is value is "+gearOpen); //TODO delete
+			            	break;
 //        
 //			            case 2:
 //			            	System.out.println("Starting a new rotation!");
@@ -397,8 +404,8 @@ public class Robot extends IterativeRobot {
 	}
 	
 //	//TODO set values to 0 to start match
-//	public void makeMotorsUseEncoders(CANTalon[] motors) {
-//		for (CANTalon motor : motors) {
+//	public void makeMotorsUseEncoders(TalonSRX[] motors) {
+//		for (TalonSRX motor : motors) {
 //			motor.setFeedbackDevice(FeedbackDevice.QuadEncoder); //Set the feedback device that is hooked up to the talon
 //			motor.setPID(0.5, 0.001, 0.0); //Set the PID constants (p, i, d)
 //			motor.enableControl(); //Enable PID control on the talon
@@ -596,5 +603,7 @@ public class Robot extends IterativeRobot {
 		}
 		return new int[] {index1, index2};
 	}
+
+
 	
 }

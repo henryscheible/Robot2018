@@ -1,9 +1,9 @@
 package org.usfirst.frc.team2239.robot;
 
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DriverStation;
 
 /*
@@ -36,6 +36,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * directory.
  */
 public class Robot extends IterativeRobot {
+	private static final double NORMAL_POWER_LEVEL = 0.8;
+	private static final double AUTONOMOUS_POWER_LEVEL = 0.7;
+	private static final double TICKS_PER_INCH = 81.5;
+	private static final double FORWARD_ONE = 130;
 	NetworkTable table;
 	NetworkTable contoursTable;
 	NetworkTable blobsTable; 
@@ -55,9 +59,9 @@ public class Robot extends IterativeRobot {
     public XboxController controller; //Control for the robot
 //    public TalonSRX climber;
       public Solenoid gearRelease;
-//    public Compressor myCompressor;
+      public Compressor myCompressor;
     public PowerDistributionPanel myPDP;
-//    public GearStateMachine autoGear;
+    public GearStateMachine autoGear;
     public String defaultAutoName = "middle";
     
     int autoStep = 0; //0 if autonomous has not been planned, 1 if planned but not done, 2 if done
@@ -88,14 +92,15 @@ public class Robot extends IterativeRobot {
 	
 	WPI_TalonSRX leftFollowerMotor2 = new 	WPI_TalonSRX(5);
 	WPI_TalonSRX leftFollowerMotor1 = new 	WPI_TalonSRX(3);
-	WPI_TalonSRX rightFollowerMotor1 = new 	WPI_TalonSRX(6);
-	WPI_TalonSRX rightFollowerMotor2 = new 	WPI_TalonSRX(4);
+	WPI_TalonSRX rightFollowerMotor2 = new 	WPI_TalonSRX(6);
+	WPI_TalonSRX rightFollowerMotor1 = new 	WPI_TalonSRX(4);
 	WPI_TalonSRX leftLeaderMotor = new 	WPI_TalonSRX(1);
 	WPI_TalonSRX rightLeaderMotor = new WPI_TalonSRX(2);
+	
 //	3s are old lead motors
 	SpeedControllerGroup left = new SpeedControllerGroup(leftLeaderMotor, leftFollowerMotor1, leftFollowerMotor2);
 	SpeedControllerGroup right = new SpeedControllerGroup(rightLeaderMotor, rightFollowerMotor1, rightFollowerMotor2);
-
+	WPI_TalonSRX[] encoderMotors = new WPI_TalonSRX[] {leftLeaderMotor, rightLeaderMotor};
 	
 	
 //	TODO fix just testing
@@ -125,7 +130,7 @@ public class Robot extends IterativeRobot {
 		}
 		
 		
-//		myCompressor = new Compressor(6); 
+		myCompressor = new Compressor(6); 
 //		myCompressor.setClosedLoopControl(true);
 		// gearRelease = new Solenoid(CAN ID on dashboard, channel on PCM (what's it plugged into));
 		gearRelease = new Solenoid(8, 0); //TODO SpiderBot
@@ -214,39 +219,56 @@ public class Robot extends IterativeRobot {
 		*/
 	
 		navSensor.reset();
+		// reset nav sensor position to zero
 		
-		//TechnoDrive theRobot, double startTime, double distance, double maxVelocity
-		//baseline = new AccelerationHelper(drive, timer.get(), 167.0, .7); //The old timed acceleration 
-		//myCompressor.start();
-		//53.5 ticks per inch
+		TechnoDrive theRobot;
+		double startTime;
+		double distance;
+		double maxVelocity;
+		baseline = new AccelerationHelper(drive, timer.get(), 167.0, .7); //The old timed acceleration 
+		myCompressor.start();
+		//53.5 ticks per inch old conversion
+
+		//diameter/tickrate*pi= .0122718463 inches per tick
+		//ticks per inch*(diameter*pi/4)=0.26987199534
+		//ticks per inch 81.5
+		//TICKS_PER_INCH
 		
-//		String auto = SmartDashboard.getString("Auto", defaultAutoName);
-//		//Encoder: TechnoDrive driveTrain, TalonSRX[] motorsToLookAt, double distance, double maxVelocity
-//		//Rotation: TechnoDrive driveTrain, AHRS navSensor, double turnAngle, double maxVelocity
-//		double forwardsMaxVolts = .8;
-//		double backwardsMaxVolts = .8;
-//		double turnMaxVolts = .8;
-//		
+		
+		String auto = SmartDashboard.getString("Auto", defaultAutoName);
+		//Encoder: TechnoDrive driveTrain, TalonSRX[] motorsToLookAt, double distance, double maxVelocity
+		//Rotation: TechnoDrive driveTrain, AHRS navSensor, double turnAngle, double maxVelocity
+		double forwardsMaxVolts = NORMAL_POWER_LEVEL;
+		double backwardsMaxVolts = NORMAL_POWER_LEVEL;
+		double turnMaxVolts = NORMAL_POWER_LEVEL;
+		//.8 = 80% power
+		
 //		autoVolts = 0;
-//		maxAutoVolts = .7;
+//		maxAutoVolts = AUTO_POWER_LEVEL;
+		//drive at 70% speed
 		
-//		if (auto.equals("middle")) {
-//			System.out.println("auto picked: "+auto);
-//			autoGear.futureActions = new Action[] {
-//					new GearCollectorAction(gearRelease, open),
-//					new EncoderAccelerator(drive, encoderMotors, 89, forwardsMaxVolts),
-//					new GearCollectorAction(gearRelease, open),
-//					new EncoderAccelerator(drive, encoderMotors, -10, backwardsMaxVolts)
-//			};
-//		} else if (auto.equals("right") || auto.equals("left")) {
-//			//multiplied by the angles to flip the sign.
-//			//1 if going for the right peg
-//			//-1 if going for the left peg
-//			int flipTurns = 1; 
-//			if (auto.equals("left")) {
-//				flipTurns = -1;
-//			}
-//			autoGear.futureActions = new Action[] {
+
+		
+		if (auto.equals("middle")) {
+			System.out.println("auto picked: "+auto);
+			autoGear.futureActions = new Action[] {
+					new GearCollectorAction(gearRelease, open),
+					new EncoderAccelerator(drive, encoderMotors, 89, forwardsMaxVolts),
+		//89 ticks forward
+					new EncoderAccelerator(drive, encoderMotors, -10, backwardsMaxVolts)
+		//10 ticks back
+			};
+		} else if (auto.equals("right") || auto.equals("left")) {
+			//multiplied by the angles to flip the sign.
+			//1 if going for the right peg
+			//-1 if going for the left peg
+			int flipTurns = 1; 
+			if (auto.equals("left")) {
+				flipTurns = -1;
+		//making it left if its not right
+			}
+			autoGear.futureActions = new Action[] {
+					new EncoderAccelerator(drive, encoderMotors, FORWARD_ONE, forwardsMaxVolts),
 //					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards1", 0), forwardsMaxVolts),
 //					new RotationAccelerator(drive, navSensor, flipTurns*SmartDashboard.getNumber("Turn1", 0), turnMaxVolts),
 //					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards2", 0), forwardsMaxVolts),
@@ -254,13 +276,15 @@ public class Robot extends IterativeRobot {
 //					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards3", 0), forwardsMaxVolts),
 //					new GearCollectorAction(gearRelease, open),
 //					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Backwards1", 0), backwardsMaxVolts),
-//			};
-//			
-//		} else if (auto.equals("baseline")) {
-//			autoGear.futureActions = new Action[] {
-//					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards1", 0), forwardsMaxVolts),
-//			};
-//		}
+		//takes numbers from the smart dashboard to tell the robot how far to do each command
+			};
+			
+		} else if (auto.equals("baseline")) {
+			autoGear.futureActions = new Action[] {
+					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards1", 0), forwardsMaxVolts),
+		//command for if we dont need to deliver and just move forward to past baseline
+			};
+		}
 		
 		curAction = null;
 	}
@@ -286,6 +310,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopInit() {
 		speed = 1;
+		//return speed to max
 		curAction = null;
 	}
 	

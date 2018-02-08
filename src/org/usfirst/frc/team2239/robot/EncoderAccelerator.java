@@ -25,7 +25,7 @@ public class EncoderAccelerator implements Action {
 	double tolerance = 20; //How close (in ticks) to the final destination should you get before stopping (should not be 0. Perfection is impossible.)
 	double moveTicks; //how much to move, in inches (positive means forwards)
 	//with 107 ticksPerInch, this thing tried to go 10 inches and instead went 22
-	double ticksPerInch = 48.55; //used to be 53.5 on the practice bot
+	double ticksPerInch = 81.5; //used to be 53.5 on the practice bot
 	double targetDistance; //the encoder value we aspire to be at when done.
 	double maxVelocityTicks = 2000; //The ticks traveled at which we start to decrease velocity at //always positive
 	boolean forward; //true if we should be moving forwards, false otherwise (still or moving backwards)	

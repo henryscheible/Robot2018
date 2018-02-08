@@ -1,5 +1,7 @@
 package org.usfirst.frc.team2239.robot;
 
+import java.util.ArrayList;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
 
@@ -40,9 +42,12 @@ public class Robot extends IterativeRobot {
 	private static final double AUTONOMOUS_POWER_LEVEL = 0.7;
 	private static final double TICKS_PER_INCH = 81.5;
 	private static final double FORWARD_ONE = 130;
-	NetworkTable table;
-	NetworkTable contoursTable;
-	NetworkTable blobsTable; 
+	private static final boolean GOING_TO_GO_FOR_QUEST = true;
+			//true is left false is right
+	
+//	NetworkTable table;
+//	NetworkTable contoursTable;
+//	NetworkTable blobsTable; 
 	final double halfYFov = Math.toRadians(32.5)/2.0; //half the vertical field of vision (radians) //fiddleable (you can change this value for calibration)
 	final double halfXFov = Math.toRadians(60)/2.0; //half the horizontal field of vision (radians) //fiddleable
 	final double realTapeHeight = 5; //height of the strip of tape (inches)
@@ -55,6 +60,8 @@ public class Robot extends IterativeRobot {
     //from http://wpilib.screenstepslive.com/s/4485/m/26401/l/255419-choosing-an-autonomous-program-from-smartdashboard
 
     
+	private boolean field_data = true;
+	private boolean goingForMiddle = true;
     public Timer timer; // Timer
     public XboxController controller; //Control for the robot
 //    public TalonSRX climber;
@@ -109,10 +116,10 @@ public class Robot extends IterativeRobot {
 		
 	//This is the constructor. Whenever a new Robot object is made
 	//this is the function that will be called to make it
-	public Robot() {
-		contoursTable = NetworkTable.getTable("GRIP/myContoursReport");
-		blobsTable = NetworkTable.getTable("GRIP/myBlobsReport");
-	}
+//	public Robot() {
+//		contoursTable = NetworkTable.getTable("GRIP/myContoursReport");
+//		blobsTable = NetworkTable.getTable("GRIP/myBlobsReport");
+//	}
 	
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -167,13 +174,14 @@ public class Robot extends IterativeRobot {
 		//Want to travel 114-32+4
 		//Want it to be 4173 ticks
 		
-		SmartDashboard.putNumber("Forwards1", 90);
-		SmartDashboard.putNumber("Forwards2", 20);
+		SmartDashboard.putNumber("Forwards1", 192);
+		SmartDashboard.putNumber("Forwards2", 264);
 		SmartDashboard.putNumber("Forwards3", 20);
 		SmartDashboard.putNumber("Backwards1", 10);
-		SmartDashboard.putNumber("Turn1", 30);
+		SmartDashboard.putNumber("Turn1", 90);
 		SmartDashboard.putNumber("Turn2", -30);
 		SmartDashboard.putString("Auto", defaultAutoName);
+		
 		
 		
 		
@@ -207,7 +215,102 @@ public class Robot extends IterativeRobot {
 	 * switch structure below with additional strings. If using the
 	 * SendableChooser make sure to add them to the chooser code above as well.
 	 */
-	
+	public Action[] getScenarioLeftClear() {
+		Action[] actions = new Action[2];
+		actions[0] = new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards1", 0), NORMAL_POWER_LEVEL);
+		actions[1] = new RotationAccelerator(drive, navSensor, SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
+		return actions;
+	}
+ 	public Action[] getScenarioLeftGet() {
+
+ 		Action[] actions = new Action[4];
+// 		actions.add(new RotationAccelerator(drive, navSensor, SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL));
+ 		actions[0] = new RotationAccelerator(drive, navSensor, SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
+ 		actions[1] = new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards2", 0), NORMAL_POWER_LEVEL);
+ 		actions[2] = new RotationAccelerator(drive, navSensor, -1 * SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
+ 		actions[3] = new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards1", 0), NORMAL_POWER_LEVEL);
+ 		//TODO add raise lift command
+ 		//TODO add open lift command
+// 		return (Action[]) actions.toArray();
+ 		return actions;
+ 	}
+ 	public Action[] getScenarioRightClear() {
+ 		Action[] actions = new Action[2];
+ 		actions[0] = new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards1", 0), NORMAL_POWER_LEVEL);
+ 		actions[1] = new RotationAccelerator(drive, navSensor, -1 * SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
+		return actions;
+ 	}
+ 	public Action[] getScenarioRightGet() {
+ 		Action[] actions = new Action[4];
+ 		actions[0] = new RotationAccelerator(drive, navSensor, -1 * SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
+ 		actions[1] = new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards2", 0), NORMAL_POWER_LEVEL);
+ 		actions[2] = new RotationAccelerator(drive, navSensor, SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
+ 		actions[3] = new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards1", 0), NORMAL_POWER_LEVEL);
+ 		//TODO add raise lift command
+ 		//TODO add open lift command
+ 		return actions;
+ 	}
+ 	public Action[] getScenarioMiddleLeftClear() {
+ 		Action[] actions = new Action[4];
+ 		actions[0] = new RotationAccelerator(drive, navSensor, -1 * SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
+ 		actions[1] = new EncoderAccelerator(drive, encoderMotors, 0.5 * SmartDashboard.getNumber("Forward2", 0), NORMAL_POWER_LEVEL);
+ 		actions[2] = new RotationAccelerator(drive, navSensor, SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
+ 		actions[3] = new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forward1", 0), NORMAL_POWER_LEVEL);
+ 		return actions;
+ 	}
+ 	public Action[] getScenarioMiddleRightClear() {
+ 		Action[] actions = new Action[4];
+ 		actions[0] = new RotationAccelerator(drive, navSensor, SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
+ 		actions[1] = new EncoderAccelerator(drive, encoderMotors, 0.5 * SmartDashboard.getNumber("Forward2", 0), NORMAL_POWER_LEVEL);
+ 		actions[2] = new RotationAccelerator(drive, navSensor, -1 * SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
+ 		actions[3] = new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forward1", 0), NORMAL_POWER_LEVEL);
+ 		return actions;
+ 	}
+ 	public Action[] getScenarioMiddleGetLeft() {
+ 		Action[] actions = new Action[4];
+ 		actions[0] = new RotationAccelerator(drive, navSensor, SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
+ 		actions[1] = new EncoderAccelerator(drive, encoderMotors, 0.5 * SmartDashboard.getNumber("Forward2", 0), NORMAL_POWER_LEVEL);
+ 		actions[2] = new RotationAccelerator(drive, navSensor, -1 * SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
+ 		actions[3] = new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forward1", 0), NORMAL_POWER_LEVEL);
+ 		//TODO add raise lift command
+ 		//TODO add open lift command
+ 		return actions;	
+ 	}
+ 		public Action[] getScenarioMiddleGetRight() {
+ 		Action[] actions = new Action[4];
+ 		actions[0] = new RotationAccelerator(drive, navSensor,-1 * SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
+ 		actions[1] = new EncoderAccelerator(drive, encoderMotors, 0.5 * SmartDashboard.getNumber("Forward2", 0), NORMAL_POWER_LEVEL);
+ 		actions[2] = new RotationAccelerator(drive, navSensor, SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
+ 		actions[3] = new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forward1", 0), NORMAL_POWER_LEVEL);
+ 		//TODO add raise lift command
+ 		//TODO add open lift command
+ 		return actions;
+ 		}{
+ 		 		
+//		navSensor.reset();
+//		
+//		if (field_data = true){
+//			
+//			new EncoderAccelerator(drive, encoderMotors, INCHES_BEFORE_TURN_FOR_SIDE_AUTONOMOUS, NORMAL_POWER_LEVEL);
+//			
+//		}else{
+//			
+//		}
+//		return new Action[] {
+	//			new EncoderAccelerator(drive, encoderMotors, FORWARD_ONE, NORMAL_POWER_LEVEL),
+//				new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards1", 0), forwardsMaxVolts),
+//				new RotationAccelerator(drive, navSensor, flipTurns*SmartDashboard.getNumber("Turn1", 0), turnMaxVolts),
+//				new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards2", 0), forwardsMaxVolts),
+//				new RotationAccelerator(drive, navSensor, -flipTurns*SmartDashboard.getNumber("Turn2", 0), turnMaxVolts),
+//				new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards3", 0), forwardsMaxVolts),
+//				new GearCollectorAction(gearRelease, open),
+//				new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Backwards1", 0), backwardsMaxVolts),
+	//takes numbers from the SmartDashboard to tell the robot how far to do each command
+		
+		
+		navSensor.reset();
+		
+	}
 
 	@Override
 	public void autonomousInit() {
@@ -221,26 +324,26 @@ public class Robot extends IterativeRobot {
 		navSensor.reset();
 		// reset nav sensor position to zero
 		
-		TechnoDrive theRobot;
-		double startTime;
-		double distance;
-		double maxVelocity;
-		baseline = new AccelerationHelper(drive, timer.get(), 167.0, .7); //The old timed acceleration 
+//		TechnoDrive theRobot;
+//		double startTime;
+//		double distance;
+//		double maxVelocity;
 		myCompressor.start();
 		//53.5 ticks per inch old conversion
 
 		//diameter/tickrate*pi= .0122718463 inches per tick
 		//ticks per inch*(diameter*pi/4)=0.26987199534
-		//ticks per inch 81.5
+		//ticks per inch 
+		
 		//TICKS_PER_INCH
 		
 		
 		String auto = SmartDashboard.getString("Auto", defaultAutoName);
 		//Encoder: TechnoDrive driveTrain, TalonSRX[] motorsToLookAt, double distance, double maxVelocity
 		//Rotation: TechnoDrive driveTrain, AHRS navSensor, double turnAngle, double maxVelocity
-		double forwardsMaxVolts = NORMAL_POWER_LEVEL;
-		double backwardsMaxVolts = NORMAL_POWER_LEVEL;
-		double turnMaxVolts = NORMAL_POWER_LEVEL;
+//		double forwardsMaxVolts = NORMAL_POWER_LEVEL;
+//		double backwardsMaxVolts = NORMAL_POWER_LEVEL;
+//		double turnMaxVolts = NORMAL_POWER_LEVEL;
 		//.8 = 80% power
 		
 //		autoVolts = 0;
@@ -249,43 +352,39 @@ public class Robot extends IterativeRobot {
 		
 
 		
-		if (auto.equals("middle")) {
+		if (auto.equals("right")) {
 			System.out.println("auto picked: "+auto);
-			autoGear.futureActions = new Action[] {
-					new GearCollectorAction(gearRelease, open),
-					new EncoderAccelerator(drive, encoderMotors, 89, forwardsMaxVolts),
-		//89 ticks forward
-					new EncoderAccelerator(drive, encoderMotors, -10, backwardsMaxVolts)
-		//10 ticks back
-			};
-		} else if (auto.equals("right") || auto.equals("left")) {
-			//multiplied by the angles to flip the sign.
-			//1 if going for the right peg
-			//-1 if going for the left peg
-			int flipTurns = 1; 
-			if (auto.equals("left")) {
-				flipTurns = -1;
-		//making it left if its not right
-			}
-			autoGear.futureActions = new Action[] {
-					new EncoderAccelerator(drive, encoderMotors, FORWARD_ONE, forwardsMaxVolts),
-//					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards1", 0), forwardsMaxVolts),
-//					new RotationAccelerator(drive, navSensor, flipTurns*SmartDashboard.getNumber("Turn1", 0), turnMaxVolts),
-//					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards2", 0), forwardsMaxVolts),
-//					new RotationAccelerator(drive, navSensor, -flipTurns*SmartDashboard.getNumber("Turn2", 0), turnMaxVolts),
-//					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards3", 0), forwardsMaxVolts),
-//					new GearCollectorAction(gearRelease, open),
-//					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Backwards1", 0), backwardsMaxVolts),
-		//takes numbers from the smart dashboard to tell the robot how far to do each command
-			};
 			
-		} else if (auto.equals("baseline")) {
-			autoGear.futureActions = new Action[] {
-					new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards1", 0), forwardsMaxVolts),
-		//command for if we dont need to deliver and just move forward to past baseline
-			};
+			if (field_data == true){
+				autoGear.futureActions = getScenarioRightClear();			
+			} else  {
+				autoGear.futureActions = getScenarioRightGet();
+			}
+			if (auto.equals("left")) {
+				System.out.println("auto picked: "+auto);
+			
+				if (field_data == true) {
+					autoGear.futureActions = getScenarioLeftGet();
+				} else {
+					autoGear.futureActions = getScenarioLeftClear();
+				}			
+			
+			}
+			if (auto.equals("middle") && goingForMiddle == true) {
+				if (field_data == true){
+					autoGear.futureActions = getScenarioMiddleGetLeft();
+				} else {
+					autoGear.futureActions = getScenarioMiddleGetRight();
+				}	
+			}
+			if (auto.equals("middle") && goingForMiddle != true){
+				if (field_data == true){
+					autoGear.futureActions = getScenarioMiddleRightClear();
+				} else {
+					autoGear.futureActions = getScenarioMiddleLeftClear();
+				}
+			}
 		}
-		
 		curAction = null;
 	}
 
@@ -294,17 +393,18 @@ public class Robot extends IterativeRobot {
 	 */
 	
 	
-//	@Override
-//	public void autonomousPeriodic() {
-//		if (curAction==null) {
-//			curAction = autoGear.getNextAction();
-//			if (curAction==null) {
-//				return;
-//			}
-//		}
-//		runAction(false);
-//	}
-//	
+	@Override
+	public void autonomousPeriodic() {
+		if (curAction==null) {
+			curAction = autoGear.getNextAction();
+			if (curAction==null) {
+				return;
+			}
+		}
+		runAction(false);
+	}
+	
+	
 
 	//Called in between the end of autonomous and the start of teleop
 	@Override
@@ -322,6 +422,7 @@ public class Robot extends IterativeRobot {
 		System.out.println("Running teleop periodic!");
 		if (curAction == null) {
 			System.out.println("auto accelerator is null");
+			//if no action, set accelerator to null
 		}
 		
 //		System.out.println("How fast the rearRightMotor is going: "+rearRightMotor.getEncVelocity());
@@ -437,7 +538,7 @@ public class Robot extends IterativeRobot {
 //			//Notes from Trent
 //			//p helps you get there if you're not getting there
 //			//d helps you limit oscillation
-//			//f is feedforward which gives you a push
+//			//f is feed forward which gives you a push
 //			//i you don't really use much
 //		}
 //	}
@@ -468,41 +569,47 @@ public class Robot extends IterativeRobot {
 		runAction(true);
 	}
 	
+	
+	
+	
+	//everything below is vision code
+	
+	
 	//get the requested values from the contours table posted by GRIP
-	public double[][] getDataFromGRIPContours(String[] propertiesToGet) {
-		double[][] ans = new double[propertiesToGet.length][];
-		for (int i=0; i<propertiesToGet.length; i++) {
-			String property = propertiesToGet[i];
-			System.out.print("Getting new data!!");
-			double[] propertyArray = contoursTable.getNumberArray(property, new double[0]);
-			System.out.print("Got a propertyArray "+property+": ");
-			for (double value : propertyArray) {
-				System.out.print(" value: ");
-				System.out.print(value);
-			}
-			ans[i] = propertyArray;
-			System.out.println();
-		}
-		return ans;
-	}
+//	public double[][] getDataFromGRIPContours(String[] propertiesToGet) {
+//		double[][] ans = new double[propertiesToGet.length][];
+//		for (int i=0; i<propertiesToGet.length; i++) {
+//			String property = propertiesToGet[i];
+//			System.out.print("Getting new data!!");
+//			double[] propertyArray = contoursTable.getNumberArray(property, new double[0]);
+//			System.out.print("Got a propertyArray "+property+": ");
+//			for (double value : propertyArray) {
+//				System.out.print(" value: ");
+//				System.out.print(value);
+//			}
+//			ans[i] = propertyArray;
+//			System.out.println();
+//		}
+//		return ans;
+//	}
 
 	//get the values we can from blobs
 	//This is a workaround since GRIP wasn't giving us all the values we wanted
-	public double[][] getDataFromGRIPBlobs(String[] propertiesToGet) {
-		double[][] ans = new double[propertiesToGet.length][];
-		for (int i=0; i<propertiesToGet.length; i++) {
-			String property = propertiesToGet[i];
-			double[] propertyArray = blobsTable.getNumberArray(property, new double[0]);
-			System.out.print("Got a propertyArray "+property+": ");
-			for (double value : propertyArray) {
-				System.out.print(" value: ");
-				System.out.print(value);
-			}
-			ans[i] = propertyArray;
-			System.out.println();
-		}
-		return ans;
-	}
+//	public double[][] getDataFromGRIPBlobs(String[] propertiesToGet) {
+//		double[][] ans = new double[propertiesToGet.length][];
+//		for (int i=0; i<propertiesToGet.length; i++) {
+//			String property = propertiesToGet[i];
+//			double[] propertyArray = blobsTable.getNumberArray(property, new double[0]);
+//			System.out.print("Got a propertyArray "+property+": ");
+//			for (double value : propertyArray) {
+//				System.out.print(" value: ");
+//				System.out.print(value);
+//			}
+//			ans[i] = propertyArray;
+//			System.out.println();
+//		}
+//		return ans;
+//	}
 	
 	//Take all the data from GRIP and return the tape contours.
 	//This is where finding the tape (and ignoring other things, including the peg covering the tape) takes place.

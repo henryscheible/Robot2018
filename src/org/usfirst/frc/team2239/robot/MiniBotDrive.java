@@ -1,8 +1,8 @@
 package org.usfirst.frc.team2239.robot;
 
-import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.VictorSP;
 
 public class MiniBotDrive extends RobotDrive {
 	//Just a comment to show github //TODO delete

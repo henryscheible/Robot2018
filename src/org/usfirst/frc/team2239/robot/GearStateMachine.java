@@ -62,10 +62,11 @@ public class GearStateMachine {
 //			}
 //		}
 //	}
-//	
+	
 	public Action getNextAction() {
 		//Just return the next accelerator in the sequence and update the sequence
 		if (futureActions.length==0) return null;
+		// if no farther to move return null
 		
 		//make a new futureAccelerators that just doesn't have the first accelerator
 		//we will return that first accelerator so the robot can run it

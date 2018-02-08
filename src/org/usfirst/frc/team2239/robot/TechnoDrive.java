@@ -66,10 +66,13 @@ public class TechnoDrive extends DifferentialDrive {
     
     public void tankDrive(XboxController controller, double speed) {
     	tankDrive(-controller.getY(XboxController.Hand.kLeft)*speed, -controller.getY(XboxController.Hand.kRight)*speed);
+    	// gets y position from both right and left joysticks 
     }
     
     public void tankDrive(XboxController controller) {
     	tankDrive(controller, 1);
+    	//whatever value y gives for speed, max that value
+    	//so if controller is .8 forward drive at a full 80% speed
     }
     
    

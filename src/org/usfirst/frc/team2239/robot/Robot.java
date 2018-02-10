@@ -220,6 +220,11 @@ public class Robot extends IterativeRobot {
 	 * switch structure below with additional strings. If using the
 	 * SendableChooser make sure to add them to the chooser code above as well.
 	 */
+	public Action[] getScenarioTestDrive() {
+		Action[] actions = new Action[1];
+		actions[0] = new EncoderAccelerator(drive, encoderMotors, 12, NORMAL_POWER_LEVEL);
+		return actions;
+	}
 	public Action[] getScenarioLeftClear() {
 		Action[] actions = new Action[2];
 		actions[0] = new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards1", 0), NORMAL_POWER_LEVEL);

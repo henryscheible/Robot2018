@@ -66,6 +66,7 @@ public class Robot extends IterativeRobot {
     public XboxController controller; //Control for the robot
     public WPI_TalonSRX cubeLift;
     public WPI_TalonSRX cubeWheels;
+    public Solenoid gearShift;
     public Compressor myCompressor;
     public PowerDistributionPanel myPDP;
     public GearStateMachine autoGear;
@@ -140,7 +141,11 @@ public class Robot extends IterativeRobot {
 		myCompressor = new Compressor(10); 
 //		myCompressor.setClosedLoopControl(true);
 		
-		
+        //gearShift = new Solenoid(CAN ID on dashboard, channel on PCM (what's it plugged into));
+        gearShift = new Solenoid(8, 0); 
+        //gearShift = new Solenoid(7, 0); //practicebot
+        gearShift.set(!open); //TODO figure out if false means closed or open
+
 		
 		
 		
@@ -291,21 +296,12 @@ public class Robot extends IterativeRobot {
 //		
 //		if (field_data = true){
 //			
-//			new EncoderAccelerator(drive, encoderMotors, INCHES_BEFORE_TURN_FOR_SIDE_AUTONOMOUS, NORMAL_POWER_LEVEL);
+//			
 //			
 //		}else{
 //			
 //		}
-//		return new Action[] {
-	//			new EncoderAccelerator(drive, encoderMotors, FORWARD_ONE, NORMAL_POWER_LEVEL),
-//				new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards1", 0), forwardsMaxVolts),
-//				new RotationAccelerator(drive, navSensor, flipTurns*SmartDashboard.getNumber("Turn1", 0), turnMaxVolts),
-//				new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards2", 0), forwardsMaxVolts),
-//				new RotationAccelerator(drive, navSensor, -flipTurns*SmartDashboard.getNumber("Turn2", 0), turnMaxVolts),
-//				new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Forwards3", 0), forwardsMaxVolts),
-//				new GearCollectorAction(gearRelease, open),
-//				new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Backwards1", 0), backwardsMaxVolts),
-	//takes numbers from the SmartDashboard to tell the robot how far to do each command
+//		
 		
 		if (navSensor != null) navSensor.reset();
 		
@@ -470,10 +466,10 @@ public class Robot extends IterativeRobot {
 //			            case 1:
 //			            	if (liftGrab) {
 //			            		//TODO if these are changed, make sure the pipes are switched on SpiderBot
-//				        		gearRelease.set(!open); //close it //TODO make sure these are accurate
+//				        		gearShift.set(!open); //close it //TODO make sure these are accurate
 //				        		liftGrab = !open;
 //				        	} else {
-//				        		gearRelease.set(open); //open it
+//				        		gearShift.set(open); //open it
 //				        		liftGrab = open;
 //				        	}
 //			            	System.out.println("we have/lost a box"+liftGrab); //TODO delete

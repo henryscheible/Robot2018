@@ -64,9 +64,9 @@ public class Robot extends IterativeRobot {
 	private boolean goingForMiddle = true;
     public Timer timer; // Timer
     public XboxController controller; //Control for the robot
-//    public TalonSRX climber;
-      public Solenoid gearRelease;
-      public Compressor myCompressor;
+    public WPI_TalonSRX cubeLift;
+    public WPI_TalonSRX cubeWheels;
+    public Compressor myCompressor;
     public PowerDistributionPanel myPDP;
     public GearStateMachine autoGear;
     public String defaultAutoName = "middle";
@@ -88,7 +88,7 @@ public class Robot extends IterativeRobot {
 	AHRS navSensor; //The navigation sensor object
 	int toggleAmt = 3; //how many different buttons are toggling
 	boolean[] toggleReadys = new boolean[toggleAmt]; //{speedToggleReady, gearToggleReady, turnToggle}
-	boolean gearOpen = false;
+	boolean liftGrab = false;
 	Action curAction = null;
 	double speed = 1;
 	AccelerationHelper baseline;
@@ -107,7 +107,7 @@ public class Robot extends IterativeRobot {
 //	3s are old lead motors
 	SpeedControllerGroup left = new SpeedControllerGroup(leftLeaderMotor, leftFollowerMotor1, leftFollowerMotor2);
 	SpeedControllerGroup right = new SpeedControllerGroup(rightLeaderMotor, rightFollowerMotor1, rightFollowerMotor2);
-	WPI_TalonSRX[] encoderMotors = new WPI_TalonSRX[] {leftLeaderMotor, rightLeaderMotor};
+	WPI_TalonSRX[] encoderMotors = new WPI_TalonSRX[] {leftFollowerMotor1, rightFollowerMotor2};
 	
 	
 //	TODO fix just testing
@@ -137,13 +137,12 @@ public class Robot extends IterativeRobot {
 		}
 		
 		
-		myCompressor = new Compressor(6); 
+		myCompressor = new Compressor(10); 
 //		myCompressor.setClosedLoopControl(true);
-		// gearRelease = new Solenoid(CAN ID on dashboard, channel on PCM (what's it plugged into));
-		gearRelease = new Solenoid(8, 0); //TODO SpiderBot
-		//gearRelease = new Solenoid(7, 0); //practicebot
-		gearRelease.set(!open); //TODO figure out if false means closed or open
-//		
+		
+		
+		
+		
 		
 		/*
 		MOTORS:
@@ -159,11 +158,12 @@ public class Robot extends IterativeRobot {
 		//drive = new TechnoDrive(4,1,3,2);//small bot
 		timer = new Timer();
 		controller = new XboxController(0);
-//		climber = new TalonSRX(5);
+		cubeWheels = new WPI_TalonSRX(7);
 		myPDP = new PowerDistributionPanel();
 		//myPDP.getVoltage();
 		try {
 			navSensor = new AHRS(SPI.Port.kMXP); /* Alternatives: SerialPort.Port.kMXP, I2C.Port.kMXP or SerialPort.Port.kUSB */
+			System.out.println("NavSensor = " + navSensor);
 		} catch (RuntimeException ex) {
 			DriverStation.reportError("Error instantiating navX-MXP: " + ex.getMessage(), true);
 		}
@@ -307,8 +307,7 @@ public class Robot extends IterativeRobot {
 //				new EncoderAccelerator(drive, encoderMotors, SmartDashboard.getNumber("Backwards1", 0), backwardsMaxVolts),
 	//takes numbers from the SmartDashboard to tell the robot how far to do each command
 		
-		
-		navSensor.reset();
+		if (navSensor != null) navSensor.reset();
 		
 	}
 
@@ -468,18 +467,18 @@ public class Robot extends IterativeRobot {
 	         	        	}
 	         	        	break;
 		         	    
-			            case 1:
-			            	if (gearOpen) {
-			            		//TODO if these are changed, make sure the pipes are switched on SpiderBot
-				        		gearRelease.set(!open); //close it //TODO make sure these are accurate
-				        		gearOpen = !open;
-				        	} else {
-				        		gearRelease.set(open); //open it
-				        		gearOpen = open;
-				        	}
-			            	System.out.println("gearRelease is value is "+gearOpen); //TODO delete
-			            	break;
-//        
+//			            case 1:
+//			            	if (liftGrab) {
+//			            		//TODO if these are changed, make sure the pipes are switched on SpiderBot
+//				        		gearRelease.set(!open); //close it //TODO make sure these are accurate
+//				        		liftGrab = !open;
+//				        	} else {
+//				        		gearRelease.set(open); //open it
+//				        		liftGrab = open;
+//				        	}
+//			            	System.out.println("we have/lost a box"+liftGrab); //TODO delete
+//			            	break;
+////        
 //			            case 2:
 //			            	System.out.println("Starting a new rotation!");
 //			            	double turnAngle = 180;

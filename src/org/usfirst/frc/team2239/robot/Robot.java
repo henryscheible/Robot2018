@@ -89,7 +89,7 @@ public class Robot extends IterativeRobot {
 	AHRS navSensor; //The navigation sensor object
 	int toggleAmt = 3; //how many different buttons are toggling
 	boolean[] toggleReadys = new boolean[toggleAmt]; //{speedToggleReady, gearToggleReady, turnToggle}
-	boolean liftGrab = false;
+	boolean gearOpen = false;
 	Action curAction = null;
 	double speed = 1;
 	AccelerationHelper baseline;
@@ -468,18 +468,18 @@ public class Robot extends IterativeRobot {
 	         	        	}
 	         	        	break;
 		         	    
-//			            case 1:
-//			            	if (liftGrab) {
-//			            		//TODO if these are changed, make sure the pipes are switched on SpiderBot
-//				        		gearShift.set(!open); //close it //TODO make sure these are accurate
-//				        		liftGrab = !open;
-//				        	} else {
-//				        		gearShift.set(open); //open it
-//				        		liftGrab = open;
-//				        	}
-//			            	System.out.println("we have/lost a box"+liftGrab); //TODO delete
-//			            	break;
-////        
+			            case 1:
+			            	if (gearOpen) {
+			            		//TODO if these are changed, make sure the pipes are switched on SpiderBot
+				        		gearShift.set(!open); //close it //TODO make sure these are accurate
+				        		gearOpen = !open;
+				        	} else {
+				        		gearShift.set(open); //open it
+				        		gearOpen = open;
+				        	}
+			            	System.out.println("we have/lost a box"+gearOpen); //TODO delete
+			            	break;
+//        
 //			            case 2:
 //			            	System.out.println("Starting a new rotation!");
 //			            	double turnAngle = 180;

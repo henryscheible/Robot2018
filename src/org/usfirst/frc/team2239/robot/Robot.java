@@ -67,8 +67,8 @@ public class Robot extends IterativeRobot {
     public WPI_TalonSRX cubeLift;
     public WPI_TalonSRX cubeWheels;
     public Solenoid gearShift;
-    public Compressor myCompressor;
-    public PowerDistributionPanel myPDP;
+//    public Compressor myCompressor;
+//    public PowerDistributionPanel myPDP;
     public GearStateMachine autoGear;
     public String defaultAutoName = "middle";
     
@@ -108,8 +108,7 @@ public class Robot extends IterativeRobot {
 //	3s are old lead motors
 	SpeedControllerGroup left = new SpeedControllerGroup(leftLeaderMotor, leftFollowerMotor1, leftFollowerMotor2);
 	SpeedControllerGroup right = new SpeedControllerGroup(rightLeaderMotor, rightFollowerMotor1, rightFollowerMotor2);
-	WPI_TalonSRX[] encoderMotors = new WPI_TalonSRX[] {leftFollowerMotor1, rightFollowerMotor2};
-	
+	WPI_TalonSRX[] encoderMotors = new WPI_TalonSRX[] {leftFollowerMotor1};
 	
 //	TODO fix just testing
 	TechnoDrive drive = new TechnoDrive(left, right);  // class that handles basic drive operations
@@ -138,7 +137,7 @@ public class Robot extends IterativeRobot {
 		}
 		
 		
-		myCompressor = new Compressor(10); 
+//		myCompressor = new Compressor(10); 
 //		myCompressor.setClosedLoopControl(true);
 		
         //gearShift = new Solenoid(CAN ID on dashboard, channel on PCM (what's it plugged into));
@@ -164,7 +163,7 @@ public class Robot extends IterativeRobot {
 		timer = new Timer();
 		controller = new XboxController(0);
 		cubeWheels = new WPI_TalonSRX(7);
-		myPDP = new PowerDistributionPanel();
+//		myPDP = new PowerDistributionPanel();
 		//myPDP.getVoltage();
 		try {
 			navSensor = new AHRS(SPI.Port.kMXP); /* Alternatives: SerialPort.Port.kMXP, I2C.Port.kMXP or SerialPort.Port.kUSB */
@@ -196,8 +195,12 @@ public class Robot extends IterativeRobot {
 //		initFollower(leftLeaderMotor, leftFollowerMotor1);
 //		initFollower(leftLeaderMotor, leftFollowerMotor2);
 		
-		//autoGear = new GearStateMachine(drive, navSensor, encoderMotors);
+		for (int i = 0; i < encoderMotors.length; i++) {
+			encoderMotors[i].setSelectedSensorPosition(0, EncoderAccelerator.ENCODER_CLOSED_LOOP_PRIMARY, 100);
+		}
 		
+		autoGear = new GearStateMachine(drive, navSensor, encoderMotors);
+
 		System.out.println("Robot has finished init");
 	}
 	
@@ -220,9 +223,14 @@ public class Robot extends IterativeRobot {
 	 * switch structure below with additional strings. If using the
 	 * SendableChooser make sure to add them to the chooser code above as well.
 	 */
+	public Action[] getScenarioTestTurn() {
+		Action[] actions = new Action[1];
+		actions[0] = new RotationAccelerator(drive, navSensor , 180, NORMAL_POWER_LEVEL);
+		return actions;
+	}
 	public Action[] getScenarioTestDrive() {
 		Action[] actions = new Action[1];
-		actions[0] = new EncoderAccelerator(drive, encoderMotors, 12, NORMAL_POWER_LEVEL);
+		actions[0] = new EncoderAccelerator(drive, encoderMotors, 120, NORMAL_POWER_LEVEL);
 		return actions;
 	}
 	public Action[] getScenarioLeftClear() {
@@ -286,7 +294,7 @@ public class Robot extends IterativeRobot {
  		//TODO add open lift command
  		return actions;	
  	}
- 		public Action[] getScenarioMiddleGetRight() {
+ 	public Action[] getScenarioMiddleGetRight() {
  		Action[] actions = new Action[4];
  		actions[0] = new RotationAccelerator(drive, navSensor,-1 * SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
  		actions[1] = new EncoderAccelerator(drive, encoderMotors, 0.5 * SmartDashboard.getNumber("Forward2", 0), NORMAL_POWER_LEVEL);
@@ -295,22 +303,7 @@ public class Robot extends IterativeRobot {
  		//TODO add raise lift command
  		//TODO add open lift command
  		return actions;
- 		}{
- 		 		
-//		navSensor.reset();
-//		
-//		if (field_data = true){
-//			
-//			
-//			
-//		}else{
-//			
-//		}
-//		
-		
-		if (navSensor != null) navSensor.reset();
-		
-	}
+ 	}
 
 	@Override
 	public void autonomousInit() {
@@ -328,7 +321,7 @@ public class Robot extends IterativeRobot {
 //		double startTime;
 //		double distance;
 //		double maxVelocity;
-		myCompressor.start();
+//		myCompressor.start();
 		//53.5 ticks per inch old conversion
 
 		//diameter/tickrate*pi= .0122718463 inches per tick
@@ -351,40 +344,41 @@ public class Robot extends IterativeRobot {
 		//drive at 70% speed
 		
 
-		
-		if (auto.equals("right")) {
-			System.out.println("auto picked: "+auto);
-			
-			if (field_data == true){
-				autoGear.futureActions = getScenarioRightClear();			
-			} else  {
-				autoGear.futureActions = getScenarioRightGet();
-			}
-			if (auto.equals("left")) {
-				System.out.println("auto picked: "+auto);
-			
-				if (field_data == true) {
-					autoGear.futureActions = getScenarioLeftGet();
-				} else {
-					autoGear.futureActions = getScenarioLeftClear();
-				}			
-			
-			}
-			if (auto.equals("middle") && goingForMiddle == true) {
-				if (field_data == true){
-					autoGear.futureActions = getScenarioMiddleGetLeft();
-				} else {
-					autoGear.futureActions = getScenarioMiddleGetRight();
-				}	
-			}
-			if (auto.equals("middle") && goingForMiddle != true){
-				if (field_data == true){
-					autoGear.futureActions = getScenarioMiddleRightClear();
-				} else {
-					autoGear.futureActions = getScenarioMiddleLeftClear();
-				}
-			}
-		}
+//		autoGear.futureActions = getScenarioTestDrive();
+		autoGear.futureActions = getScenarioTestTurn();
+//		if (auto.equals("right")) {
+//			System.out.println("auto picked: "+auto);
+//			
+//			if (field_data == true){
+//				autoGear.futureActions = getScenarioRightClear();			
+//			} else  {
+//				autoGear.futureActions = getScenarioRightGet();
+//			}
+//			if (auto.equals("left")) {
+//				System.out.println("auto picked: "+auto);
+//			
+//				if (field_data == true) {
+//					autoGear.futureActions = getScenarioLeftGet();
+//				} else {
+//					autoGear.futureActions = getScenarioLeftClear();
+//				}			
+//			
+//			}
+//			if (auto.equals("middle") && goingForMiddle == true) {
+//				if (field_data == true){
+//					autoGear.futureActions = getScenarioMiddleGetLeft();
+//				} else {
+//					autoGear.futureActions = getScenarioMiddleGetRight();
+//				}	
+//			}
+//			if (auto.equals("middle") && goingForMiddle != true){
+//				if (field_data == true){
+//					autoGear.futureActions = getScenarioMiddleRightClear();
+//				} else {
+//					autoGear.futureActions = getScenarioMiddleLeftClear();
+//				}
+//			}
+//		}
 		curAction = null;
 	}
 

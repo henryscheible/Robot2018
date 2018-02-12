@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 
 public class EncoderAccelerator implements Action {
 	
-	private static int ENCODER_CLOSED_LOOP_PRIMARY = 0;
-	private static int ENCODER_CLOSED_LOOP_CASCADING = 1;
+	public static int ENCODER_CLOSED_LOOP_PRIMARY = 0;
+	public static int ENCODER_CLOSED_LOOP_CASCADING = 1;
 	
 	TechnoDrive driveTrain;
 	WPI_TalonSRX[] valueMotors;
@@ -25,7 +25,8 @@ public class EncoderAccelerator implements Action {
 	double tolerance = 20; //How close (in ticks) to the final destination should you get before stopping (should not be 0. Perfection is impossible.)
 	double moveTicks; //how much to move, in inches (positive means forwards)
 	//with 107 ticksPerInch, this thing tried to go 10 inches and instead went 22
-	double ticksPerInch = 81.5; //used to be 53.5 on the practice bot
+//	double ticksPerInch = 81.5; //used to be 53.5 on the practice bot
+	double ticksPerInch = 1715;//115.5 inch
 	double targetDistance; //the encoder value we aspire to be at when done.
 	double maxVelocityTicks = 2000; //The ticks traveled at which we start to decrease velocity at //always positive
 	boolean forward; //true if we should be moving forwards, false otherwise (still or moving backwards)	
@@ -36,8 +37,11 @@ public class EncoderAccelerator implements Action {
 		this.driveTrain = driveTrain;
 		this.valueMotors = motorsToLookAt;
 		this.moveTicks = distance*ticksPerInch;
-		this.targetDistance = getEncoderValue()+this.moveTicks;
+		double encValue = getEncoderValue();
+		this.targetDistance = encValue+this.moveTicks;
 		this.maxVelocity = maxVelocity;
+		
+//		throw new RuntimeException("Starting encoder value = "+encValue+", Move ticks = " + this.moveTicks + ", Target distance = "+this.targetDistance);
 	}
 	
 	
@@ -47,6 +51,7 @@ public class EncoderAccelerator implements Action {
 	{
 		System.out.println("Im actually moving straight!");
 		double curValue = getEncoderValue();
+		System.out.println("curValue: " + curValue);
 		double offDistance = (targetDistance-curValue);
 		System.out.println("I'm this far off: "+offDistance);
 		System.out.println("targetDistance: "+targetDistance);
@@ -97,10 +102,13 @@ public class EncoderAccelerator implements Action {
 
 	public double getEncoderValue() {
 		//TODO don't just average - also check to see if any of the encoders are way off or may be broken and ignore those ones.
-		double sum = 0;
+		double sum = 0.0;
+		double reading = 0.0;
 		for (WPI_TalonSRX motor : this.valueMotors) {
 			
-			sum+=motor.getSelectedSensorPosition(ENCODER_CLOSED_LOOP_PRIMARY);
+			reading = motor.getSelectedSensorPosition(ENCODER_CLOSED_LOOP_PRIMARY);
+			sum += reading;
+			System.err.println("Encoder reading: " + reading);
 		}
 		double avg = sum/this.valueMotors.length; //compute the average encoder value
 		System.out.println("the average encoder values from sensors: " + avg);

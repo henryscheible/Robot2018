@@ -113,10 +113,10 @@ public class Robot extends IterativeRobot {
 	WPI_TalonSRX rightFollowerMotor1 = new WPI_TalonSRX(4);
 	WPI_TalonSRX leftLeaderMotor = new WPI_TalonSRX(1);
 	WPI_TalonSRX rightLeaderMotor = new WPI_TalonSRX(2);
-	WPI_TalonSRX liftWheelsRight = new WPI_TalonSRX(20);
-	WPI_TalonSRX liftWheelsLeft = new WPI_TalonSRX(21);
-	WPI_TalonSRX lift = new WPI_TalonSRX(22);
-	WPI_TalonSRX rampDeploy = new WPI_TalonSRX(23);
+	WPI_TalonSRX liftWheelsRight = new WPI_TalonSRX(9);
+	WPI_TalonSRX liftWheelsLeft = new WPI_TalonSRX(7);
+	WPI_TalonSRX lift = new WPI_TalonSRX(10);
+	WPI_TalonSRX rampDeploy = new WPI_TalonSRX(11);
 
 	// 3s are old lead motors
 	SpeedControllerGroup left = new SpeedControllerGroup(leftLeaderMotor, leftFollowerMotor1, leftFollowerMotor2);
@@ -573,36 +573,35 @@ public class Robot extends IterativeRobot {
 
 		if (controller.getRawButton(1)) {
 			// Button A = push cube
+			System.out.println("picking up cube");
 			liftWheels.set(1);
-		} else {
-			liftWheels.set(0);
-		}
-		if (controller.getRawButton(2)) {
+		} else if (controller.getRawButton(2)) {
 			// Button B = pull cube
+			System.out.println("pushing out cube");
 			liftWheels.set(-1);
 		} else {
 			liftWheels.set(0);
 		}
+		
 		if (controller.getRawButton(3)) {
 			// Button X = lift up
+			System.out.println("raising lift");
 			lift.set(1);
-		} else {
-			lift.set(0);
-		}
-		if (controller.getRawButton(4)) {
+		} else if (controller.getRawButton(4)) {
 			// Button Y = lift down
+			System.out.println("lowering lift");
 			lift.set(-1);
 		} else {
 			lift.set(0);
 		}
+		
 		if (controller.getRawButton(8)) {
 			// Start Button = lower ramp
+			System.out.println("lowering ramp");
 			rampDeploy.set(1);
-		} else {
-			lift.set(0);
-		}
-		if (controller.getRawButton(7)) {
+		} else if (controller.getRawButton(7)) {
 			// Back Button = raise ramp
+			System.out.println("raising ramp (maybe)");
 			rampDeploy.set(-1);
 		} else {
 			rampDeploy.set(0);

@@ -17,6 +17,7 @@ public class RotationAccelerator implements Action {
 	double targetAngle; //the angle we aspire to be at. This can be greater than 2Pi //TODO test if this can be negative
 	double maxVelocityAngle = 30; //The angle (in degrees) we start to decrease velocity at //always positive
 	boolean clockwise; //whether or not the turnAngle is a clockwise angle
+	private boolean hasStarted = false;
 	
 	
 	
@@ -34,10 +35,15 @@ public class RotationAccelerator implements Action {
 	//returns false if the rotation is not complete
 	public boolean run()
 	{
-		System.out.println("Im actually rotating!");
+		if (!hasStarted ) {
+			navSensor.reset();
+			hasStarted = true;
+		}
+
+//		System.out.println("Im actually rotating!");
 		double curAngle = getAngle();
 		double offAngle = (targetAngle-curAngle);
-		System.out.println("I'm this far off: "+offAngle);
+//		System.out.println("I'm this far off: "+offAngle);
 		if (targetAngle-tolerance < curAngle && curAngle < targetAngle+tolerance) { //we did it!
 			driveTrain.tankDrive(0, 0); //stop driving
 			return true;
@@ -47,7 +53,7 @@ public class RotationAccelerator implements Action {
 		if (shouldBeClockwise!=clockwise) {
 			maxVelocity = Math.max(maxVelocity - swingPastDecrease, offset);
 			curVelocity = 0; //stop it from swinging past
-			System.out.println("Swung past the target!");
+//			System.out.println("Swung past the target!");
 		}
 		clockwise = shouldBeClockwise;
 		
@@ -58,10 +64,10 @@ public class RotationAccelerator implements Action {
 			targetVelocity = Math.max(((maxVelocity-offset)/maxVelocityAngle)*offAngle-offset, -maxVelocity);
 		}
 		
-		System.out.println("Target velocity before setting is: "+targetVelocity);
-		System.out.println("curVelocity before setting is: "+curVelocity);
+//		System.out.println("Target velocity before setting is: "+targetVelocity);
+//		System.out.println("curVelocity before setting is: "+curVelocity);
 		if (clockwise) {
-			System.out.println("We're going clockwise");
+//			System.out.println("We're going clockwise");
 			if (targetVelocity > curVelocity+accelerate) { //if I'm going slower than I should, ramp up to it
 				curVelocity = curVelocity+accelerate;
 			} else {
@@ -69,7 +75,7 @@ public class RotationAccelerator implements Action {
 			}
 			curVelocity = Math.min(curVelocity, maxVelocity);
 		} else {
-			System.out.println("We're going counterclockwise");
+//			System.out.println("We're going counterclockwise");
 			if (targetVelocity < curVelocity-accelerate) { //if I'm going slower than I should, ramp up to it
 				curVelocity = curVelocity-accelerate;
 			} else {
@@ -77,14 +83,14 @@ public class RotationAccelerator implements Action {
 			}
 			curVelocity = Math.max(curVelocity, -maxVelocity);
 		}
-		System.out.println("Target velocity is: "+targetVelocity);
-		System.out.println("Actually driving at: " + curVelocity);
+//		System.out.println("Target velocity is: "+targetVelocity);
+//		System.out.println("Actually driving at: " + curVelocity);
 		driveTrain.tankDrive(curVelocity, -curVelocity); //actually drive
 		return false;
 	}
 	
 	public double getAngle() {
-		System.out.println("the degrees from nav sensor: " + navSensor.getAngle());
+//		System.out.println("the degrees from nav sensor: " + navSensor.getAngle());
 		return navSensor.getAngle();
 		 
 	}

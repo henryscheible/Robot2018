@@ -60,7 +60,7 @@ public class TechnoDrive extends DifferentialDrive {
 
     @Override
     public void tankDrive(double left, double right, boolean squared) {
-    	System.out.println("What the tankDrive is doing: " +left+ " " +right);
+//    	System.out.println("What the tankDrive is doing: " +left+ " " +right);
         super.tankDrive(-left, -right, squared);
     }
     

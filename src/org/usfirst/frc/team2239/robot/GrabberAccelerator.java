@@ -8,6 +8,7 @@ public class GrabberAccelerator implements Action {
 	private SpeedControllerGroup motorsToLookAt;
 	private double speed;
 	private double timeToRun;
+	private boolean hasStarted = false;
 	
 	GrabberAccelerator (double time, double speed, SpeedControllerGroup motorsToLookAt) {
 		this.motorsToLookAt = motorsToLookAt;
@@ -22,17 +23,21 @@ public class GrabberAccelerator implements Action {
 	 */
 	public boolean run()
 	{
+		if (!hasStarted ) {
+			System.out.println("Starting GrabberAccelerator("+ timeToRun +", "+speed+")");
+			timer.start();
+			hasStarted = true;
+		}
 		
-		timer.start(); 
+		// If the timer has not yet expired...
 		if (timer.get() <= timeToRun){
 			motorsToLookAt.set(speed);
 		} else {
+			// Timer has expired, so end the action
 			motorsToLookAt.set(0);
+			timer.reset();
 			return true;
 		}
-		timer.reset();
-		
-		
 		return false;
 	}
 	 

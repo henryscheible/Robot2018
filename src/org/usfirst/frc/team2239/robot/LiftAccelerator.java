@@ -9,6 +9,7 @@ public class LiftAccelerator implements Action {
 	private WPI_TalonSRX motor;
 	private double speed;
 	private double timeToRun;
+	private boolean hasStarted = false;
 	
 	LiftAccelerator (double time, double speed, WPI_TalonSRX motor) {
 		this.motor = motor;
@@ -25,17 +26,21 @@ public class LiftAccelerator implements Action {
 	 */
 	public boolean run()
 	{
+		if (!hasStarted ) {
+			System.out.println("Starting GrabberAccelerator("+ timeToRun +", "+speed+")");
+			timer.start();
+			hasStarted = true;
+		}
 		
-		timer.start(); 
+		// If the timer has not yet expired...
 		if (timer.get() <= timeToRun){
 			motor.set(speed);
 		} else {
+			// Timer has expired, so end the action
 			motor.set(0);
+			timer.reset();
 			return true;
 		}
-		timer.reset();
-		
-		
 		return false;
 	}
 	 

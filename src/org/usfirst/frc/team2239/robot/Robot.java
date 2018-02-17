@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DriverStation;
 
@@ -155,7 +156,7 @@ public class Robot extends IterativeRobot {
 		NetworkTable table = inst.getTable("Preferences");
 		goForCube = table.getEntry("GoForCube");
 
-		// CameraServer.getInstance().startAutomaticCapture();
+		CameraServer.getInstance().startAutomaticCapture();
 
 		// Default all the "ready"s to true. No buttons should be pressed at the
 		// start, therefore all should be ready to be pressed.

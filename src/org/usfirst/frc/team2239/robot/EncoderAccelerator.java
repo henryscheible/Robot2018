@@ -26,7 +26,7 @@ public class EncoderAccelerator implements Action {
 	double moveTicks; //how much to move, in inches (positive means forwards)
 	//with 107 ticksPerInch, this thing tried to go 10 inches and instead went 22
 //	double ticksPerInch = 81.5; //used to be 53.5 on the practice bot
-	double ticksPerInch = 1715;//115.5 inch
+	double ticksPerInch = 1864;//115.5 inch
 	double targetDistance; //the encoder value we aspire to be at when done.
 	double maxVelocityTicks = 2000; //The ticks traveled at which we start to decrease velocity at //always positive
 	boolean forward; //true if we should be moving forwards, false otherwise (still or moving backwards)	
@@ -46,11 +46,14 @@ public class EncoderAccelerator implements Action {
 	}
 	
 	
-	//returns true if the rotation is complete
-	//returns false if the rotation is not complete
+	/**
+	 * @see org.usfirst.frc.team2239.robot.Action#run()
+	 * @return true if the rotation is complete or false if the rotation is not complete
+	 */
 	public boolean run()
 	{
 		if (!hasStarted) {
+			System.out.println("Starting EncoderAccelerator("+ this.moveTicks +")");
 			for (int i = 0; i < valueMotors.length; i++) {
 				valueMotors[i].setSelectedSensorPosition(0, ENCODER_CLOSED_LOOP_PRIMARY, 100);
 			}
@@ -71,8 +74,10 @@ public class EncoderAccelerator implements Action {
 		boolean shouldBeForwards = offDistance>0;
 		if (shouldBeForwards!=forward) {
 			maxVelocity = Math.max(maxVelocity - rollPastDecrease, offset);
-			curVelocity = 0; //stop it from swinging past
+//			curVelocity = 0; //stop it from swinging past
+			driveTrain.tankDrive(0, 0); // Actually stop it if we're not doing the back up code
 //			System.out.println("Swung past the target!");
+			return true; // This line disables the backup code!!! Comment out to re-enable it.
 		}
 		forward = shouldBeForwards;
 		

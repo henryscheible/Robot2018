@@ -31,11 +31,14 @@ public class RotationAccelerator implements Action {
 	}
 	
 	
-	//returns true if the rotation is complete
-	//returns false if the rotation is not complete
+	/**
+	 * @see org.usfirst.frc.team2239.robot.Action#run()
+	 * @return true if the rotation is complete or false if the rotation is not complete
+	 */
 	public boolean run()
 	{
 		if (!hasStarted ) {
+			System.out.println("Starting RotationAccelerator("+this.targetAngle+")");
 			navSensor.reset();
 			hasStarted = true;
 		}

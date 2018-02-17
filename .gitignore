@@ -1,4 +1,7 @@
 /bin/
 build
+build/*
+**/*.jar
 **/*.class
-/dist/
+dist
+dist/*

@@ -22,7 +22,9 @@ import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 //import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -41,7 +43,7 @@ public class Robot extends IterativeRobot {
 	private static final boolean GOING_TO_GO_FOR_QUEST = true;
 	// true is left false is right
 
-	// NetworkTable table;
+	NetworkTable table;
 	// NetworkTable contoursTable;
 	// NetworkTable blobsTable;
 	final double halfYFov = Math.toRadians(32.5) / 2.0; // half the vertical
@@ -67,8 +69,8 @@ public class Robot extends IterativeRobot {
 	// from
 	// http://wpilib.screenstepslive.com/s/4485/m/26401/l/255419-choosing-an-autonomous-program-from-smartdashboard
 
-	private boolean field_data = false;
-	private boolean goingForMiddle = true;
+	private boolean switchPlateOnLeft = false;
+	private boolean goingForSwitch = true;
 	public Timer timer; // Timer
 	public XboxController controller; // Control for the robot
 	public Solenoid gearShift;
@@ -130,7 +132,9 @@ public class Robot extends IterativeRobot {
 														// operations
 	Boolean open = true;
 	private int location;
-
+	
+	private NetworkTableEntry goForCube;
+	
 	// This is the constructor. Whenever a new Robot object is made
 	// this is the function that will be called to make it
 	// public Robot() {
@@ -145,6 +149,11 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		System.out.println("Robot has started init!");
+
+		
+		NetworkTableInstance inst = NetworkTableInstance.getDefault();
+		NetworkTable table = inst.getTable("Preferences");
+		goForCube = table.getEntry("GoForCube");
 
 		// CameraServer.getInstance().startAutomaticCapture();
 
@@ -308,24 +317,26 @@ public class Robot extends IterativeRobot {
 	}
 
 	public Action[] getScenarioMiddleGetLeft() {
-		Action[] actions = new Action[5];
-		actions[0] = new EncoderAccelerator(drive, encoderMotors, 84, NORMAL_POWER_LEVEL);
-		actions[1] = new RotationAccelerator(drive, navSensor, -60, NORMAL_POWER_LEVEL);
-		actions[2] = new EncoderAccelerator(drive, encoderMotors, 60, NORMAL_POWER_LEVEL);
+		Action[] actions = new Action[6];
+		actions[0] = new EncoderAccelerator(drive, encoderMotors, 12, NORMAL_POWER_LEVEL);
+		actions[1] = new RotationAccelerator(drive, navSensor, -90, NORMAL_POWER_LEVEL);
+		actions[2] = new EncoderAccelerator(drive, encoderMotors, 132, NORMAL_POWER_LEVEL);
 		actions[3] = new RotationAccelerator(drive, navSensor, 90, NORMAL_POWER_LEVEL);
-		actions[4] = new RotationAccelerator(drive, navSensor, 60, NORMAL_POWER_LEVEL);
+		actions[4] = new EncoderAccelerator(drive, encoderMotors, 180, NORMAL_POWER_LEVEL);
+		actions[5] = new RotationAccelerator(drive, navSensor, 90, NORMAL_POWER_LEVEL);
 		// TODO add raise lift command
 		// TODO add open lift command
 		return actions;
 	}
 
 	public Action[] getScenarioMiddleGetRight() {
-		Action[] actions = new Action[5];
-		actions[0] = new EncoderAccelerator(drive, encoderMotors, 84, NORMAL_POWER_LEVEL);
-		actions[1] = new RotationAccelerator(drive, navSensor, 60, NORMAL_POWER_LEVEL);
-		actions[2] = new EncoderAccelerator(drive, encoderMotors, 60, NORMAL_POWER_LEVEL);
+		Action[] actions = new Action[6];
+		actions[0] = new EncoderAccelerator(drive, encoderMotors, 12, NORMAL_POWER_LEVEL);
+		actions[1] = new RotationAccelerator(drive, navSensor, 90, NORMAL_POWER_LEVEL);
+		actions[2] = new EncoderAccelerator(drive, encoderMotors, 132, NORMAL_POWER_LEVEL);
 		actions[3] = new RotationAccelerator(drive, navSensor, -90, NORMAL_POWER_LEVEL);
-		actions[4] = new RotationAccelerator(drive, navSensor, -60, NORMAL_POWER_LEVEL);
+		actions[4] = new EncoderAccelerator(drive, encoderMotors, 180, NORMAL_POWER_LEVEL);
+		actions[5] = new RotationAccelerator(drive, navSensor, -90, NORMAL_POWER_LEVEL);
 		// TODO add raise lift command
 		// TODO add open lift command
 		return actions;
@@ -333,20 +344,20 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void autonomousInit() {
-
 		/*
 		 * default FRC code; leave it for now autoSelected =
 		 * chooser.getSelected(); autoSelected =
 		 * SmartDashboard.getString("Auto Selector", defaultAuto);
 		 * System.out.println("Auto selected: " + autoSelected);
 		 */
-
+		goingForSwitch = goForCube.getBoolean(false);
 		navSensor.reset();
 		for (int i = 0; i < encoderMotors.length; i++) {
 			encoderMotors[i].setSelectedSensorPosition(0, EncoderAccelerator.ENCODER_CLOSED_LOOP_PRIMARY, 100);
 		}
 		gameData = DriverStation.getInstance().getGameSpecificMessage();
 		location = DriverStation.getInstance().getLocation();
+		
 
 		// reset nav sensor position to zero
 
@@ -382,16 +393,16 @@ public class Robot extends IterativeRobot {
 
 		if (gameData.length() > 0) {
 			if (gameData.charAt(0) == 'L') {
-				field_data = true;
+				switchPlateOnLeft = true;
 			} else {
-				field_data = false;
+				switchPlateOnLeft = false;
 			}
 		}
 
-		System.out.println("starting if startments with location=" + location + ", field_data=" + field_data);
+		System.out.println("starting if startments with location=" + location + ", switchOnLeft=" + switchPlateOnLeft + ", goForCube="+goingForSwitch);
 		if (location == 3) {
 			System.out.println("driver location: " + location);
-			if (field_data) {
+			if (switchPlateOnLeft || !goingForSwitch) {
 				System.out.println("trying to do rightClear");
 				autoGear.futureActions = getScenarioRightClear();
 			} else {
@@ -401,24 +412,24 @@ public class Robot extends IterativeRobot {
 		} else if (location == 1) {
 			System.out.println("driver location: " + location);
 
-			if (field_data) {
+			if (switchPlateOnLeft && goingForSwitch) {
 				System.out.println("trying to do LeftGet");
 				autoGear.futureActions = getScenarioLeftGet();
 			} else {
-				System.out.println("trying to do LeftCear");
+				System.out.println("trying to do LeftClear");
 				autoGear.futureActions = getScenarioLeftClear();
 			}
 
-		} else if (location == 2 && goingForMiddle) {
-			if (field_data) {
+		} else if (location == 2 && goingForSwitch) {
+			if (switchPlateOnLeft) {
 				System.out.println("goingForMidLeft is running");
 				autoGear.futureActions = getScenarioMiddleGetLeft();
 			} else {
 				System.out.println("goingForMidRight is running");
 				autoGear.futureActions = getScenarioMiddleGetRight();
 			}
-		} else if (location == 2 && !goingForMiddle) {
-			if (field_data) {
+		} else if (location == 2 && !goingForSwitch) {
+			if (switchPlateOnLeft) {
 				System.out.println("clearingMidRight is running");
 				autoGear.futureActions = getScenarioMiddleRightClear();
 			} else {

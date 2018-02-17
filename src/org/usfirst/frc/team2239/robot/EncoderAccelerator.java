@@ -38,8 +38,8 @@ public class EncoderAccelerator implements Action {
 		this.driveTrain = driveTrain;
 		this.valueMotors = motorsToLookAt;
 		this.moveTicks = distance*ticksPerInch;
-		double encValue = getEncoderValue();
-		this.targetDistance = encValue+this.moveTicks;
+		//double encValue = getEncoderValue();
+		this.targetDistance = this.moveTicks; //encValue+this.moveTicks;
 		this.maxVelocity = maxVelocity;
 		
 //		throw new RuntimeException("Starting encoder value = "+encValue+", Move ticks = " + this.moveTicks + ", Target distance = "+this.targetDistance);
@@ -58,6 +58,7 @@ public class EncoderAccelerator implements Action {
 				valueMotors[i].setSelectedSensorPosition(0, ENCODER_CLOSED_LOOP_PRIMARY, 100);
 			}
 			hasStarted = true;
+			return false;
 		}
 		
 //		System.out.println("Im actually moving straight!");

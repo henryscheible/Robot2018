@@ -26,7 +26,7 @@ public class RotationAccelerator implements Action {
 		this.driveTrain = driveTrain;
 		this.navSensor = navSensor;
 		this.turnAngle = turnAngle;
-		this.targetAngle = getAngle()+turnAngle;
+		this.targetAngle = turnAngle; //getAngle()+turnAngle;
 		this.maxVelocity = maxVelocity;
 	}
 	
@@ -41,6 +41,7 @@ public class RotationAccelerator implements Action {
 			System.out.println("Starting RotationAccelerator("+this.targetAngle+")");
 			navSensor.reset();
 			hasStarted = true;
+			return false;
 		}
 
 //		System.out.println("Im actually rotating!");

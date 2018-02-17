@@ -245,101 +245,98 @@ public class Robot extends IterativeRobot {
 		return actions;
 	}
 
-	public Action[] getScenarioLeft() {
-		Action[] actions = new Action[1];
-		actions[0] = new EncoderAccelerator(drive, encoderMotors, 150, NORMAL_POWER_LEVEL);
+	public Action[] getScenarioLeftClear() {
+		Action[] actions = new Action[2];
+		actions[0] = new EncoderAccelerator(drive, encoderMotors, 84, NORMAL_POWER_LEVEL);
 		// actions[1] = new RotationAccelerator(drive, navSensor,
 		// SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
 		return actions;
 	}
 
-//	public Action[] getScenarioLeftGet() {
-//
-//		Action[] actions = new Action[4];
-//		// actions.add(new RotationAccelerator(drive, navSensor,
-//		// SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL));
-//		// actions[0] = new RotationAccelerator(drive, navSensor,
-//		// SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
-//		actions[0] = new EncoderAccelerator(drive, encoderMotors, 120, NORMAL_POWER_LEVEL);
-//		actions[1] = new RotationAccelerator(drive, navSensor, 90, NORMAL_POWER_LEVEL);
-//		// actions[3] = new EncoderAccelerator(drive, encoderMotors,
-//		// SmartDashboard.getNumber("Forwards1", 0), NORMAL_POWER_LEVEL);
-//		// TODO add raise lift command
-//		// TODO add open lift command
-//		// return (Action[]) actions.toArray();
-//		return actions;
-//	}
+	public Action[] getScenarioLeftGet() {
 
-	public Action[] getScenarioRight() {
-		Action[] actions = new Action[1];
-		actions[0] = new EncoderAccelerator(drive, encoderMotors, 150, NORMAL_POWER_LEVEL);
+		Action[] actions = new Action[4];
+		// actions.add(new RotationAccelerator(drive, navSensor,
+		// SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL));
+		// actions[0] = new RotationAccelerator(drive, navSensor,
+		// SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
+		actions[0] = new EncoderAccelerator(drive, encoderMotors, 120, NORMAL_POWER_LEVEL);
+		actions[1] = new RotationAccelerator(drive, navSensor, 90, NORMAL_POWER_LEVEL);
+		// actions[3] = new EncoderAccelerator(drive, encoderMotors,
+		// SmartDashboard.getNumber("Forwards1", 0), NORMAL_POWER_LEVEL);
+		// TODO add raise lift command
+		// TODO add open lift command
+		// return (Action[]) actions.toArray();
+		return actions;
+	}
+
+	public Action[] getScenarioRightClear() {
+		Action[] actions = new Action[2];
+		actions[0] = new EncoderAccelerator(drive, encoderMotors, 120, NORMAL_POWER_LEVEL);
 		// actions[1] = new RotationAccelerator(drive, navSensor, -1 *
 		// SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
 		return actions;
 	}
 
-//	public Action[] getScenarioRightGet() {
-//		Action[] actions = new Action[4];
-//		// actions[0] = new EncoderAccelerator(drive, encoderMotors,
-//		// SmartDashboard.getNumber("Forwards2", 0), NORMAL_POWER_LEVEL);
-//		actions[0] = new EncoderAccelerator(drive, encoderMotors, 120, NORMAL_POWER_LEVEL);
-//		actions[1] = new RotationAccelerator(drive, navSensor, -1 * 90, NORMAL_POWER_LEVEL);
-//		// TODO add raise lift command
-//		// TODO add open lift command
-//		return actions;
-//	}
-
-	
-		public Action[] getScenarioMiddleLeft() {
-			Action[] actions = new Action[5];
-			// TODO add in new angles for turn
-			actions[0] = new EncoderAccelerator(drive, encoderMotors, 12, NORMAL_POWER_LEVEL);
-			actions[1] = new RotationAccelerator(drive, navSensor, 90, NORMAL_POWER_LEVEL);
-			actions[2] = new EncoderAccelerator(drive, encoderMotors, 132, NORMAL_POWER_LEVEL);
-			actions[3] = new RotationAccelerator(drive, navSensor, -90, NORMAL_POWER_LEVEL);
-			actions[4] = new EncoderAccelerator(drive, encoderMotors, 150, NORMAL_POWER_LEVEL);
-			return actions;
-		}
-
-	public Action[] getScenarioMiddleRight() {
-		Action[] actions = new Action[5];
-		// TODO add in new angles for turn
-		actions[0] = new EncoderAccelerator(drive, encoderMotors, 12, NORMAL_POWER_LEVEL);
-		actions[1] = new RotationAccelerator(drive, navSensor, -90, NORMAL_POWER_LEVEL);
-		actions[2] = new EncoderAccelerator(drive, encoderMotors, 132, NORMAL_POWER_LEVEL);
-		actions[3] = new RotationAccelerator(drive, navSensor, 90, NORMAL_POWER_LEVEL);
-		actions[4] = new EncoderAccelerator(drive, encoderMotors, 150, NORMAL_POWER_LEVEL);
+	public Action[] getScenarioRightGet() {
+		Action[] actions = new Action[4];
+		// actions[0] = new EncoderAccelerator(drive, encoderMotors,
+		// SmartDashboard.getNumber("Forwards2", 0), NORMAL_POWER_LEVEL);
+		actions[0] = new EncoderAccelerator(drive, encoderMotors, 120, NORMAL_POWER_LEVEL);
+		actions[1] = new RotationAccelerator(drive, navSensor, -1 * 90, NORMAL_POWER_LEVEL);
+		// TODO add raise lift command
+		// TODO add open lift command
 		return actions;
 	}
 
-//	public Action[] getScenarioMiddleGetLeft() {
-//		ArrayList<Action> actionList = new ArrayList<Action>();
-//		// Action[] actions = new Action[1];
-//		actionList.add(new EncoderAccelerator(drive, encoderMotors, 84, NORMAL_POWER_LEVEL));
-//		actionList.add(new RotationAccelerator(drive, navSensor, -60, NORMAL_POWER_LEVEL));
-//		actionList.add(new EncoderAccelerator(drive, encoderMotors, 60, NORMAL_POWER_LEVEL));
-//		actionList.add(new RotationAccelerator(drive, navSensor, 90, NORMAL_POWER_LEVEL));
-//		actionList.add(new RotationAccelerator(drive, navSensor, 60, NORMAL_POWER_LEVEL));
-//		// TODO add raise lift command
-//		// TODO add open lift command
-//		return actionList.toArray(new Action[actionList.size()]);
-//		// return actions;
-//	}
+	public Action[] getScenarioMiddleLeftClear() {
+		Action[] actions = new Action[4];
+		// TODO add in new angles for turn
+		actions[0] = new EncoderAccelerator(drive, encoderMotors, 84, NORMAL_POWER_LEVEL);
+		actions[1] = new RotationAccelerator(drive, navSensor, -45, NORMAL_POWER_LEVEL);
+		actions[2] = new EncoderAccelerator(drive, encoderMotors, 4.4, NORMAL_POWER_LEVEL);
+		actions[3] = new RotationAccelerator(drive, navSensor, 45, NORMAL_POWER_LEVEL);
+		return actions;
+	}
 
-//	public Action[] getScenarioMiddleGetRight() {
-//		ArrayList<Action> actionList = new ArrayList<Action>();
-//		// Action[] actions = new Action[1];
-//		actionList.add(new EncoderAccelerator(drive, encoderMotors, 84, NORMAL_POWER_LEVEL));
-//		actionList.add(new RotationAccelerator(drive, navSensor, 60, NORMAL_POWER_LEVEL));
-//		actionList.add(new EncoderAccelerator(drive, encoderMotors, 60, NORMAL_POWER_LEVEL));
-//		actionList.add(new RotationAccelerator(drive, navSensor, -90, NORMAL_POWER_LEVEL));
-//		actionList.add(new RotationAccelerator(drive, navSensor, -60, NORMAL_POWER_LEVEL));
-//		// TODO add raise lift command
-//		// TODO add open lift command
-//		return actionList.toArray(new Action[actionList.size()]);
-//		// return actions;
-//
-//	}
+	public Action[] getScenarioMiddleRightClear() {
+		Action[] actions = new Action[4];
+		// TODO add in new angles for turn
+		actions[0] = new EncoderAccelerator(drive, encoderMotors, 120, NORMAL_POWER_LEVEL);
+		actions[1] = new RotationAccelerator(drive, navSensor, 45, NORMAL_POWER_LEVEL);
+		actions[2] = new EncoderAccelerator(drive, encoderMotors, 120, NORMAL_POWER_LEVEL);
+		actions[3] = new RotationAccelerator(drive, navSensor, -45, NORMAL_POWER_LEVEL);
+		return actions;
+	}
+
+	public Action[] getScenarioMiddleGetLeft() {
+		ArrayList<Action> actionList = new ArrayList<Action>();
+		// Action[] actions = new Action[1];
+		actionList.add(new EncoderAccelerator(drive, encoderMotors, 84, NORMAL_POWER_LEVEL));
+		actionList.add(new RotationAccelerator(drive, navSensor, -60, NORMAL_POWER_LEVEL));
+		actionList.add(new EncoderAccelerator(drive, encoderMotors, 60, NORMAL_POWER_LEVEL));
+		actionList.add(new RotationAccelerator(drive, navSensor, 90, NORMAL_POWER_LEVEL));
+		actionList.add(new RotationAccelerator(drive, navSensor, 60, NORMAL_POWER_LEVEL));
+		// TODO add raise lift command
+		// TODO add open lift command
+		return actionList.toArray(new Action[actionList.size()]);
+		// return actions;
+	}
+
+	public Action[] getScenarioMiddleGetRight() {
+		ArrayList<Action> actionList = new ArrayList<Action>();
+		// Action[] actions = new Action[1];
+		actionList.add(new EncoderAccelerator(drive, encoderMotors, 84, NORMAL_POWER_LEVEL));
+		actionList.add(new RotationAccelerator(drive, navSensor, 60, NORMAL_POWER_LEVEL));
+		actionList.add(new EncoderAccelerator(drive, encoderMotors, 60, NORMAL_POWER_LEVEL));
+		actionList.add(new RotationAccelerator(drive, navSensor, -90, NORMAL_POWER_LEVEL));
+		actionList.add(new RotationAccelerator(drive, navSensor, -60, NORMAL_POWER_LEVEL));
+		// TODO add raise lift command
+		// TODO add open lift command
+		return actionList.toArray(new Action[actionList.size()]);
+		// return actions;
+
+	}
 
 	@Override
 	public void autonomousInit() {
@@ -403,24 +400,39 @@ public class Robot extends IterativeRobot {
 			System.out.println("driver location: " + location);
 			if (field_data == true) {
 				System.out.println("trying to do rightClear");
-				autoGear.futureActions = getScenarioRight();
-			} 
+				autoGear.futureActions = getScenarioRightClear();
+			} else {
+				System.out.println("trying to do rightGet");
+				autoGear.futureActions = getScenarioRightGet();
+			}
 		} else if (location == 1) {
 			System.out.println("driver location: " + location);
+
 			if (field_data == true) {
-				System.out.println("trying to do LeftAuto");
-				autoGear.futureActions = getScenarioLeft();
-			}
-		} else if (location == 2) {
-			System.out.println("driver location: " + location);
-			if (field_data == true) {
-				System.out.println("trying to do MidRightAuto");
-				autoGear.futureActions = getScenarioMiddleRight();
+				System.out.println("trying to do LeftGet");
+				autoGear.futureActions = getScenarioLeftGet();
 			} else {
-				System.out.println("trying to do MidLeftAuto");
-				autoGear.futureActions = getScenarioMiddleLeft();
+				System.out.println("trying to do LeftCear");
+				autoGear.futureActions = getScenarioLeftClear();
 			}
-		} 
+
+		} else if (location == 2 && goingForMiddle == true) {
+			if (field_data == true) {
+				System.out.println("goingForMidLeft is running");
+				autoGear.futureActions = getScenarioMiddleGetLeft();
+			} else {
+				System.out.println("goingForMidRight is running");
+				autoGear.futureActions = getScenarioMiddleGetRight();
+			}
+		} else if (location == 2 && goingForMiddle != true) {
+			if (field_data == true) {
+				System.out.println("clearingMidRight is running");
+				autoGear.futureActions = getScenarioMiddleRightClear();
+			} else {
+				System.out.println("clearingMidLeft is running");
+				autoGear.futureActions = getScenarioMiddleLeftClear();
+			}
+		}
 		curAction = null;
 	}
 

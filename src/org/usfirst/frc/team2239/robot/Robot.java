@@ -26,7 +26,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-//import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -75,6 +75,8 @@ public class Robot extends IterativeRobot {
 	public Timer timer; // Timer
 	public XboxController controller; // Control for the robot
 	public Solenoid gearShift;
+	public Solenoid rampDeploy;
+	public Solenoid platformDeploy;
 	// public Compressor myCompressor;
 	// public PowerDistributionPanel myPDP;
 	public GearStateMachine autoGear;
@@ -100,6 +102,7 @@ public class Robot extends IterativeRobot {
 														// gearToggleReady,
 														// turnToggle}
 	boolean gearOpen = false;
+	boolean rampIsDeployed = false;
 	Action curAction = null;
 	String gameData;
 
@@ -119,7 +122,7 @@ public class Robot extends IterativeRobot {
 	WPI_TalonSRX liftWheelsRight = new WPI_TalonSRX(9);
 	WPI_TalonSRX liftWheelsLeft = new WPI_TalonSRX(7);
 	WPI_TalonSRX lift = new WPI_TalonSRX(10);
-	WPI_TalonSRX rampDeploy = new WPI_TalonSRX(11);
+	//WPI_TalonSRX rampDeploy = new WPI_TalonSRX(11);
 
 	// 3s are old lead motors
 	SpeedControllerGroup left = new SpeedControllerGroup(leftLeaderMotor, leftFollowerMotor1, leftFollowerMotor2);
@@ -152,11 +155,8 @@ public class Robot extends IterativeRobot {
 		System.out.println("Robot has started init!");
 
 		
-		NetworkTableInstance inst = NetworkTableInstance.getDefault();
-		NetworkTable table = inst.getTable("Preferences");
-		goForCube = table.getEntry("GoForCube");
 
-		CameraServer.getInstance().startAutomaticCapture();
+//		CameraServer.getInstance().startAutomaticCapture();
 
 		// Default all the "ready"s to true. No buttons should be pressed at the
 		// start, therefore all should be ready to be pressed.
@@ -173,6 +173,8 @@ public class Robot extends IterativeRobot {
 		// gearShift = new Solenoid(CAN ID on dashboard, channel on PCM (what's
 		// it plugged into));
 		gearShift = new Solenoid(8, 0);
+		rampDeploy = new Solenoid(11, 1);
+		platformDeploy = new Solenoid(12, 2);
 		// gearShift = new Solenoid(7, 0); //practicebot
 		gearShift.set(!open); // TODO figure out if false means closed or open
 		timer = new Timer();
@@ -254,23 +256,46 @@ public class Robot extends IterativeRobot {
 		actions[0] = new EncoderAccelerator(drive, encoderMotors, 120, NORMAL_POWER_LEVEL);
 		return actions;
 	}
-
+	
+//	public Action[] getScenarioPyramidSmashRight() {
+//		Action[] actions = new Action[5];
+//		// TODO add in new angles for turn
+//		actions[0] = new EncoderAccelerator(drive, encoderMotors, 84, NORMAL_POWER_LEVEL);
+//		actions[1] = new RotationAccelerator(drive, navSensor, 90, NORMAL_POWER_LEVEL);
+//		actions[2] = new EncoderAccelerator(drive, encoderMotors, 162, NORMAL_POWER_LEVEL);
+//		actions[3] = new RotationAccelerator(drive, navSensor, -90, NORMAL_POWER_LEVEL);
+//		actions[4] = new EncoderAccelerator(drive, encoderMotors, 48, NORMAL_POWER_LEVEL);
+//		return actions;
+//	}
+//	
+//	public Action[] getScenarioPyramidSmashLeftAlt() {
+//		Action[] actions = new Action[5];
+//		// TODO add in new angles for turn
+//		actions[0] = new EncoderAccelerator(drive, encoderMotors, 12, NORMAL_POWER_LEVEL);
+//		actions[1] = new RotationAccelerator(drive, navSensor, -90, NORMAL_POWER_LEVEL);
+//		actions[2] = new EncoderAccelerator(drive, encoderMotors, 82, NORMAL_POWER_LEVEL);
+//		actions[3] = new RotationAccelerator(drive, navSensor, 90, NORMAL_POWER_LEVEL);
+//		actions[4] = new EncoderAccelerator(drive, encoderMotors, 180, NORMAL_POWER_LEVEL);
+//		return actions;
+//	}
+	
 	public Action[] getScenarioLeftClear() {
+		System.out.println("LeftClear");
 		Action[] actions = new Action[1];
-		actions[0] = new EncoderAccelerator(drive, encoderMotors, 180, NORMAL_POWER_LEVEL);
+		actions[0] = new EncoderAccelerator(drive, encoderMotors, 204, NORMAL_POWER_LEVEL);
 		// actions[1] = new RotationAccelerator(drive, navSensor,
 		// SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
 		return actions;
 	}
 
 	public Action[] getScenarioLeftGet() {
-
+		System.out.println("LeftGet");
 		Action[] actions = new Action[2];
 		// actions.add(new RotationAccelerator(drive, navSensor,
 		// SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL));
 		// actions[0] = new RotationAccelerator(drive, navSensor,
 		// SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
-		actions[0] = new EncoderAccelerator(drive, encoderMotors, 120, NORMAL_POWER_LEVEL);
+		actions[0] = new EncoderAccelerator(drive, encoderMotors, 132, NORMAL_POWER_LEVEL);
 		actions[1] = new RotationAccelerator(drive, navSensor, 90, NORMAL_POWER_LEVEL);
 		// actions[3] = new EncoderAccelerator(drive, encoderMotors,
 		// SmartDashboard.getNumber("Forwards1", 0), NORMAL_POWER_LEVEL);
@@ -280,17 +305,19 @@ public class Robot extends IterativeRobot {
 	}
 
 	public Action[] getScenarioRightClear() {
+		System.out.println("RightClear");
 		Action[] actions = new Action[2];
-		actions[0] = new EncoderAccelerator(drive, encoderMotors, 120, NORMAL_POWER_LEVEL);
+		actions[0] = new EncoderAccelerator(drive, encoderMotors, 204, NORMAL_POWER_LEVEL);
 		// actions[1] = new RotationAccelerator(drive, navSensor, -1 * SmartDashboard.getNumber("Turn1", 0), NORMAL_POWER_LEVEL);
 		return actions;
 	}
 
 	public Action[] getScenarioRightGet() {
+		System.out.println("RightGet");
 		Action[] actions = new Action[2];
 		// actions[0] = new EncoderAccelerator(drive, encoderMotors,
 		// SmartDashboard.getNumber("Forwards2", 0), NORMAL_POWER_LEVEL);
-		actions[0] = new EncoderAccelerator(drive, encoderMotors, 120, NORMAL_POWER_LEVEL);
+		actions[0] = new EncoderAccelerator(drive, encoderMotors, 132, NORMAL_POWER_LEVEL);
 		actions[1] = new RotationAccelerator(drive, navSensor, -1 * 90, NORMAL_POWER_LEVEL);
 		// TODO add raise lift command
 		// TODO add open lift command
@@ -298,20 +325,22 @@ public class Robot extends IterativeRobot {
 	}
 
 	public Action[] getScenarioMiddleLeftClear() {
+		System.out.println("MiddleLeftClear");
 		Action[] actions = new Action[5];
 		actions[0] = new EncoderAccelerator(drive, encoderMotors, 12, NORMAL_POWER_LEVEL);
 		actions[1] = new RotationAccelerator(drive, navSensor, -90, NORMAL_POWER_LEVEL);
-		actions[2] = new EncoderAccelerator(drive, encoderMotors, 132, NORMAL_POWER_LEVEL);
+		actions[2] = new EncoderAccelerator(drive, encoderMotors, 108, NORMAL_POWER_LEVEL);
 		actions[3] = new RotationAccelerator(drive, navSensor, 90, NORMAL_POWER_LEVEL);
         actions[4] = new EncoderAccelerator(drive, encoderMotors, 180, NORMAL_POWER_LEVEL);
 		return actions;
 	}
 
 	public Action[] getScenarioMiddleRightClear() {
+		System.out.println("MiddleRightClear");
 		Action[] actions = new Action[5];
 		actions[0] = new EncoderAccelerator(drive, encoderMotors, 12, NORMAL_POWER_LEVEL);
 		actions[1] = new RotationAccelerator(drive, navSensor, 90, NORMAL_POWER_LEVEL);
-		actions[2] = new EncoderAccelerator(drive, encoderMotors, 132, NORMAL_POWER_LEVEL);
+		actions[2] = new EncoderAccelerator(drive, encoderMotors, 108, NORMAL_POWER_LEVEL);
 		actions[3] = new RotationAccelerator(drive, navSensor, -90, NORMAL_POWER_LEVEL);
         actions[4] = new EncoderAccelerator(drive, encoderMotors, 180, NORMAL_POWER_LEVEL);
 		return actions;
@@ -319,9 +348,10 @@ public class Robot extends IterativeRobot {
 
 	public Action[] getScenarioMiddleGetLeft() {
 		Action[] actions = new Action[6];
+		System.out.println("middlegetLeft");
 		actions[0] = new EncoderAccelerator(drive, encoderMotors, 12, NORMAL_POWER_LEVEL);
 		actions[1] = new RotationAccelerator(drive, navSensor, -90, NORMAL_POWER_LEVEL);
-		actions[2] = new EncoderAccelerator(drive, encoderMotors, 132, NORMAL_POWER_LEVEL);
+		actions[2] = new EncoderAccelerator(drive, encoderMotors, 108, NORMAL_POWER_LEVEL);
 		actions[3] = new RotationAccelerator(drive, navSensor, 90, NORMAL_POWER_LEVEL);
 		actions[4] = new EncoderAccelerator(drive, encoderMotors, 180, NORMAL_POWER_LEVEL);
 		actions[5] = new RotationAccelerator(drive, navSensor, 90, NORMAL_POWER_LEVEL);
@@ -331,10 +361,11 @@ public class Robot extends IterativeRobot {
 	}
 
 	public Action[] getScenarioMiddleGetRight() {
+		System.out.println("MiddleGetRight");
 		Action[] actions = new Action[6];
 		actions[0] = new EncoderAccelerator(drive, encoderMotors, 12, NORMAL_POWER_LEVEL);
 		actions[1] = new RotationAccelerator(drive, navSensor, 90, NORMAL_POWER_LEVEL);
-		actions[2] = new EncoderAccelerator(drive, encoderMotors, 132, NORMAL_POWER_LEVEL);
+		actions[2] = new EncoderAccelerator(drive, encoderMotors, 108, NORMAL_POWER_LEVEL);
 		actions[3] = new RotationAccelerator(drive, navSensor, -90, NORMAL_POWER_LEVEL);
 		actions[4] = new EncoderAccelerator(drive, encoderMotors, 180, NORMAL_POWER_LEVEL);
 		actions[5] = new RotationAccelerator(drive, navSensor, -90, NORMAL_POWER_LEVEL);
@@ -345,6 +376,10 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void autonomousInit() {
+
+		NetworkTableInstance inst = NetworkTableInstance.getDefault();
+		NetworkTable table = inst.getTable("Preferences");
+		goForCube = table.getEntry("GoForSwitch");
 		/*
 		 * default FRC code; leave it for now autoSelected =
 		 * chooser.getSelected(); autoSelected =
@@ -422,6 +457,11 @@ public class Robot extends IterativeRobot {
 			}
 
 		} else if (location == 2 && goingForSwitch) {
+//			if(switchPlateOnLeft){
+//			autoGear.futureActions = getScenarioPyramidSmashRight();
+//			} else {
+//			autoGear.futureActions = getScenarioPyramidSmashLeftAlt();
+//			}
 			if (switchPlateOnLeft) {
 				System.out.println("goingForMidLeft is running");
 				autoGear.futureActions = getScenarioMiddleGetLeft();
@@ -540,10 +580,21 @@ public class Robot extends IterativeRobot {
 							gearShift.set(open); // open it
 							gearOpen = open;
 						}
-						// System.out.println("we have/lost a box" + gearOpen);
+						
 						// // TODO
 						// delete
 						break;
+					case 2:
+						if (rampIsDeployed) {
+							rampDeploy.set(!open);
+							platformDeploy.set(!open);
+							rampIsDeployed = true;
+							System.out.println("rampDeployPiston is extended");
+						} else {
+							rampDeploy.set(open);
+							platformDeploy.set(open);
+							System.out.println("rampDeployPiston is retracted");
+						}
 					//
 					// case 2:
 					// System.out.println("Starting a new rotation!");
@@ -587,7 +638,7 @@ public class Robot extends IterativeRobot {
 		} else {
 			liftWheels.set(0);
 		}
-		
+		/*
 		if (controller.getRawButton(3)) {
 			// Button X = lift up
 			System.out.println("raising lift");
@@ -611,7 +662,7 @@ public class Robot extends IterativeRobot {
 		} else {
 			rampDeploy.set(0);
 		}
-
+*/
 		// Up=0, up-right = 1, right = 2. Goes to 7.
 		int POV = controller.getSimplePOV();
 		System.out.print(POV);

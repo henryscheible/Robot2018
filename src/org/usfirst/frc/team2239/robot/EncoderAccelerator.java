@@ -25,19 +25,31 @@ public class EncoderAccelerator implements Action {
 	double tolerance = 20; //How close (in ticks) to the final destination should you get before stopping (should not be 0. Perfection is impossible.)
 	double moveTicks; //how much to move, in inches (positive means forwards)
 	//with 107 ticksPerInch, this thing tried to go 10 inches and instead went 22
-//	double ticksPerInch = 81.5; //used to be 53.5 on the practice bot
-	double ticksPerInch = 1864;//115.5 inch
+//	double ticksPerInch = 81.5; //used to be 53.5 on the practice bot 
+	double ticksPerInch = 4*Math.PI*1024;//115.5 inch
 	double targetDistance; //the encoder value we aspire to be at when done.
 	double maxVelocityTicks = 2000; //The ticks traveled at which we start to decrease velocity at //always positive
+	double liftWheelDiameter = 7/8;//TODO decide
+//	double liftWheelDiameter = 65/32;//TODO decide
+	double idk = 2655*.0784*Math.PI*liftWheelDiameter*1024;//lift motor rpm = 2655, lift motor gear ratio .0784, ticks per rotation 1024
+	double liftWheelModifier = idk; //The difference in speed between the main motors and the motor that controls the lift
 	boolean forward; //true if we should be moving forwards, false otherwise (still or moving backwards)	
 	private boolean hasStarted = false;
 	
 	
-	public EncoderAccelerator (TechnoDrive driveTrain, WPI_TalonSRX[] motorsToLookAt, double distance, double maxVelocity) {
+	public EncoderAccelerator (TechnoDrive driveTrain, WPI_TalonSRX[]  motorsToLookAt, double distance, double maxVelocity) {
+		this(driveTrain, motorsToLookAt, distance, maxVelocity, false);
+	}
+
+	public EncoderAccelerator (TechnoDrive driveTrain, WPI_TalonSRX[]  motorsToLookAt, double distance, double maxVelocity, boolean isLiftMotor) {
 		this.forward = (distance>0);
 		this.driveTrain = driveTrain;
 		this.valueMotors = motorsToLookAt;
-		this.moveTicks = distance*ticksPerInch;
+		this.moveTicks = distance*ticksPerInch;	
+		if (isLiftMotor){
+			this.moveTicks = distance*ticksPerInch*liftWheelModifier;	
+		}
+		
 		//double encValue = getEncoderValue();
 		this.targetDistance = this.moveTicks; //encValue+this.moveTicks;
 		this.maxVelocity = maxVelocity;
@@ -68,7 +80,7 @@ public class EncoderAccelerator implements Action {
 //		System.out.println("I'm this far off: "+offDistance);
 //		System.out.println("targetDistance: "+targetDistance);
 		if (targetDistance-tolerance < curValue && curValue < targetDistance+tolerance) { //we did it!
-			driveTrain.tankDrive(0, 0); //stop driving //TODO this causes a lot of slippage when moving forwards and bakwards
+			driveTrain.tankDrive(0, 0); //stop driving //TODO this causes a lot of slippage when moving forwards and backwards
 			return true;
 		}
 		

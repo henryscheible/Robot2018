@@ -1,5 +1,6 @@
 package org.usfirst.frc.team2239.robot;
 
+import java.io.Console;
 import java.util.ArrayList;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
@@ -73,9 +74,11 @@ public class Robot extends IterativeRobot {
 	private boolean switchPlateOnLeft = false;
 	private boolean goingForSwitch = true;
 	public Timer timer; // Timer
-	public XboxController controller; // Control for the robot
+	public XboxController controller;
+	public XboxController controller2;// Control for the robot
 	public Solenoid gearShift;
-	public Solenoid rampDeploy;
+	public Solenoid openGrabber;
+	public Solenoid rampDepoy;
 //	public Solenoid platformDeploy;
 	 public Compressor myCompressor;
 	 public PowerDistributionPanel myPDP;
@@ -85,6 +88,7 @@ public class Robot extends IterativeRobot {
 	 public boolean pulling = false;
 	 public boolean liftMotorsOn = false;
 	 public boolean isSpinningSlowly = false;
+	 public boolean grabberIsOpen = true; 
 	int autoStep = 0; // 0 if autonomous has not been planned, 1 if planned but
 						// not done, 2 if done
 	double autoVolts = 0;
@@ -116,15 +120,15 @@ public class Robot extends IterativeRobot {
 	// void MotorGroupLeft(leftMotor1 leftMotor2 leftMotor3);
 	// MotorGroupRight(rightMotor2, rightMotor2, rightMotor3);
 
-	WPI_TalonSRX leftFollowerMotor2 = new WPI_TalonSRX(0);
+	WPI_TalonSRX leftFollowerMotor2 = new WPI_TalonSRX(1);
 	WPI_TalonSRX leftFollowerMotor1 = new WPI_TalonSRX(5);
 	WPI_TalonSRX rightFollowerMotor2 = new WPI_TalonSRX(6);
-	WPI_TalonSRX rightFollowerMotor1 = new WPI_TalonSRX(4);
-	WPI_TalonSRX leftLeaderMotor = new WPI_TalonSRX(7);
-	WPI_TalonSRX rightLeaderMotor = new WPI_TalonSRX(9);
-	WPI_TalonSRX liftWheelsRight = new WPI_TalonSRX(2);
-	WPI_TalonSRX liftWheelsLeft = new WPI_TalonSRX(1);
-	WPI_TalonSRX lift = new WPI_TalonSRX(3);
+	WPI_TalonSRX rightFollowerMotor1 = new WPI_TalonSRX(2);
+	WPI_TalonSRX leftLeaderMotor = new WPI_TalonSRX(3);
+	WPI_TalonSRX rightLeaderMotor = new WPI_TalonSRX(4);
+	WPI_TalonSRX liftWheelsRight = new WPI_TalonSRX(9);
+	WPI_TalonSRX liftWheelsLeft = new WPI_TalonSRX(7);
+	WPI_TalonSRX lift = new WPI_TalonSRX(10);
 	//WPI_TalonSRX rampDeploy = new WPI_TalonSRX(11);
 
 	// 3s are old lead motors
@@ -170,24 +174,25 @@ public class Robot extends IterativeRobot {
 		gameData = DriverStation.getInstance().getGameSpecificMessage();
 		location = DriverStation.getInstance().getLocation();
 
-		 myCompressor = new Compressor(10);
+		 myCompressor = new Compressor(14);//this CAN ID has to match the PCM CAN ID
 		 myCompressor.start();
-//		 myCompressor.setClosedLoopControl(true);
+		 myCompressor.setClosedLoopControl(true);
 
 //		 gearShift = new Solenoid() (CAN ID on dashboard, channel on PCM (what's it plugged into));
-		gearShift = new Solenoid(8, 0);
-		rampDeploy = new Solenoid(11, 1);
-//		platformDeploy = new Solenoid(12, 2);
-		gearShift = new Solenoid(7, 0); //practicebot
+		gearShift = new Solenoid(8,3);
+//		rampDeploy = new Solenoid(11,1);
+		openGrabber = new Solenoid(14,2);
+//		platformDeploy = new Solenoid(12,2);
+		
 		gearShift.set(!open); // TODO figure out if false means closed or open
 		timer = new Timer();
 		controller = new XboxController(0);
+		controller2 = new XboxController(1); 
 
 		// myPDP = new PowerDistributionPanel();
 		// myPDP.getVoltage();
 		try {
-			navSensor = new AHRS(
-					SPI.Port.kMXP); /*
+			navSensor = new AHRS(SPI.Port.kMXP); /*
 									 * Alternatives: SerialPort.Port.kMXP,
 									 * I2C.Port.kMXP or SerialPort.Port.kUSB
 									 */
@@ -257,7 +262,10 @@ public class Robot extends IterativeRobot {
 	public Action[] getScenarioTestDrive() {
 		System.out.println("testDrive start");
 		Action[] actions = new Action[1];
-		actions[0] = new EncoderAccelerator(drive, encoderMotors, 10, .8);
+		
+		actions[0] = new EncoderAccelerator(drive, encoderMotors, 1, 1);
+		System.out.println("TestDrive");
+		//inches,power
 		return actions;
 	}
 	
@@ -270,8 +278,7 @@ public class Robot extends IterativeRobot {
 	public Action[] getScenarioTestShoot() {
 		Action[] actions = new Action[1];
 		actions[0] = new GrabberAccelerator(2.5, 1, liftWheels);
-		return actions
-					;
+		return actions;
 	}
 	
 //	public Action[] getScenarioPyramidSmashRight() {
@@ -496,9 +503,16 @@ public class Robot extends IterativeRobot {
 //				autoGear.futureActions = getScenarioMiddleLeftClear();
 //			}
 //		}
-		autoGear.futureActions = getScenarioTestTurn();
+//		autoGear.futureActions = getScenarioTestDrive();
+		timer.start();
+		while(timer.get() <= 4.0){
+			left.set(-.75);
+			right.set(.78);
+		}
+		timer.reset();
 		curAction = null;
 	}
+	//left: rots, right: rot
 
 	/**
 	 * This function is called periodically during autonomous
@@ -528,6 +542,9 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
+		
+//		System.out.println("*******"+myCompressor.getPressureSwitchValue());
+		
 		// System.out.println("Running teleop periodic!");
 		// if (curAction == null) {
 		// System.out.println("auto accelerator is null");
@@ -546,106 +563,152 @@ public class Robot extends IterativeRobot {
 		//
 		// SmartDashboard.putBoolean("Trigger", toggleReadys[0]); //TODO
 		// uncomment
-
-		boolean[] triggers = new boolean[toggleAmt];
-		// Go through each toggle
-		// Set all the values in triggers appropriately.
-		for (int index = 0; index < toggleAmt; index++) {
-			// 0: Speed changing
-			// 1: Gear
-			// 2: Auto turn
-
-			// see if the buttons are pushed down or not
-			switch (index) {
-			
-			case 0:
-				triggers[index] = controller.getRawButton(5) || controller.getRawButton(6);
-				break;
-			case 1:
-				triggers[index] = controller.getRawButton(7);
-			case 2:
-				triggers[index] = controller.getRawButton(1);
-			default:
-				break; // we are no longer using this toggle button
-			}
-
-			// actually update/run
-			boolean isReady = toggleReadys[index]; // is this button ready to be
-													// activated/pressed down
-			boolean isTriggered = triggers[index];
-			if (isReady) {
-				if (isTriggered) { // button is down and this is the first time
-									// I've noticed
-					// fire the trigger; the button has been pressed!
-					switch (index) {
-					
-					case 0:
-						if (gearIsOpen) {
-							// TODO if these are changed, make sure the pipes
-							// are switched on SpiderBot
-							gearShift.set(!open); // close it //TODO make sure
-													// these are accurate
-							gearIsOpen = !open;
-						} else {
-							gearShift.set(open); // open it
-							gearIsOpen = open;
-						}
-						
-						// // TODO
-						// delete
-						break; 
-//					case 1:
-//						if (!isSpinningSlowly) {
-//							System.out.println("keeping cube in grabber");
-//							isSpinningSlowly = true;
+//
+//		boolean[] triggers = new boolean[toggleAmt];
+//		// Go through each toggle
+//		// Set all the values in triggers appropriately.
+//		
+//		
+//		
+//		for (int index = 0; index < toggleAmt; index++) {
+//			// 0: Gear Shift
+//			// 1: Open/Close Grabber
+//			// 2: Speed Change
+//
+//			// see if the buttons are pushed down or not
+//			switch (index) {
+//			
+//			case 0:
+//				triggers[index] = controller.getRawButton(5) || controller.getRawButton(6);
+//				break;
+//			case 1:
+//				triggers[index] = controller2.getRawButton(5) || controller2.getRawButton(6);
+//				break;
+//			case 2:
+//				triggers[index] = controller.getRawButton(1);
+//		 
+//			default:
+//				break; // we are no longer using this toggle button
+//			}
+//
+//			// actually update/run
+//			boolean isReady = toggleReadys[index]; // is this button ready to be
+//													// activated/pressed down
+//			boolean isTriggered = triggers[index];
+//			if (isReady) {
+//				if (isTriggered) { // button is down and this is the first time
+//									// I've noticed
+//					// fire the trigger; the button has been pressed!
+//					System.out.println("Checking index...");
+//					switch (index) {
+//					
+//					case 0:
+//						if (gearIsOpen) {
+//							// TODO if these are changed, make sure the pipes
+//							// are switched on SpiderBot
+//							gearShift.set(false); // close it //TODO make sure
+//													// these are accurate
+//							gearIsOpen = false;
+//							System.out.println("not open");
 //						} else {
-//							isSpinningSlowly = false;
+//							gearShift.set(true); // open it
+//							gearIsOpen = true;
+//							System.out.println("open");
+//
+//						}
+//						
+//						// // TODO
+//						// delete
+//						break; 
+//					
+//					case 1:
+//						
+//						if (grabberIsOpen) {
+//							System.out.println("grabber closed");
+//							openGrabber.set(false);
+//							grabberIsOpen = false;
+//							
+//						} else {
+//							System.out.println("grabber opened");
+//							openGrabber.set(true);
+//							grabberIsOpen = true;
 //						}
 //						break;
-					case 2:
-						if (speed == 1){
-							speed = .7;
-						} else {
-							speed = 1;
-						}
-						
-					//
-					// case 2:
-					// System.out.println("Starting a new rotation!");
-					// double turnAngle = 180;
-					// //public RotationAccelerationHelper (TechnoDrive
-					// driveTrain, AHRS navSensor, double turnAngle, double
-					// maxVelocity)
-					// curAction = new RotationAccelerator(drive, navSensor,
-					// turnAngle, .8);
-					// break;
-					//
-
-					default:
-						break; // we are no longer using this toggle button
-
-					}
-					toggleReadys[index] = false; // Don't notice it anymore
-													// until the button is
-													// lifted up
-				}
-			} else { // if not ready
-				if (!isTriggered) { // button is no longer up (or just isn't up)
-					toggleReadys[index] = true; // I'm ready for it to be pushed
-												// down again
-				}
-			}
-		}
-
-		SmartDashboard.putBoolean("Turn is triggered", triggers[2]);
+//					case 2:
+//						if (speed == 1){
+//							speed = .7;
+//						} else {
+//							speed = 1;
+//						}
+//						
+//					//
+//					// case 2:
+//					// System.out.println("Starting a new rotation!");
+//					// double turnAngle = 180;
+//					// //public RotationAccelerationHelper (TechnoDrive
+//					// driveTrain, AHRS navSensor, double turnAngle, double
+//					// maxVelocity)
+//					// curAction = new RotationAccelerator(drive, navSensor,
+//					// turnAngle, .8);
+//					// break;
+//					//
+//					
+//					default:
+//						break; // we are no longer using this toggle button
+//
+//					}
+//					toggleReadys[index] = false; // Don't notice it anymore
+//													// until the button is
+//													// lifted up
+//				}
+//			} else { // if not ready
+//				if (!isTriggered) { // button is no longer up (or just isn't up)
+//					toggleReadys[index] = true; // I'm ready for it to be pushed
+//												// down again
+//				}
+//			}
+//		}
 
 		runAction();
-		
-		if (controller.getTrigger(XboxController.Hand.kRight)) {
+		if (controller.getRawButtonPressed(5)||controller.getRawButtonPressed(6)) {
+			if (gearIsOpen) {
+				// TODO if these are changed, make sure the pipes
+				// are switched on SpiderBot
+				gearShift.set(false); // close it //TODO make sure
+										// these are accurate
+				gearIsOpen = false;
+				System.out.println("not open");
+			} else {
+				gearShift.set(true); // open it
+				gearIsOpen = true;
+				System.out.println("open");
+
+			}
+		}
+		if (controller2.getRawButtonPressed(5)||controller.getRawButtonPressed(6)) {
+			if (grabberIsOpen) {
+				System.out.println("grabber closed");
+				openGrabber.set(false);
+				grabberIsOpen = false;
+				
+			} else {
+				System.out.println("grabber opened");
+				openGrabber.set(true);
+				grabberIsOpen = true;
+			}
+		}
+		if (controller.getRawButtonPressed(1)) {
+			if (speed == 1){
+				speed = .7;
+			} else {
+				speed = 1;
+			}
+		}
+		if (controller2.getTrigger(XboxController.Hand.kRight)) {
 			// Push in the right stick to push the cube
 			System.out.println("picking up cube");
 			liftWheels.set(-1);
-		} else if (controller.getTrigger(XboxController.Hand.kLeft)) {
+		} else if (controller2.getTrigger(XboxController.Hand.kLeft)) {
 			// Push in the left stick to pull the cube
 			System.out.println("pushing out cube");
 			liftWheels.set(1);
@@ -665,13 +728,13 @@ public class Robot extends IterativeRobot {
 			lift.set(0);
 		}
 		
-		if (controller.getRawButton(8)) {
-			// Start Button = lower ramp
-			System.out.println("lowering ramp");
-			rampDeploy.set(open);
-		} else {
-			rampDeploy.set(!open);
-		}
+//		if (controller.getRawButton(8)) {
+//			// Start Button = lower ramp
+//			System.out.println("lowering ramp");
+//			rampDeploy.set(open);
+//		} else {
+//			rampDeploy.set(!open);
+//		}
 
 		// Up=0, up-right = 1, right = 2. Goes to 7.
 		int POV = controller.getSimplePOV();

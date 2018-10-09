@@ -126,15 +126,15 @@ public class Robot extends IterativeRobot {
 	WPI_TalonSRX rightFollowerMotor1 = new WPI_TalonSRX(2);
 	WPI_TalonSRX leftLeaderMotor = new WPI_TalonSRX(3);
 	WPI_TalonSRX rightLeaderMotor = new WPI_TalonSRX(4);
-	WPI_TalonSRX liftWheelsRight = new WPI_TalonSRX(9);
-	WPI_TalonSRX liftWheelsLeft = new WPI_TalonSRX(7);
+	WPI_TalonSRX grabberWheelsRight = new WPI_TalonSRX(9);
+	WPI_TalonSRX grabberWheelsLeft = new WPI_TalonSRX(7);
 	WPI_TalonSRX lift = new WPI_TalonSRX(10);
 	//WPI_TalonSRX rampDeploy = new WPI_TalonSRX(11);
 
 	// 3s are old lead motors
 	SpeedControllerGroup left = new SpeedControllerGroup(leftLeaderMotor, leftFollowerMotor1, leftFollowerMotor2);
 	SpeedControllerGroup right = new SpeedControllerGroup(rightLeaderMotor, rightFollowerMotor1, rightFollowerMotor2);
-	SpeedControllerGroup liftWheels = new SpeedControllerGroup(liftWheelsLeft, liftWheelsRight);
+	SpeedControllerGroup grabberWheels = new SpeedControllerGroup(grabberWheelsLeft, grabberWheelsRight);
 	WPI_TalonSRX[] encoderMotors = new WPI_TalonSRX[] { rightFollowerMotor2 };
 	WPI_TalonSRX[] encoderLiftMotor = new WPI_TalonSRX[] { lift };
 	// TODO fix just testing
@@ -224,7 +224,7 @@ public class Robot extends IterativeRobot {
 		/*
 		 * Because the lift wheels run in opposite directions, we need to invert one of them
 		 */
-//		liftWheelsLeft.setInverted(true);
+//		grabberWheelsLeft.setInverted(true);
 		
 		
 		for (int i = 0; i < encoderMotors.length; i++) {
@@ -277,7 +277,7 @@ public class Robot extends IterativeRobot {
 	
 	public Action[] getScenarioTestShoot() {
 		Action[] actions = new Action[1];
-		actions[0] = new GrabberAccelerator(2.5, 1, liftWheels);
+		actions[0] = new GrabberAccelerator(2.5, 1, grabberWheels);
 		return actions;
 	}
 	
@@ -324,7 +324,7 @@ public class Robot extends IterativeRobot {
 		// actions[3] = new EncoderAccelerator(drive, encoderMotors,
 		// SmartDashboard.getNumber("Forwards1", 0), NORMAL_POWER_LEVEL);
 		actions[2] = new EncoderAccelerator(drive, encoderLiftMotor, 10, NORMAL_POWER_LEVEL, true);
-		actions[3] = new GrabberAccelerator(2.5, 1, liftWheels);
+		actions[3] = new GrabberAccelerator(2.5, 1, grabberWheels);
 		return actions;
 	}
 
@@ -344,7 +344,7 @@ public class Robot extends IterativeRobot {
 		actions[0] = new EncoderAccelerator(drive, encoderMotors, 132, NORMAL_POWER_LEVEL);
 		actions[1] = new RotationAccelerator(drive, navSensor, -1 * 90, NORMAL_POWER_LEVEL);
 		actions[2] = new EncoderAccelerator(drive, encoderLiftMotor, 10, NORMAL_POWER_LEVEL, true);
-		actions[3] = new GrabberAccelerator(2.5, 1, liftWheels);
+		actions[3] = new GrabberAccelerator(2.5, 1, grabberWheels);
 		return actions;
 	}
 
@@ -380,7 +380,7 @@ public class Robot extends IterativeRobot {
 		actions[4] = new EncoderAccelerator(drive, encoderMotors, 180, NORMAL_POWER_LEVEL);
 		actions[5] = new RotationAccelerator(drive, navSensor, 90, NORMAL_POWER_LEVEL);
 		actions[6] = new EncoderAccelerator(drive, encoderLiftMotor, 10, NORMAL_POWER_LEVEL, true);
-		actions[7] = new GrabberAccelerator(2.5, 1, liftWheels);
+		actions[7] = new GrabberAccelerator(2.5, 1, grabberWheels);
 		return actions;
 	}
 
@@ -394,7 +394,7 @@ public class Robot extends IterativeRobot {
 		actions[4] = new EncoderAccelerator(drive, encoderMotors, 180, NORMAL_POWER_LEVEL);
 		actions[5] = new RotationAccelerator(drive, navSensor, -90, NORMAL_POWER_LEVEL);
 		actions[6] = new EncoderAccelerator(drive, encoderLiftMotor, 10, NORMAL_POWER_LEVEL, true);
-		actions[7] = new GrabberAccelerator(2.5, 1, liftWheels);
+		actions[7] = new GrabberAccelerator(2.5, 1, grabberWheels);
 		return actions;
 	}
 
@@ -707,13 +707,13 @@ public class Robot extends IterativeRobot {
 		if (controller2.getTrigger(XboxController.Hand.kRight)) {
 			// Push in the right stick to push the cube
 			System.out.println("picking up cube");
-			liftWheels.set(-1);
+			grabberWheels.set(-1);
 		} else if (controller2.getTrigger(XboxController.Hand.kLeft)) {
 			// Push in the left stick to pull the cube
 			System.out.println("pushing out cube");
-			liftWheels.set(1);
+			grabberWheels.set(1);
 		} else {
-			liftWheels.set(0);
+			grabberWheels.set(0);
 		}
 		
 		if (controller.getRawButton(3)) {

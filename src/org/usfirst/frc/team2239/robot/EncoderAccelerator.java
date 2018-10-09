@@ -26,7 +26,7 @@ public class EncoderAccelerator implements Action {
 	double moveTicks; //how much to move, in inches (positive means forwards)
 	//with 107 ticksPerInch, this thing tried to go 10 inches and instead went 22
 //	double ticksPerInch = 81.5; //used to be 53.5 on the practice bot 
-	double ticksPerInch = 4*Math.PI*1024;//115.5 inch
+	double ticksPerInch = 10000;//4*Math.PI*1024;//115.5 inch
 	double targetDistance; //the encoder value we aspire to be at when done.
 	double maxVelocityTicks = 2000; //The ticks traveled at which we start to decrease velocity at //always positive
 	double liftWheelDiameter = 7/8;//TODO decide
@@ -73,12 +73,12 @@ public class EncoderAccelerator implements Action {
 			return false;
 		}
 		
-//		System.out.println("Im actually moving straight!");
+		System.out.println("Im actually moving straight!");
 		double curValue = getEncoderValue();
-//		System.out.println("curValue: " + curValue);
+		System.out.println("curValue: " + curValue);
 		double offDistance = (targetDistance-curValue);
-//		System.out.println("I'm this far off: "+offDistance);
-//		System.out.println("targetDistance: "+targetDistance);
+		System.out.println("I'm this far off: "+offDistance);
+		System.out.println("targetDistance: "+targetDistance);
 		if (targetDistance-tolerance < curValue && curValue < targetDistance+tolerance) { //we did it!
 			driveTrain.tankDrive(0, 0); //stop driving //TODO this causes a lot of slippage when moving forwards and backwards
 			return true;
@@ -89,7 +89,7 @@ public class EncoderAccelerator implements Action {
 			maxVelocity = Math.max(maxVelocity - rollPastDecrease, offset);
 //			curVelocity = 0; //stop it from swinging past
 			driveTrain.tankDrive(0, 0); // Actually stop it if we're not doing the back up code
-//			System.out.println("Swung past the target!");
+			System.out.println("Swung past the target!");
 			return true; // This line disables the backup code!!! Comment out to re-enable it.
 		}
 		forward = shouldBeForwards;
@@ -101,10 +101,10 @@ public class EncoderAccelerator implements Action {
 			targetVelocity = Math.max(((maxVelocity-offset)/maxVelocityTicks)*offDistance-offset, -maxVelocity);
 		}
 		
-//		System.out.println("Target velocity before setting is: "+targetVelocity);
-//		System.out.println("curVelocity before setting is: "+curVelocity);
+		System.out.println("Target velocity before setting is: "+targetVelocity);
+		System.out.println("curVelocity before setting is: "+curVelocity);
 		if (forward) {
-//			System.out.println("We're going forwards");
+			System.out.println("We're going forwards");
 			if (targetVelocity > curVelocity+accelerate) { //if I'm going slower than I should, ramp up to it
 				curVelocity = curVelocity+accelerate;
 			} else {
@@ -112,7 +112,7 @@ public class EncoderAccelerator implements Action {
 			}
 			curVelocity = Math.min(curVelocity, maxVelocity);
 		} else {
-//			System.out.println("We're going counterclockwise");
+			System.out.println("We're going counterclockwise");
 			if (targetVelocity < curVelocity-accelerate) { //if I'm going slower than I should, ramp up to it
 				curVelocity = curVelocity-accelerate;
 			} else {
@@ -120,8 +120,8 @@ public class EncoderAccelerator implements Action {
 			}
 			curVelocity = Math.max(curVelocity, -maxVelocity);
 		}
-//		System.out.println("Target velocity is: "+targetVelocity);
-//		System.out.println("Actually driving at: " + curVelocity);
+		System.out.println("Target velocity is: "+targetVelocity);
+		System.out.println("Actually driving at: " + curVelocity);
 		driveTrain.tankDrive(curVelocity, curVelocity); //actually drive
 		return false;
 	}

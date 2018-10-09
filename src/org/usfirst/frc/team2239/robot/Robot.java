@@ -51,13 +51,13 @@ public class Robot extends IterativeRobot {
 	final double halfYFov = Math.toRadians(32.5) / 2.0; // half the vertical
 														// field of vision
 														// (radians)
-														// //fiddleable (you can
+														// fiddleable (you can
 														// change this value for
 														// calibration)
 	final double halfXFov = Math.toRadians(60) / 2.0; // half the horizontal
 														// field of vision
 														// (radians)
-														// //fiddleable
+														// fiddleable
 	final double realTapeHeight = 5; // height of the strip of tape (inches)
 	final double spread = 8.25; // distance between the centers of the strips of
 								// tape (inches)
@@ -79,18 +79,18 @@ public class Robot extends IterativeRobot {
 	public Solenoid gearShift;
 	public Solenoid openGrabber;
 	public Solenoid rampDepoy;
-//	public Solenoid platformDeploy;
-	 public Compressor myCompressor;
-	 public PowerDistributionPanel myPDP;
+	// public Solenoid platformDeploy;
+	public Compressor myCompressor;
+	public PowerDistributionPanel myPDP;
 	public GearStateMachine autoGear;
-	 public String defaultAutoName = "middle";
-	 public boolean pushing = false;
-	 public boolean pulling = false;
-	 public boolean liftMotorsOn = false;
-	 public boolean isSpinningSlowly = false;
-	 public boolean grabberIsOpen = true; 
-	int autoStep = 0; // 0 if autonomous has not been planned, 1 if planned but
-						// not done, 2 if done
+	public String defaultAutoName = "middle";
+	public boolean pushing = false;
+	public boolean pulling = false;
+	public boolean liftMotorsOn = false;
+	public boolean isSpinningSlowly = false;
+	public boolean grabberIsOpen = true; 
+	int autoStep = 0; // 0 if autonomous has not been planned, 1 if
+					  // planned but not done, 2 if done
 	double autoVolts = 0;
 	double maxAutoVolts = .8;
 	// double testAngle = 0;
@@ -106,8 +106,8 @@ public class Robot extends IterativeRobot {
 	AHRS navSensor; // The navigation sensor object
 	int toggleAmt = 3; // how many different buttons are toggling
 	boolean[] toggleReadys = new boolean[toggleAmt]; // {speedToggleReady,
-														// gearToggleReady,
-														// turnToggle}
+													 // gearToggleReady,
+													 // turnToggle}
 	boolean gearIsOpen = false;
 	boolean rampIsDeployed = false;
 	Action curAction = null;
@@ -115,7 +115,7 @@ public class Robot extends IterativeRobot {
 
 	double speed = 1;
 	AccelerationHelper baseline;
-	// drive = new TechnoDrive(4,1,3,2);//small bot
+	// drive = new TechnoDrive(4,1,3,2); // small bot
 	// TODO make sure you change this for SpiderBot
 	// void MotorGroupLeft(leftMotor1 leftMotor2 leftMotor3);
 	// MotorGroupRight(rightMotor2, rightMotor2, rightMotor3);
@@ -129,7 +129,7 @@ public class Robot extends IterativeRobot {
 	WPI_TalonSRX grabberWheelsRight = new WPI_TalonSRX(9);
 	WPI_TalonSRX grabberWheelsLeft = new WPI_TalonSRX(7);
 	WPI_TalonSRX lift = new WPI_TalonSRX(10);
-	//WPI_TalonSRX rampDeploy = new WPI_TalonSRX(11);
+	// WPI_TalonSRX rampDeploy = new WPI_TalonSRX(11);
 
 	// 3s are old lead motors
 	SpeedControllerGroup left = new SpeedControllerGroup(leftLeaderMotor, leftFollowerMotor1, leftFollowerMotor2);
@@ -139,8 +139,8 @@ public class Robot extends IterativeRobot {
 	WPI_TalonSRX[] encoderLiftMotor = new WPI_TalonSRX[] { lift };
 	// TODO fix just testing
 	TechnoDrive drive = new TechnoDrive(left, right); // class that handles
-														// basic drive
-														// operations
+													  // basic drive
+													  // operations
 	Boolean open = true;
 	private int location;
 	
@@ -163,7 +163,7 @@ public class Robot extends IterativeRobot {
 
 		
 
-//		CameraServer.getInstance().startAutomaticCapture();
+		// CameraServer.getInstance().startAutomaticCapture();
 
 		// Default all the "ready"s to true. No buttons should be pressed at the
 		// start, therefore all should be ready to be pressed.
@@ -174,15 +174,15 @@ public class Robot extends IterativeRobot {
 		gameData = DriverStation.getInstance().getGameSpecificMessage();
 		location = DriverStation.getInstance().getLocation();
 
-		 myCompressor = new Compressor(14);//this CAN ID has to match the PCM CAN ID
-		 myCompressor.start();
-		 myCompressor.setClosedLoopControl(true);
+		myCompressor = new Compressor(14);//this CAN ID has to match the PCM CAN ID
+		myCompressor.start();
+		myCompressor.setClosedLoopControl(true);
 
-//		 gearShift = new Solenoid() (CAN ID on dashboard, channel on PCM (what's it plugged into));
+		// gearShift = new Solenoid() (CAN ID on dashboard, channel on PCM (what's it plugged into));
 		gearShift = new Solenoid(8,3);
-//		rampDeploy = new Solenoid(11,1);
+		// rampDeploy = new Solenoid(11,1);
 		openGrabber = new Solenoid(14,2);
-//		platformDeploy = new Solenoid(12,2);
+		// platformDeploy = new Solenoid(12,2);
 		
 		gearShift.set(!open); // TODO figure out if false means closed or open
 		timer = new Timer();
@@ -867,8 +867,8 @@ public class Robot extends IterativeRobot {
 		try {
 			for (int i = 0; i < contours.length; i++) { // for each contour
 				Contour contour = new Contour(); // create default Contour with
-													// all values at default
-													// value
+												 // all values at default
+												 // value
 				contour.x = contourPropertyArrays[0][i];
 				contour.y = contourPropertyArrays[1][i];
 				contour.w = contourPropertyArrays[2][i];

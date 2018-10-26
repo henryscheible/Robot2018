@@ -44,7 +44,9 @@ public class RotationAccelerator implements Action {
 			return false;
 		}
 
-//		System.out.println("Im actually rotating!");
+		
+		
+/*//		System.out.println("Im actually rotating!");
 		double curAngle = getAngle();
 		double offAngle = (targetAngle-curAngle);
 //		System.out.println("I'm this far off: "+offAngle);
@@ -91,7 +93,7 @@ public class RotationAccelerator implements Action {
 //		System.out.println("Actually driving at: " + curVelocity);
 		driveTrain.tankDrive(curVelocity, -curVelocity); //actually drive
 		return false;
-	}
+	}*/
 	
 	public double getAngle() {
 //		System.out.println("the degrees from nav sensor: " + navSensor.getAngle());

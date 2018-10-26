@@ -27,6 +27,7 @@ public class AutonomousAccelerator implements Action {
 	private double leftDistance;
 	private double rightDistance;
 	private double time;
+	private double moveTicks = 4*Math.PI*1024;
 	public AutonomousAccelerator(SpeedControllerGroup left, SpeedControllerGroup right, SpeedControllerGroup grabberWheels, WPI_TalonSRX lift, WPI_TalonSRX encoderLeft, WPI_TalonSRX encoderRight, Solenoid grabberSolenoid, double leftSpeed, double rightSpeed, double grabberWheelsSpeed, double liftSpeed,  boolean grabberState, double leftDistance, double rightDistance, double time) {
 		this.left = left;
 		this.right = right;
@@ -64,6 +65,8 @@ public class AutonomousAccelerator implements Action {
 		}
 		else if(leftDistance > 0 || rightDistance > 0){
 			while(getEncoderValue(encoderLeft) >= leftDistance && getEncoderValue(encoderRight) >= rightDistance){
+				System.out.println("current encoder value left: " + getEncoderValue(encoderLeft));
+				System.out.println("current encoder value right: " + getEncoderValue(encoderRight));
 				left.set(leftSpeed);
 				right.set(rightSpeed);
 				grabberWheels.set(grabberWheelsSpeed);
@@ -73,7 +76,7 @@ public class AutonomousAccelerator implements Action {
 			return true;
 		}
 		else if(leftDistance < 0 || rightDistance < 0){
-			while(getEncoderValue(encoderLeft) <= leftDistance && getEncoderValue(encoderRight) <= rightDistance){
+			while(getEncoderValue(encoderLeft) <= leftDistance*moveTicks && getEncoderValue(encoderRight) <= rightDistance*moveTicks){
 				left.set(leftSpeed);
 				right.set(rightSpeed);
 				grabberWheels.set(grabberWheelsSpeed);

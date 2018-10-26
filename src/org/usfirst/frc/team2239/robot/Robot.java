@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 //TODO double check for double imports
 //TODO check for unused imports (don't just delete them; think about if what was using them is missing)
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -76,6 +77,7 @@ public class Robot extends IterativeRobot {
 	public Timer timer; // Timer
 	public XboxController controller;
 	public XboxController controller2;// Control for the robot
+	public Joystick alternate;
 	public Solenoid gearShift;
 	public Solenoid openGrabber;
 	public Solenoid rampDepoy;
@@ -89,6 +91,8 @@ public class Robot extends IterativeRobot {
 	public boolean liftMotorsOn = false;
 	public boolean isSpinningSlowly = false;
 	public boolean grabberIsOpen = true; 
+	public boolean xboxControl = true;
+	public boolean controlSwapEnabled = false;
 	int autoStep = 0; // 0 if autonomous has not been planned, 1 if
 					  // planned but not done, 2 if done
 	double autoVolts = 0;
@@ -135,7 +139,7 @@ public class Robot extends IterativeRobot {
 	SpeedControllerGroup left = new SpeedControllerGroup(leftLeaderMotor, leftFollowerMotor1, leftFollowerMotor2);
 	SpeedControllerGroup right = new SpeedControllerGroup(rightLeaderMotor, rightFollowerMotor1, rightFollowerMotor2);
 	SpeedControllerGroup grabberWheels = new SpeedControllerGroup(grabberWheelsLeft, grabberWheelsRight);
-	WPI_TalonSRX[] encoderMotors = new WPI_TalonSRX[] { rightFollowerMotor2 };
+	WPI_TalonSRX[] encoderMotors = new WPI_TalonSRX[] { rightFollowerMotor2, leftFollowerMotor1};
 	WPI_TalonSRX[] encoderLiftMotor = new WPI_TalonSRX[] { lift };
 	// TODO fix just testing
 	TechnoDrive drive = new TechnoDrive(left, right); // class that handles
@@ -179,7 +183,7 @@ public class Robot extends IterativeRobot {
 		myCompressor.setClosedLoopControl(true);
 
 		// gearShift = new Solenoid() (CAN ID on dashboard, channel on PCM (what's it plugged into));
-		gearShift = new Solenoid(8,3);
+		gearShift = new Solenoid(14, 3);
 		// rampDeploy = new Solenoid(11,1);
 		openGrabber = new Solenoid(14,2);
 		// platformDeploy = new Solenoid(12,2);
@@ -188,6 +192,7 @@ public class Robot extends IterativeRobot {
 		timer = new Timer();
 		controller = new XboxController(0);
 		controller2 = new XboxController(1); 
+		alternate = new Joystick(1);
 
 		// myPDP = new PowerDistributionPanel();
 		// myPDP.getVoltage();
@@ -262,8 +267,9 @@ public class Robot extends IterativeRobot {
 	public Action[] getScenarioTestDrive() {
 		System.out.println("testDrive start");
 		Action[] actions = new Action[1];
-		
-		actions[0] = new EncoderAccelerator(drive, encoderMotors, 1, 1);
+		actions[0] = new AutonomousAccelerator(left, right, grabberWheels, lift, leftFollowerMotor1, rightFollowerMotor2, openGrabber, -1.0, .35, .1, -.1,  true, 12, 12, 0);
+//		actions[0] = new AutonomousAccelerator(left, right, grabberWheels, lift, leftFollowerMotor1, rightFollowerMotor, openGrabber, -1.0, 1.0, .1, -.1,  true, 0, 0, 2.0);
+//		actions[0] = new EncoderAccelerator(drive, encoderMotors, 1, 1);
 		System.out.println("TestDrive");
 		//inches,power
 		return actions;
@@ -503,13 +509,17 @@ public class Robot extends IterativeRobot {
 //				autoGear.futureActions = getScenarioMiddleLeftClear();
 //			}
 //		}
-//		autoGear.futureActions = getScenarioTestDrive();
-		timer.start();
-		while(timer.get() <= 4.0){
-			left.set(-.75);
-			right.set(.78);
-		}
-		timer.reset();
+		autoGear.futureActions = getScenarioTestDrive();
+				
+		
+				
+//				
+//		timer.start();
+//		while(timer.get() <= 3.0){
+//			left.set(-1.0);
+//			right.set(.35);//.78
+//		}
+//		timer.reset();
 		curAction = null;
 	}
 	//left: rots, right: rot
@@ -685,7 +695,27 @@ public class Robot extends IterativeRobot {
 
 			}
 		}
-		if (controller2.getRawButtonPressed(5)||controller.getRawButtonPressed(6)) {
+		
+		if((alternate.getRawButtonPressed(7)&&alternate.getRawButtonPressed(12)||(controller.getRawButton(2)&&controller.getRawButton(9)))){
+			if(controlSwapEnabled){
+				System.out.println("controlSwapDisabled");
+				controlSwapEnabled = false;
+			}else{
+				System.out.println("controlSwapEnabled");
+				controlSwapEnabled = true;
+			}
+		}
+		
+		if((alternate.getRawButtonPressed(2)||controller.getRawButtonPressed(7))&&controlSwapEnabled){
+			//Xbox controller BACK
+			if(xboxControl){
+				xboxControl = false;
+			}else{
+				xboxControl = true;
+			}
+		}
+		
+		if (/*controller2.getRawButtonPressed(5)||controller2.getRawButtonPressed(6)||*/alternate.getRawButtonPressed(3)) {
 			if (grabberIsOpen) {
 				System.out.println("grabber closed");
 				openGrabber.set(false);
@@ -704,11 +734,11 @@ public class Robot extends IterativeRobot {
 				speed = 1;
 			}
 		}
-		if (controller2.getTrigger(XboxController.Hand.kRight)) {
+		if (/*controller2.getTrigger(XboxController.Hand.kRight)||*/alternate.getRawButton(5)) {
 			// Push in the right stick to push the cube
 			System.out.println("picking up cube");
 			grabberWheels.set(-1);
-		} else if (controller2.getTrigger(XboxController.Hand.kLeft)) {
+		} else if (/*controller2.getTrigger(XboxController.Hand.kLeft)||*/alternate.getRawButton(1)) {
 			// Push in the left stick to pull the cube
 			System.out.println("pushing out cube");
 			grabberWheels.set(1);
@@ -716,11 +746,11 @@ public class Robot extends IterativeRobot {
 			grabberWheels.set(0);
 		}
 		
-		if (controller.getRawButton(3)) {
+		if (/*controller2.getRawButton(3)||*/alternate.getRawButton(6)) {
 			// Button X = lift up
 			System.out.println("raising lift");
 			lift.set(1);
-		} else if (controller.getRawButton(4)) {
+		} else if (/*controller2.getRawButton(4)||*/alternate.getRawButton(4)) {
 			// Button Y = lift down
 			System.out.println("lowering lift");
 			lift.set(-1);
@@ -768,6 +798,7 @@ public class Robot extends IterativeRobot {
 	// }
 
 	public void runAction(boolean teleop) {
+		
 		// System.out.println("POV: " + controller.getSimplePOV());
 		if (curAction != null) {
 			if (teleop && controller.getSimplePOV() == 2) { // If the button
@@ -803,8 +834,10 @@ public class Robot extends IterativeRobot {
 					// System.out.println("Accelerator not finished yet.");
 				}
 			}
-		} else if (teleop) {
+		} else if (teleop&& xboxControl) {
 			drive.tankDrive(controller, speed);
+		}else if (teleop){
+			drive.arcadeDrive(alternate.getRawAxis(1), -alternate.getRawAxis(0));
 		}
 	}
 

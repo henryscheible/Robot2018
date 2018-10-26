@@ -65,7 +65,7 @@ public class TechnoDrive extends DifferentialDrive {
     }
     
     public void tankDrive(XboxController controller, double speed) {
-    	tankDrive(-controller.getY(XboxController.Hand.kLeft)*speed, -controller.getY(XboxController.Hand.kRight)*speed);
+    	tankDrive(-controller.getY(XboxController.Hand.kLeft)*speed, -controller.getY(XboxController.Hand.kRight)*speed*.65);
     	// gets y position from both right and left joysticks 
     }
     

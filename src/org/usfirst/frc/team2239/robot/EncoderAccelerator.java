@@ -26,7 +26,7 @@ public class EncoderAccelerator implements Action {
 	double moveTicks; //how much to move, in inches (positive means forwards)
 	//with 107 ticksPerInch, this thing tried to go 10 inches and instead went 22
 //	double ticksPerInch = 81.5; //used to be 53.5 on the practice bot 
-	double ticksPerInch = 10000;//4*Math.PI*1024;//115.5 inch
+	double ticksPerInch = 4*Math.PI*1024*(50/34);//115.5 inch
 	double targetDistance; //the encoder value we aspire to be at when done.
 	double maxVelocityTicks = 2000; //The ticks traveled at which we start to decrease velocity at //always positive
 	double liftWheelDiameter = 7/8;//TODO decide
